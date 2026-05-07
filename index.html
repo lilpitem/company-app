@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.28</title>
+<title>Yun Yi Finance v2.29</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -41,7 +41,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .amt { font-weight: 700; font-size: 15px; }
 .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
 
-/* Calendar Engine (Safari Fixed) */
+/* Calendar Engine */
 .cal-grid { display: flex; flex-wrap: wrap; width: 100%; }
 .cal-h { width: 14.285%; font-size: 11px; color: var(--muted); text-align: center; padding-bottom: 8px; }
 .cal-c { width: 14.285%; height: 45px; display: flex; justify-content: center; align-items: flex-start; }
@@ -78,7 +78,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 <div class="header">
   <div class="brand">蘊一財務 / <span id="hdr-m"></span></div>
-  <div id="sync-status">讀取雲端...</div>
+  <div id="sync-status">雲端同步中</div>
 </div>
 
 <div id="s-home" class="screen active">
@@ -99,7 +99,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <div id="s-ldg" class="screen">
-  <div class="card"><div class="card-title">帳目明細 <span onclick="loadCloud()">🔄</span></div><div id="ldg-list"></div></div>
+  <div class="card"><div class="card-title">帳目明細 <span style="font-size:10px; color:var(--muted); font-weight:normal;">(已自動同步雲端)</span></div><div id="ldg-list"></div></div>
 </div>
 
 <div id="s-pay" class="screen">
@@ -125,7 +125,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="field"><label>項目內容</label><input type="text" id="l-c" placeholder="例如：場地費" required></div>
   <div class="field"><label>歸屬成員</label><select id="l-m"></select></div>
   <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
-  <button type="submit" class="btn-p">儲存並同步雲端</button></form></div>
+  <button type="submit" class="btn-p">儲存</button></form></div>
 </div>
 
 <div class="modal-overlay" id="m-emp" onclick="closeM(event,'m-emp')">
@@ -134,7 +134,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="field"><label>姓名</label><input type="text" id="e-n" required></div>
   <div class="field"><label>底薪</label><input type="number" id="e-s" required inputmode="numeric"></div>
   <div class="field"><label>獎金代墊</label><input type="number" id="e-b" value="0" inputmode="numeric"></div>
-  <button type="submit" class="btn-p">儲存設定</button>
+  <button type="submit" class="btn-p">儲存</button>
   <button type="button" id="btn-del-emp" style="width:100%;margin-top:10px;background:transparent;color:var(--red);border:none;" onclick="delEmp()">刪除人員</button></form></div>
 </div>
 
@@ -149,15 +149,29 @@ const fmt = n => '$' + Math.round(n).toLocaleString();
 let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
 let now = new Date(), selD = now.toISOString().slice(0,10), charts = {}, delIdx = -1;
 
+// 🌟 雲端雙向同步系統
 async function sync() {
     if(!URL) return; const st = $('sync-status'); st.textContent='同步中...'; st.className='syncing';
-    try { await fetch(URL, {method:'POST', mode:'no-cors', body:JSON.stringify({emp,ldg})});
-    st.textContent='雲端已同步'; st.className='sync-ok'; } catch(e){ st.textContent='離線模式'; }
+    try { 
+        await fetch(URL, {method:'POST', mode:'no-cors', body:JSON.stringify({emp,ldg})});
+        st.textContent='雲端已同步'; st.className='sync-ok'; 
+    } catch(e){ st.textContent='離線模式'; st.className=''; }
 }
+
 async function loadCloud() {
-    const st = $('sync-status'); st.textContent='讀取中...';
-    try { const res = await fetch(URL); const d = await res.json(); if(d){ emp=d.emp||[]; ldg=d.ldg||[]; saveLoc(); render(); updateMem(); st.textContent='雲端已同步'; st.className='sync-ok'; }} catch(e){ st.textContent='讀取失敗'; }
+    const st = $('sync-status'); st.textContent='更新資料...'; st.className='syncing';
+    try { 
+        const res = await fetch(URL); const d = await res.json(); 
+        if(d){ emp=d.emp||[]; ldg=d.ldg||[]; saveLoc(); render(); updateMem(); st.textContent='雲端已同步'; st.className='sync-ok'; }
+    } catch(e){ st.textContent='同步失敗'; st.className=''; }
 }
+
+// 🌟 自動喚醒更新機制 (App 從背景回到畫面時自動抓資料)
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        loadCloud();
+    }
+});
 
 function saveLoc() { localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); }
 function go(p, el) { $$('.screen').forEach(s=>s.classList.remove('active')); $$('.nav-item').forEach(n=>n.classList.remove('active')); $(`s-${p}`).classList.add('active'); el.classList.add('active'); }
@@ -167,9 +181,20 @@ function closeMById(id) { $(id).classList.remove('open'); }
 function setT(t) { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn active exp':'t-btn exp'; $('tb-inc').className=t==='income'?'t-btn active inc':'t-btn inc'; }
 function prepLdg() { setT('expense'); $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; openM('m-ldg'); }
 function prepEmp() { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; $('btn-del-emp').style.display='none'; openM('m-emp'); }
-function saveLdg() { ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); saveLoc(); sync(); render(); $('m-ldg').classList.remove('open'); }
-function saveEmp() { const id=$('e-id').value, d={name:$('e-n').value, salary:Number($('e-s').value), bonus:Number($('e-b').value)}; if(id!=='') emp[id]=d; else emp.push(d); saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); }
+
+// 🌟 任何儲存動作都會觸發 sync()
+function saveLdg() { 
+  ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); 
+  saveLoc(); sync(); render(); $('m-ldg').classList.remove('open'); 
+}
+function saveEmp() { 
+  const id=$('e-id').value, d={name:$('e-n').value, salary:Number($('e-s').value), bonus:Number($('e-b').value)}; 
+  if(id!=='') emp[id]=d; else emp.push(d); 
+  saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); 
+}
 function delEmp() { if(confirm('確定刪除人員？')){ emp.splice($('e-id').value,1); saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); } }
+function execDel() { if(delIdx!==-1){ ldg.splice(delIdx,1); saveLoc(); sync(); render(); } closeMById('m-del'); }
+
 function updateMem() { $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">${e.name}</option>`).join(''); }
 
 function showDet(i) {
@@ -179,8 +204,6 @@ function showDet(i) {
     $('det-e-btn').onclick = () => { closeMById('m-det'); $('e-id').value=i; $('e-n').value=e.name; $('e-s').value=e.salary; $('e-b').value=e.bonus; $('btn-del-emp').style.display='block'; openM('m-emp'); };
     openM('m-det');
 }
-
-function execDel() { if(delIdx!==-1){ ldg.splice(delIdx,1); saveLoc(); sync(); render(); } closeMById('m-del'); }
 
 function render() {
     const mStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`;
