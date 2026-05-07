@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
-<title>Yun Yi Finance v3.0 | iOS Edition</title>
+<title>Yun Yi Finance v3.1 | iOS Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -57,7 +57,7 @@ body {
 .row-sub { font-size: 13px; color: var(--muted); }
 .amt { font-weight: 600; font-size: 17px; text-align: right; white-space: nowrap; }
 
-/* ⬇ 新增：iOS 灰色小箭頭 (Chevron) ⬇ */
+/* ── iOS 灰色小箭頭 (Chevron) ── */
 .chevron {
   width: 14px; height: 14px; margin-left: 8px; flex-shrink: 0;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238E8E93" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>');
@@ -110,18 +110,15 @@ body {
   width:100%; max-width:430px; background: rgba(10, 10, 10, 0.95);
   border-top: 0.5px solid var(--border); display:flex; z-index:100;
   padding: 8px 0 calc(env(safe-area-inset-bottom) + 8px);
-  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); /* 毛玻璃效果 */
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
 }
 .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--muted); }
 .nav-item.active { color:var(--accent); }
-/* ⬇ 替換原生 Emoji 為精心繪製的 iOS 藍色 SVG 圖示 ⬇ */
 .nav-icon-svg {
   width: 26px; height: 26px; stroke: currentColor; stroke-width: 2;
   fill: none; stroke-linecap: round; stroke-linejoin: round;
 }
-/* Active 狀態使用藍色 Fill */
 .nav-item.active .nav-icon-svg.fill { fill: var(--accent); }
-
 .nav-label { font-size:10px; font-weight:600; letter-spacing: 0.2px;}
 
 /* ── 中央新增按鈕 (iOS 風格) ── */
@@ -152,12 +149,10 @@ body {
 }
 .cal-d.active { background:var(--accent); color:#fff; font-weight: 600; }
 .cal-d.today:not(.active) { color:var(--accent); font-weight: 600; }
-/* 今日的小原點 */
 .cal-d.today:not(.active)::after {
   content: ''; position: absolute; bottom: 2px; width: 4px; height: 4px;
   border-radius: 50%; background: var(--accent);
 }
-
 .dots { display:flex; gap:2.5px; position:absolute; bottom:3px; }
 .dot { width:4px; height:4px; border-radius:50%; }
 
@@ -177,7 +172,7 @@ body {
 .modal-overlay.open .modal { transform: translateY(0); }
 .modal-h { width:36px; height:5px; background:var(--muted); border-radius:3px; margin:0 auto 20px; opacity: 0.5; }
 
-/* ⬇ 新增：彈窗上方動作按鈕區域 (iOS 風格) ⬇ */
+/* ── 彈窗上方動作按鈕區域 (iOS 風格) ── */
 .modal-actions {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
 }
@@ -219,7 +214,6 @@ body {
 }
 .field select { -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238E8E93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l5 5 5-5"/></svg>'); background-repeat: no-repeat; background-position: right 14px center; background-size: 18px;}
 
-/* 修復 iOS file input 樣式 */
 .field input[type="file"] { padding: 12px; font-size: 13px; color: var(--muted); }
 
 /* ──按鈕系統 ── */
@@ -246,6 +240,9 @@ body {
 .legend-item div:last-child { font-size:16px; font-weight:700; }
 
 </style>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 </head>
 <body id="swipe-area">
 
@@ -335,7 +332,8 @@ body {
     <div class="fab-btn-wrap">
       <div class="fab"><svg class="fab-icon-svg"><use href="#icon-plus"></use></svg></div>
     </div>
-    <div class="nav-label" style="opacity: 0;">新增</div> </div>
+    <div class="nav-label" style="opacity: 0;">新增</div>
+  </div>
   <div class="nav-item" onclick="go('ldg',this)">
     <svg class="nav-icon-svg fill"><use href="#icon-ldg"></use></svg>
     <div class="nav-label">明細</div>
@@ -366,17 +364,22 @@ body {
       <button class="m-act-btn" onclick="triggerLdgSubmit()">儲存</button>
     </div>
 
-    <div class="t-toggle">
-      <button class="t-btn active exp" id="tb-exp" onclick="setT('expense')">支出</button>
-      <button class="t-btn inc" id="tb-inc" onclick="setT('income')">收入</button>
-    </div>
-
   <form id="ldg-form" onsubmit="event.preventDefault(); saveLdg();">
     <input type="hidden" id="l-t" value="expense">
+    
+    <div class="field">
+      <label>日期</label>
+      <input type="date" id="l-d" required>
+    </div>
+
+    <div class="t-toggle">
+      <button type="button" class="t-btn active exp" id="tb-exp" onclick="setT('expense')">支出</button>
+      <button type="button" class="t-btn inc" id="tb-inc" onclick="setT('income')">收入</button>
+    </div>
+
     <div class="field"><label>金額</label><input type="number" id="l-a" placeholder="$0" required inputmode="numeric"></div>
     <div class="field"><label>項目內容</label><input type="text" id="l-c" placeholder="例如：租金" required></div>
     <div class="field"><label>歸屬成員</label><select id="l-m"></select></div>
-    <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
     
     <div class="field"><label>上傳照片 (選填)</label><input type="file" id="l-p" accept="image/*"></div>
     <div class="field"><label>發票號碼</label><input type="text" id="l-inv" placeholder="AB-12345678"></div>
@@ -434,8 +437,7 @@ body {
 </div>
 
 <script>
-// 版本號檢查機制 (強制更新)
-const CURRENT_VERSION = '3.0.0_iOS'; 
+const CURRENT_VERSION = '3.1.0_iOS'; 
 const localVersion = localStorage.getItem('app_version');
 
 if (localVersion !== CURRENT_VERSION) {
@@ -445,7 +447,6 @@ if (localVersion !== CURRENT_VERSION) {
 
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
 
-// ── 工具函式 (部分更新以優化效能) ──
 const $ = id => document.getElementById(id);
 const $$ = s => document.querySelectorAll(s);
 const qV = id => $(id).value;
@@ -453,22 +454,18 @@ const fmt = n => '$' + Math.round(n).toLocaleString();
 const toIsoD = d => d.toISOString().slice(0,10);
 const setSync = (txt, cls) => { const s = $('sync-status'); s.textContent = txt; s.className = cls; };
 
-// ── 表單提交中轉 ──
 const triggerLdgSubmit = () => $('ldg-form').requestSubmit();
 const triggerEmpSubmit = () => $('emp-form').requestSubmit();
 
-// ── 資料與初始化 ──
 let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
 
 const today = new Date();
 let calYear = today.getFullYear(), calMonth = today.getMonth(), selD = toIsoD(today);
 let charts = {}, delIdx = -1;
 
-// 更新 Chart.js 全局 Dark Mode 配置
 Chart.defaults.color = '#8E8E93';
 Chart.defaults.font.family = '-apple-system, system-ui, sans-serif';
 
-// 月份與滑動偵測
 const shiftMonth = (delta) => { const d = new Date(calYear, calMonth + delta, 1); calYear = d.getFullYear(); calMonth = d.getMonth(); render(); };
 const resetMonth = () => { const d = new Date(); calYear = d.getFullYear(); calMonth = d.getMonth(); selD = toIsoD(d); render(); };
 const pickMonth = (val) => { if(!val) return; const [y, m] = val.split('-'); calYear = parseInt(y); calMonth = parseInt(m)-1; render(); };
@@ -483,7 +480,6 @@ $('swipe-area').addEventListener('touchend', e => {
     }
 }, {passive: true});
 
-// 雲端同步
 function jsonpFetch(url) {
     return new Promise((resolve, reject) => {
         const cbName = '_cb_' + Date.now(), script = document.createElement('script');
@@ -560,16 +556,12 @@ function render() {
     const mStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
     const curLdg = ldg.map((r,i)=>({...r, oid:i})).filter(r=>r.date.startsWith(mStr));
     
-    // 更新 iOS 風格日期導覽
     $('hdr-m').textContent = `${calYear}年 ${calMonth+1}月`;
     $('m-input').value = mStr;
     
-    // ⬇ 增加灰色小箭頭 <div class="chevron"></div> ⬇
     const row = (r, showMember=true) => `<div class="list-row" ontouchstart="pressT=setTimeout(()=>{delIdx=${r.oid};openM('m-del')},600)" ontouchend="clearTimeout(pressT)"><div class="row-info"><div class="row-main">${r.cat}${r.clm==='請款'?' <small style="color:var(--amber);font-size:11px;">[請款]</small>':''}</div><div class="row-sub">${r.date}${showMember ? ' · '+r.mem : ''}${r.note?' · '+r.note:''}</div></div><div class="amt" style="color:var(--${r.type==='income'?'green':'red'})">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div></div>`;
     
     $('ldg-list').innerHTML = curLdg.map(row).join('') || '<div class="empty">本月無帳目</div>';
-    
-    // 薪資列表增加箭頭
     $('emp-list').innerHTML = emp.map((e,i)=>`<div class="list-row" onclick="showDet(${i})"><div class="row-info"><div class="row-main">${e.name}</div><div class="row-sub">本月預算：${fmt(e.salary+e.bonus)}</div></div><div class="chevron"></div></div>`).join('') || '<div class="empty">無人員</div>';
     
     let inc=0, exp=0; curLdg.forEach(r=>r.type==='income'?inc+=r.amt:exp+=r.amt);
@@ -577,23 +569,19 @@ function render() {
     $('val-p').textContent=fmt(net); $('val-p').style.color = net>=0 ? 'var(--text)' : 'var(--red)';
     $('val-inc').textContent=fmt(inc); $('val-exp').textContent=fmt(exp); $('val-sal').textContent=fmt(sal);
     
-    // 繪製圖表 (iOS 色彩)
     if(charts.m) charts.m.destroy();
     charts.m = new Chart($('c-main'), {type:'doughnut', data:{datasets:[{data:[exp,sal,inc||1], backgroundColor:['#FF453A','#FF9F0A','#32D74B'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'85%'} });
     
-    // 日曆繪製 (iOS Calendar 風格)
     const dInM = new Date(calYear, calMonth+1, 0).getDate(), fDay = new Date(calYear, calMonth, 1).getDay();
     let calH = '<div class="cal-grid">' + ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-h">${w}</div>`).join('') + '<div class="cal-c"></div>'.repeat(fDay);
     for(let d=1; d<=dInM; d++) {
         const dS = `${mStr}-${String(d).padStart(2,'0')}`, rcs = curLdg.filter(r=>r.date===dS);
-        // iOS 風格的記帳小點
         const dots = (rcs.some(r=>r.type==='income')?`<div class="dot" style="background:var(--green)"></div>`:'') + (rcs.some(r=>r.type==='expense')?`<div class="dot" style="background:var(--red)"></div>`:'');
         calH += `<div class="cal-c"><div class="cal-d ${dS===selD?'active':''} ${dS===toIsoD(new Date())?'today':''}" onclick="selD='${dS}';render();">${d}<div class="dots">${dots}</div></div></div>`;
     }
     $('cal-grid').innerHTML = calH+'</div>';
     const dObj = new Date(selD);
     $('cal-title').textContent = `${dObj.getMonth()+1}月${dObj.getDate()}日 星期${['日','一','二','三','四','五','六'][dObj.getDay()]}`;
-    // 日曆列表不顯示成員 (iOS 風格較簡潔)
     $('cal-list').innerHTML = ldg.map((r,ix)=>({...r,oid:ix})).filter(r=>r.date===selD).map(r=>row(r,false)).join('') || '<div class="empty">本日無紀錄</div>';
 }
 
@@ -602,10 +590,8 @@ function showDet(i) {
     const curMonthLdg = ldg.map((r,ix)=>({...r,oid:ix})).filter(r=>r.date.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`) && r.mem === e.name);
 
     if(charts.e) charts.e.destroy();
-    // 圓環圖 (iOS 色彩)
     charts.e = new Chart($('c-emp'), {type:'doughnut', data:{datasets:[{data:[e.salary, e.bonus], backgroundColor:['#5E5CE6','#FF9F0A'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'80%'} });
     
-    // 成員相關項目
     $('det-list').innerHTML = curMonthLdg.map(r=>row(r, false)).join('') || '<div class="empty">本月無相關支薪</div>';
 
     $('det-e-btn').onclick = () => {
