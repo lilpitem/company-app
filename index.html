@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.16</title>
+<title>Yun Yi Finance v2.17</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -61,16 +61,16 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--muted); margin-right: 4px; }
 .img-thumb { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; border: 0.5px solid var(--border); }
 
-/* 🌟 強制對齊版日曆 CSS (Single Grid) */
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px 0; justify-items: center; }
-.cal-head { font-size: 12px; color: var(--muted); font-weight: 500; padding-bottom: 4px; }
+/* 🌟 終極防跑位版日曆 CSS (高度/寬度徹底鎖死) */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px 0; justify-items: center; align-items: center; }
+.cal-head { font-size: 12px; color: var(--muted); font-weight: 500; padding-bottom: 6px; }
 .cal-day { 
-  width: 38px; height: 38px; 
+  width: 36px; height: 36px; /* 更安全的尺寸 */
   display: flex; flex-direction: column; align-items: center; justify-content: center; 
   border-radius: 50%; font-size: 15px; font-weight: 500; position: relative; cursor: pointer; transition: 0.2s; 
 }
 .cal-day:active { background: rgba(255,255,255,0.05); transform: scale(0.9); }
-.cal-day.empty { visibility: hidden; }
+.cal-day.empty { visibility: hidden; pointer-events: none; }
 .cal-day.today { color: var(--accent2); font-weight: 700; border: 1px solid rgba(167, 139, 250, 0.4); }
 .cal-day.active { background: var(--accent); color: white; border-color: var(--accent); }
 .cal-dots { display: flex; gap: 3px; position: absolute; bottom: 4px; }
@@ -547,7 +547,7 @@ function renderLedger() {
   }).join('');
 }
 
-// 🌟 全新對齊版的日曆渲染邏輯
+// 🌟 終極防抖、防跑位之日曆渲染 (固定生成 42 格)
 function selectCalendarDate(dateStr) {
   selectedCalendarDate = dateStr;
   renderCalendar();
@@ -562,21 +562,23 @@ function renderCalendar() {
   const todayStr = new Date().toISOString().slice(0, 10);
   const monthPrefix = `${year}-${month.toString().padStart(2, '0')}`;
 
-  // 開頭宣告 Single Grid 容器
   let html = '<div class="cal-grid">';
   
-  // 渲染表頭的星期幾 (在同一個 Grid 裡面)
   const weekDays = ['日','一','二','三','四','五','六'];
   weekDays.forEach(wd => {
     html += `<div class="cal-head">${wd}</div>`;
   });
 
-  // 填補月初的空白天數
+  // 紀錄目前已產生的格子數 (目標為 42 格 = 6週)
+  let cellCount = 0;
+
+  // 填補月初空白
   for (let i = 0; i < firstDay; i++) {
     html += `<div class="cal-day empty"></div>`;
+    cellCount++;
   }
 
-  // 渲染每一天
+  // 渲染實際日期
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${monthPrefix}-${d.toString().padStart(2, '0')}`;
     const isSelected = (dateStr === selectedCalendarDate);
@@ -599,8 +601,17 @@ function renderCalendar() {
          ${d}
          <div class="cal-dots">${dotsHtml}</div>
       </div>`;
+    cellCount++;
   }
-  html += '</div>'; // Grid 結尾
+
+  // 🌟 填滿剩下的空白，確保網格永遠保持 42 格 (6排)
+  // 這將徹底杜絕切換月份時，卡片高度縮放導致的視覺錯位
+  while (cellCount < 42) {
+    html += `<div class="cal-day empty"></div>`;
+    cellCount++;
+  }
+
+  html += '</div>'; 
   $('calendar-grid-container').innerHTML = html;
 }
 
