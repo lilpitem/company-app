@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.10</title>
+<title>Yun Yi Finance v2.11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,9 +19,20 @@
   --border: rgba(124,106,247,0.2); --radius: 16px; --radius-sm: 10px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; }
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; overscroll-behavior-y: none; }
 .screen { display: none; min-height: 100vh; padding-bottom: 90px; }
-.screen.active { display: block; }
+
+/* 🌟 加入轉場動畫專用的 CSS */
+.screen.active { 
+  display: block; 
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out; 
+  opacity: 1; 
+  transform: translateX(0); 
+}
+.slide-out-left { opacity: 0 !important; transform: translateX(-30px) !important; }
+.slide-out-right { opacity: 0 !important; transform: translateX(30px) !important; }
+.slide-in-left { opacity: 0 !important; transform: translateX(-30px) !important; transition: none !important; }
+.slide-in-right { opacity: 0 !important; transform: translateX(30px) !important; transition: none !important; }
 
 /* Header & Navigation */
 .header { padding: 56px 20px 20px; background: linear-gradient(180deg, var(--bg2) 0%, transparent 100%); }
@@ -241,11 +252,10 @@ let ledger = JSON.parse(localStorage.getItem('yunyi_ledger') || '[]');
 let trendChart = null;
 let metricsChart = null;
 
-// 長按刪除機制變數
 let pressTimer;
 let targetDeleteIndex = -1;
+let isAnimating = false; // 動畫鎖定狀態，防止連刷
 
-// 日期狀態管理
 const now = new Date();
 let currentYear = now.getFullYear();
 let currentMonth = now.getMonth() + 1;
@@ -273,14 +283,43 @@ function handleNativeDateChange(input) {
   const parts = input.value.split('-');
   currentYear = parseInt(parts[0], 10);
   currentMonth = parseInt(parts[1], 10);
-  updateDateUI();
+  updateDateUI(); // 原生選擇不加動畫，直接切換最順
 }
 
+// 🌟 核心動畫切換邏輯
 function changeMonth(delta) {
-  currentMonth += delta;
-  if (currentMonth < 1) { currentMonth = 12; currentYear--; }
-  else if (currentMonth > 12) { currentMonth = 1; currentYear++; }
-  updateDateUI();
+  if (isAnimating) return; // 如果正在動畫中，忽略重複滑動
+  isAnimating = true;
+
+  const screen = document.querySelector('.screen.active');
+  
+  // 1. 決定向哪邊滑出
+  if (delta > 0) screen.classList.add('slide-out-left');
+  else screen.classList.add('slide-out-right');
+
+  // 2. 等待 0.15 秒淡出完畢後，偷偷更新數據
+  setTimeout(() => {
+    currentMonth += delta;
+    if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+    else if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+    
+    updateDateUI(); // 渲染新的月份數據
+
+    // 將畫面瞬間移到另一側準備滑入 (不帶動畫)
+    screen.classList.remove('slide-out-left', 'slide-out-right');
+    if (delta > 0) screen.classList.add('slide-in-right');
+    else screen.classList.add('slide-in-left');
+
+    // 3. 觸發瀏覽器重繪後，移除準備 class，開始滑入動畫
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        screen.classList.remove('slide-in-right', 'slide-in-left');
+        
+        // 等待滑入動畫完成後，解鎖滑動
+        setTimeout(() => { isAnimating = false; }, 150); 
+      });
+    });
+  }, 150);
 }
 
 function save() {
@@ -304,61 +343,50 @@ function openModal(id) { $(id).classList.add('open'); }
 function closeModal(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeModalById(id) { $(id).classList.remove('open'); }
 
-// ==========================================
-// 核心升級：防手震、防滾動的「軸向鎖定引擎」
-// ==========================================
 let touchstartX = 0, touchstartY = 0;
-let swipeDirection = null; // null: 尚未決定, 'H': 橫向, 'V': 直向
+let swipeDirection = null; 
 
 document.addEventListener('touchstart', e => {
   if(e.target.closest('.modal-overlay')) return; 
   touchstartX = e.touches[0].screenX;
   touchstartY = e.touches[0].screenY;
-  swipeDirection = null; // 每次手指碰觸都重置判定
+  swipeDirection = null; 
 }, { passive: true });
 
 document.addEventListener('touchmove', e => {
-  if(e.target.closest('.modal-overlay')) return;
-  if(!touchstartX || !touchstartY) return;
+  if(e.target.closest('.modal-overlay') || !touchstartX || !touchstartY || isAnimating) return;
 
   let moveX = e.touches[0].screenX;
   let moveY = e.touches[0].screenY;
   let xDiff = Math.abs(touchstartX - moveX);
   let yDiff = Math.abs(touchstartY - moveY);
 
-  // 當手指移動超過 3px 時，瞬間鎖定主要滑動方向
   if (swipeDirection === null && (xDiff > 3 || yDiff > 3)) {
     swipeDirection = (xDiff > yDiff) ? 'H' : 'V'; 
   }
 
-  // 若判定為「橫向 (H)」，立刻阻止系統上下滾動！
   if (swipeDirection === 'H') {
     if (e.cancelable) e.preventDefault();
   }
-}, { passive: false }); // 必須設為 false 才能真正阻擋系統預設滾動
+}, { passive: false }); 
 
 document.addEventListener('touchend', e => {
   if(e.target.closest('.modal-overlay')) return;
   
-  // 只有在系統確認你是「橫向滑動」時，才執行切換月份
   if (swipeDirection === 'H') {
     let touchendX = e.changedTouches[0].screenX;
     let xDiff = touchstartX - touchendX;
     
-    // 滑動超過 40px 才觸發
     if(Math.abs(xDiff) > 40) {
       if(xDiff > 0) changeMonth(1); 
       else changeMonth(-1); 
     }
   }
   
-  // 重置狀態
   touchstartX = 0; touchstartY = 0;
   swipeDirection = null;
 }, { passive: true });
 
-
-// ==== 長按刪除核心邏輯 ====
 function startPress(e, idx) {
   targetDeleteIndex = idx;
   pressTimer = setTimeout(() => {
@@ -367,19 +395,15 @@ function startPress(e, idx) {
   }, 600);
 }
 
-function cancelPress() {
-  clearTimeout(pressTimer);
-}
+function cancelPress() { clearTimeout(pressTimer); }
 
 function confirmDeleteLedger() {
   if(targetDeleteIndex !== -1) {
     ledger.splice(targetDeleteIndex, 1);
-    save();
-    renderAll();
+    save(); renderAll();
   }
   closeModalById('modal-delete');
 }
-// ==========================
 
 function renderEmployees() {
   const el = $('emp-list');
@@ -448,9 +472,7 @@ function renderLedger() {
   
   const renderedItems = [];
   ledger.forEach((r, idx) => {
-    if(r.date.startsWith(selMonth)) {
-      renderedItems.push({ ...r, originalIndex: idx });
-    }
+    if(r.date.startsWith(selMonth)) renderedItems.push({ ...r, originalIndex: idx });
   });
 
   if(!renderedItems.length) { el.innerHTML = '<div class="empty">本月尚無帳目紀錄</div>'; return; }
