@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.9</title>
+<title>Yun Yi Finance v2.10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,7 +19,7 @@
   --border: rgba(124,106,247,0.2); --radius: 16px; --radius-sm: 10px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; overscroll-behavior-y: none; }
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; }
 .screen { display: none; min-height: 100vh; padding-bottom: 90px; }
 .screen.active { display: block; }
 
@@ -305,54 +305,56 @@ function closeModal(e, id) { if(e.target === $(id)) $(id).classList.remove('open
 function closeModalById(id) { $(id).classList.remove('open'); }
 
 // ==========================================
-// 核心升級：防手震、防滾動的方向鎖定滑動引擎
+// 核心升級：防手震、防滾動的「軸向鎖定引擎」
 // ==========================================
 let touchstartX = 0, touchstartY = 0;
-let isSwipingHorizontal = false;
+let swipeDirection = null; // null: 尚未決定, 'H': 橫向, 'V': 直向
 
 document.addEventListener('touchstart', e => {
   if(e.target.closest('.modal-overlay')) return; 
-  touchstartX = e.changedTouches[0].screenX;
-  touchstartY = e.changedTouches[0].screenY;
-  isSwipingHorizontal = false; // 每次觸碰重置狀態
+  touchstartX = e.touches[0].screenX;
+  touchstartY = e.touches[0].screenY;
+  swipeDirection = null; // 每次手指碰觸都重置判定
 }, { passive: true });
 
-// 透過 touchmove 來動態鎖定畫面
 document.addEventListener('touchmove', e => {
   if(e.target.closest('.modal-overlay')) return;
   if(!touchstartX || !touchstartY) return;
 
-  let moveX = e.changedTouches[0].screenX;
-  let moveY = e.changedTouches[0].screenY;
-  
+  let moveX = e.touches[0].screenX;
+  let moveY = e.touches[0].screenY;
   let xDiff = Math.abs(touchstartX - moveX);
   let yDiff = Math.abs(touchstartY - moveY);
 
-  // 當滑動距離超過 10px 時，立刻判定主要方向
-  if (xDiff > 10 || yDiff > 10) {
-    if (xDiff > yDiff) {
-      // 確定是左右滑！啟動防滾動機制，鎖死上下移動
-      isSwipingHorizontal = true;
-      e.preventDefault(); 
-    }
+  // 當手指移動超過 3px 時，瞬間鎖定主要滑動方向
+  if (swipeDirection === null && (xDiff > 3 || yDiff > 3)) {
+    swipeDirection = (xDiff > yDiff) ? 'H' : 'V'; 
   }
-}, { passive: false }); // 必須是 false 才能阻擋瀏覽器預設滾動
+
+  // 若判定為「橫向 (H)」，立刻阻止系統上下滾動！
+  if (swipeDirection === 'H') {
+    if (e.cancelable) e.preventDefault();
+  }
+}, { passive: false }); // 必須設為 false 才能真正阻擋系統預設滾動
 
 document.addEventListener('touchend', e => {
   if(e.target.closest('.modal-overlay')) return;
   
-  let touchendX = e.changedTouches[0].screenX;
-  let xDiff = touchstartX - touchendX;
-
-  // 只要被判定為水平滑動，且滑動距離超過 40px，就切換月份
-  if(isSwipingHorizontal && Math.abs(xDiff) > 40) {
-    if(xDiff > 0) changeMonth(1); // 左滑：下個月
-    else changeMonth(-1); // 右滑：上個月
+  // 只有在系統確認你是「橫向滑動」時，才執行切換月份
+  if (swipeDirection === 'H') {
+    let touchendX = e.changedTouches[0].screenX;
+    let xDiff = touchstartX - touchendX;
+    
+    // 滑動超過 40px 才觸發
+    if(Math.abs(xDiff) > 40) {
+      if(xDiff > 0) changeMonth(1); 
+      else changeMonth(-1); 
+    }
   }
   
   // 重置狀態
   touchstartX = 0; touchstartY = 0;
-  isSwipingHorizontal = false;
+  swipeDirection = null;
 }, { passive: true });
 
 
@@ -432,7 +434,7 @@ function deleteEmployee() {
 
 function addLedger() {
   const date=$('l-date').value, name=$('l-name').value, amt=$('l-amt').value, cat=$('l-cat').value, pay=$('l-pay').value;
-  const proj=$('l-proj').value.trim() || '一般常規'; // 若未填寫自動帶入一般常規
+  const proj=$('l-proj').value.trim() || '一般常規';
   if(!name || !amt) return;
   ledger.unshift({ date, name, amt: parseInt(amt), cat, proj, pay });
   save(); renderAll(); closeModalById('modal-ledger');
