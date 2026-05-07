@@ -6,23 +6,25 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.26</title>
+<title>Yun Yi Finance v2.27</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root { --bg: #0f0f1a; --bg2: #1a1a2e; --card: #1e1e35; --accent: #7c6af7; --accent2: #a78bfa; --green: #34d399; --red: #f87171; --amber: #fbbf24; --text: #f0f0ff; --muted: #8888aa; --border: rgba(124,106,247,0.15); --radius: 16px; }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; }
-.screen { display: none; min-height: 100vh; padding-bottom: 110px; animation: fadeIn 0.3s; }
+.screen { display: none; min-height: 100vh; padding-bottom: 110px; }
 .screen.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Header & Nav */
+/* Header & Sync Status */
 .header { padding: 56px 20px 20px; background: linear-gradient(180deg, var(--bg2), transparent); display: flex; justify-content: space-between; align-items: center; }
 .brand-title { font-size: 18px; font-weight: 700; }
-#sync-status { font-size: 10px; padding: 3px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--muted); }
-.syncing { color: var(--amber)!important; } .sync-ok { color: var(--green)!important; background: rgba(52,211,153,0.1)!important; }
+#sync-status { font-size: 10px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); transition: 0.3s; }
+.syncing { color: var(--amber); animation: pulse 1s infinite; }
+.sync-ok { color: var(--green); background: rgba(52,211,153,0.1); }
+@keyframes pulse { 50% { opacity: 0.5; } }
 
+/* Navigation */
 .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 10px 0 calc(15px + env(safe-area-inset-bottom)); }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--muted); }
 .nav-item.active { color: var(--accent2); }
@@ -33,12 +35,12 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 0 16px 12px; }
 .card-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; }
 .list-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 0.5px solid rgba(255,255,255,0.03); }
-.row-main { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+.row-main { font-size: 15px; font-weight: 500; }
 .row-sub { font-size: 11px; color: var(--muted); }
 .amt { font-weight: 700; font-size: 15px; }
 .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
 
-/* Calendar (Flex Engine) */
+/* Calendar */
 .cal-grid { display: flex; flex-wrap: wrap; width: 100%; }
 .cal-h { width: 14.285%; font-size: 11px; color: var(--muted); text-align: center; padding-bottom: 8px; }
 .cal-c { width: 14.285%; height: 45px; display: flex; justify-content: center; align-items: flex-start; }
@@ -46,9 +48,9 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .cal-d.active { background: var(--accent); color: #fff; }
 .cal-d.today:not(.active) { border: 1px solid var(--accent2); color: var(--accent2); }
 .dots { display: flex; gap: 2px; position: absolute; bottom: 3px; }
-.dot { width: 3px; height: 3px; border-radius: 50%; }
+.dot { width: 3.5px; height: 3px; border-radius: 50%; }
 
-/* Forms & Modals */
+/* Modals */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: flex-end; }
 .modal-overlay.open { display: flex; }
 .modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 20px 20px calc(40px + env(safe-area-inset-bottom)); width: 100%; max-height: 85vh; overflow-y: auto; }
@@ -60,22 +62,23 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .field { margin-bottom: 15px; }
 .field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
 .field input, .field select { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: 8px; color: #fff; font-size: 15px; outline: none; }
-.btn-p { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; }
-
-.chart-box { position: relative; height: 180px; display: flex; justify-content: center; align-items: center; }
+.btn-p { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <div class="brand-title">蘊一財務 / <span id="hdr-m"></span></div>
-  <div id="sync-status">雲端同步中...</div>
+  <div id="sync-status" onclick="loadFromCloud()">讀取雲端...</div>
 </div>
 
 <div id="s-home" class="screen active">
   <div class="card" style="padding-top:20px;">
     <div class="card-title">本月盈餘概覽</div>
-    <div class="chart-box"><canvas id="c-main"></canvas><div style="position:absolute; font-weight:700; font-size:22px;" id="val-p">$0</div></div>
+    <div style="position:relative; height:180px; display:flex; justify-content:center; align-items:center;">
+      <canvas id="c-main"></canvas>
+      <div style="position:absolute; font-weight:700; font-size:22px;" id="val-p">$0</div>
+    </div>
   </div>
 </div>
 
@@ -85,7 +88,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <div id="s-ldg" class="screen">
-  <div class="card"><div class="card-title">帳目明細<span onclick="loadFromCloud()">🔄</span></div><div id="ldg-list"></div></div>
+  <div class="card"><div class="card-title">帳目明細 <span onclick="loadFromCloud()">🔄</span></div><div id="ldg-list"></div></div>
 </div>
 
 <div id="s-pay" class="screen">
@@ -107,7 +110,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="field"><label>類別</label><input type="text" id="l-c" placeholder="攝影費、耗材" required></div>
   <div class="field"><label>經手成員</label><select id="l-m"></select></div>
   <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
-  <button type="submit" class="btn-p">儲存並同步</button></form></div>
+  <button type="submit" class="btn-p">儲存並同步雲端</button></form></div>
 </div>
 
 <div class="modal-overlay" id="m-emp" onclick="closeM(event,'m-emp')">
@@ -116,7 +119,8 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="field"><label>人員姓名</label><input type="text" id="e-n" required></div>
   <div class="field"><label>底薪設定</label><input type="number" id="e-s" required inputmode="numeric"></div>
   <div class="field"><label>獎金代墊</label><input type="number" id="e-b" value="0" inputmode="numeric"></div>
-  <button type="submit" class="btn-p">儲存設定</button></form></div>
+  <button type="submit" class="btn-p">儲存設定</button>
+  <button type="button" id="btn-del-emp" style="width:100%;margin-top:10px;background:transparent;color:var(--red);border:none;" onclick="delEmp()">刪除人員</button></form></div>
 </div>
 
 <script>
@@ -126,43 +130,53 @@ const fmt = n => '$' + Math.round(n).toLocaleString();
 let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
 let now = new Date(), selD = now.toISOString().slice(0,10), charts = {};
 
+// 🌟 強化同步邏輯
 async function sync() {
-    if(!URL) return; $('sync-status').textContent='同步中...'; $('sync-status').className='syncing';
-    try { await fetch(URL, {method:'POST', mode:'no-cors', body:JSON.stringify({emp,ldg})});
-    $('sync-status').textContent='雲端已同步'; $('sync-status').className='sync-ok'; } catch(e){ $('sync-status').textContent='離線模式'; }
+    if(!URL) return; 
+    const st = $('sync-status'); st.textContent='同步中...'; st.className='syncing';
+    try { 
+        await fetch(URL, {method:'POST', mode:'no-cors', body:JSON.stringify({emp,ldg})});
+        st.textContent='雲端已同步'; st.className='sync-ok';
+    } catch(e){ st.textContent='離線模式'; st.className=''; }
 }
+
 async function loadFromCloud() {
-    try { const res = await fetch(URL); const d = await res.json(); if(d){ emp=d.emp||[]; ldg=d.ldg||[]; saveLoc(); render(); updateMem(); }} catch(e){}
+    const st = $('sync-status'); st.textContent='讀取中...'; st.className='syncing';
+    try { 
+        const res = await fetch(URL); 
+        const d = await res.json(); 
+        if(d && (d.emp || d.ldg)){ 
+            emp = d.emp || []; ldg = d.ldg || []; 
+            saveLoc(); render(); updateMem();
+            st.textContent='雲端已同步'; st.className='sync-ok';
+        }
+    } catch(e){ st.textContent='讀取失敗'; st.className=''; }
 }
+
 function saveLoc() { localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); }
 function go(p, el) { $$('.screen').forEach(s=>s.classList.remove('active')); $$('.nav-item').forEach(n=>n.classList.remove('active')); $(`s-${p}`).classList.add('active'); el.classList.add('active'); }
 function openM(id) { $(id).classList.add('open'); }
 function closeM(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function setT(t) { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn active exp':'t-btn exp'; $('tb-inc').className=t==='income'?'t-btn active inc':'t-btn inc'; }
 function prepLdg() { setT('expense'); $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; openM('m-ldg'); }
-function prepEmp() { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; openM('m-emp'); }
-function saveLdg() { ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); saveLoc(); sync(); render(); $( 'm-ldg').classList.remove('open'); }
+function prepEmp() { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; $('btn-del-emp').style.display='none'; openM('m-emp'); }
+function saveLdg() { ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); saveLoc(); sync(); render(); $('m-ldg').classList.remove('open'); }
 function saveEmp() { const id=$('e-id').value, d={name:$('e-n').value, salary:Number($('e-s').value), bonus:Number($('e-b').value)}; if(id!=='') emp[id]=d; else emp.push(d); saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); }
+function delEmp() { if(confirm('確定刪除？')){ emp.splice($('e-id').value,1); saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); } }
 function updateMem() { $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">${e.name}</option>`).join(''); }
 
 function render() {
     const mStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`;
     const curLdg = ldg.filter(r=>r.date.startsWith(mStr));
     $('hdr-m').textContent = `${now.getFullYear()}年 ${now.getMonth()+1}月`;
-    
-    // List Render
     const row = r => `<div class="list-row"><div class="row-info"><div class="row-main">${r.cat}</div><div class="row-sub">${r.date} · ${r.mem}</div></div><div class="amt" style="color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div></div>`;
     $('ldg-list').innerHTML = curLdg.map(row).join('') || '<div class="empty">無紀錄</div>';
-    $('emp-list').innerHTML = emp.map((e,i)=>`<div class="list-row" onclick="$('e-id').value=${i};$('e-n').value='${e.name}';$('e-s').value=${e.salary};$('e-b').value=${e.bonus};openM('m-emp')"><div class="row-info"><div class="row-main">${e.name}</div><div class="row-sub">本月預算：${fmt(e.salary+e.bonus)}</div></div><div style="font-size:12px;color:var(--accent2)">編輯</div></div>`).join('') || '<div class="empty">無成員</div>';
-
-    // Stats & Chart
+    $('emp-list').innerHTML = emp.map((e,i)=>`<div class="list-row" onclick="$('e-id').value=${i};$('e-n').value='${e.name}';$('e-s').value=${e.salary};$('e-b').value=${e.bonus};$('btn-del-emp').style.display='block';openM('m-emp')"><div class="row-info"><div class="row-name">${e.name}</div><div class="row-sub">本月薪資：${fmt(e.salary+e.bonus)}</div></div><div style="font-size:12px;color:var(--accent2)">編輯</div></div>`).join('') || '<div class="empty">無成員</div>';
     let i=0, e=0; curLdg.forEach(r=>r.type==='income'?i+=r.amt:e+=r.amt);
     let s=emp.reduce((a,b)=>a+b.salary+b.bonus, 0), net=i-e-s;
     $('val-p').textContent=fmt(net); $('val-p').style.color=net>=0?'var(--accent2)':'var(--red)';
     if(charts['m']) charts['m'].destroy();
     charts['m'] = new Chart($('c-main'), {type:'doughnut', data:{datasets:[{data:[e,s,i], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'85%'} });
-
-    // Calendar
     const dInM = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate(), fDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
     let calH = '<div class="cal-grid">'+['日','一','二','三','四','五','六'].map(w=>`<div class="cal-h">${w}</div>`).join('');
     for(let j=0; j<fDay; j++) calH+='<div class="cal-c"></div>';
@@ -176,7 +190,11 @@ function render() {
     $('cal-list').innerHTML = ldg.filter(r=>r.date===selD).map(row).join('') || '<div class="empty">本日無紀錄</div>';
 }
 
-window.onload = () => { render(); updateMem(); loadFromCloud(); };
+window.onload = async () => { 
+    render(); 
+    updateMem(); 
+    await loadFromCloud(); // 優先讀取雲端覆蓋本地
+};
 </script>
 </body>
 </html>
