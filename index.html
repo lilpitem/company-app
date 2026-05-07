@@ -2,12 +2,12 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.4</title>
+<title>Yun Yi Finance v2.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -26,8 +26,6 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 /* Header & Navigation */
 .header { padding: 56px 20px 20px; background: linear-gradient(180deg, var(--bg2) 0%, transparent 100%); }
 .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
-
-/* 標題下拉選單風格 (包含透明原生 Input) */
 .dropdown-title { position: relative; display: inline-flex; align-items: center; gap: 6px; font-size: 18px; padding: 4px 8px; margin-left: -8px; border-radius: 8px; transition: background 0.2s; overflow: hidden; }
 .dropdown-title:active { background: rgba(255,255,255,0.05); }
 .dropdown-title .muted { color: var(--muted); font-weight: 400; }
@@ -35,7 +33,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .dropdown-title .chevron { color: var(--muted); font-size: 12px; margin-top: 2px; }
 .native-date-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
-.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 8px 0 20px; }
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 8px 0 calc(20px + env(safe-area-inset-bottom)); }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
 .nav-icon { font-size: 20px; color: var(--muted); }
 .nav-label { font-size: 10px; color: var(--muted); }
@@ -52,18 +50,31 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .row-sub { font-size: 11px; color: var(--muted); }
 .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--muted); margin-right: 4px; }
 
+/* 長按互動樣式 */
+.pressable-row {
+  -webkit-touch-callout: none; /* 禁用系統選單 */
+  -webkit-user-select: none;   /* 禁用文字選取 */
+  user-select: none;
+  transition: background 0.2s, transform 0.1s;
+  border-radius: 8px;
+  padding: 12px 8px; /* 增加一點點擊範圍 */
+  margin: 0 -8px;
+}
+.pressable-row:active { background: rgba(255,255,255,0.05); transform: scale(0.98); }
+
 /* Buttons & Inputs */
 .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .btn-add { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: rgba(124,106,247,0.1); border: 1px dashed var(--accent); border-radius: var(--radius-sm); color: var(--accent2); cursor: pointer; font-size: 14px; margin-top: 10px; }
 .field { margin-bottom: 12px; }
 .field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
-.field input, .field select { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none; }
-.btn-primary { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
+.field input, .field select { width: 100%; padding: 12px 10px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; outline: none; -webkit-appearance: none; }
+.btn-primary { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.1s, background 0.2s; }
+.btn-primary:active { transform: scale(0.97); background: var(--accent2); }
 
 /* Modals */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: flex-end; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 20px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 24px 20px calc(40px + env(safe-area-inset-bottom)); width: 100%; max-height: 85vh; overflow-y: auto; }
 .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 15px; }
 
 .empty { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
@@ -146,6 +157,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
       </div>
       <div class="icon-btn" onclick="exportCSV()">💾</div>
     </div>
+    <div style="font-size: 11px; color: var(--muted); margin-top: 8px; margin-left: 8px;">💡 提示：長按紀錄可進行刪除</div>
   </div>
   <div class="card">
     <div id="ledger-list"></div>
@@ -159,39 +171,53 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="nav-item" onclick="goTo('ledger',this)"><div class="nav-icon">📒</div><div class="nav-label">帳本</div></div>
 </nav>
 
+<div class="modal-overlay" id="modal-delete" onclick="closeModal(event,'modal-delete')">
+  <div class="modal" style="text-align: center;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="margin-bottom:10px; font-weight:700;">刪除這筆紀錄</div>
+    <p style="color:var(--muted); font-size:14px; margin-bottom:24px;">確定要刪除這筆帳目嗎？此動作無法復原。</p>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn-primary" style="flex:1; background:rgba(255,255,255,0.08); color:var(--text);" onclick="closeModalById('modal-delete')">取消</button>
+      <button class="btn-primary" style="flex:1; background:var(--red);" onclick="confirmDeleteLedger()">刪除</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-ledger" onclick="closeModal(event,'modal-ledger')">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" style="margin-bottom:15px; font-weight:700;">新增帳目</div>
-    <div class="field"><label>日期</label><input type="date" id="l-date"></div>
-    <div class="field"><label>項目名稱</label><input type="text" id="l-name" placeholder="例如：DV茶會場地費"></div>
-    <div class="field"><label>金額</label><input type="number" id="l-amt" placeholder="0"></div>
-    <div class="field"><label>分類 (科目)</label>
-      <select id="l-cat">
-        <option value="營業收入">營業收入</option>
-        <option value="進貨成本">進貨成本</option>
-        <option value="行銷費用">行銷費用</option>
-        <option value="人事費用">人事費用</option>
-        <option value="雜支">雜支</option>
-      </select>
-    </div>
-    <div class="field"><label>歸屬專案</label>
-      <select id="l-proj">
-        <option value="一般常規">一般常規</option>
-        <option value="DV門店-香包">DV門店-香包</option>
-        <option value="DV門店-蠟燭">DV門店-蠟燭</option>
-        <option value="DV門店-水晶">DV門店-水晶</option>
-        <option value="DV門店-cocodor">DV門店-cocodor</option>
-      </select>
-    </div>
-    <div class="field"><label>支付/收款方式</label>
-      <select id="l-pay">
-        <option value="公司轉帳">公司轉帳</option>
-        <option value="現金">現金</option>
-        <option value="個人代墊">個人代墊</option>
-      </select>
-    </div>
-    <button class="btn-primary" onclick="addLedger()">儲存紀錄</button>
+    <form onsubmit="event.preventDefault(); addLedger();">
+      <div class="field"><label>日期</label><input type="date" id="l-date" required></div>
+      <div class="field"><label>項目名稱</label><input type="text" id="l-name" placeholder="例如：DV茶會場地費" required></div>
+      <div class="field"><label>金額</label><input type="number" id="l-amt" placeholder="0" required inputmode="numeric"></div>
+      <div class="field"><label>分類 (科目)</label>
+        <select id="l-cat">
+          <option value="營業收入">營業收入</option>
+          <option value="進貨成本">進貨成本</option>
+          <option value="行銷費用">行銷費用</option>
+          <option value="人事費用">人事費用</option>
+          <option value="雜支">雜支</option>
+        </select>
+      </div>
+      <div class="field"><label>歸屬專案</label>
+        <select id="l-proj">
+          <option value="一般常規">一般常規</option>
+          <option value="DV門店-香包">DV門店-香包</option>
+          <option value="DV門店-蠟燭">DV門店-蠟燭</option>
+          <option value="DV門店-水晶">DV門店-水晶</option>
+          <option value="DV門店-cocodor">DV門店-cocodor</option>
+        </select>
+      </div>
+      <div class="field"><label>支付/收款方式</label>
+        <select id="l-pay">
+          <option value="公司轉帳">公司轉帳</option>
+          <option value="現金">現金</option>
+          <option value="個人代墊">個人代墊</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">儲存紀錄</button>
+    </form>
   </div>
 </div>
 
@@ -199,13 +225,16 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="modal">
     <div class="modal-handle"></div>
     <div id="emp-modal-title" style="margin-bottom:15px; font-weight:700;">新增人員</div>
-    <input type="hidden" id="emp-edit-id">
-    <div class="field"><label>姓名</label><input type="text" id="e-name"></div>
-    <div class="field"><label>職稱</label><input type="text" id="e-role"></div>
-    <div class="field"><label>底薪 / 基本薪資</label><input type="number" id="e-salary"></div>
-    <div class="field"><label>本月獎金 / 代墊回補</label><input type="number" id="e-bonus" value="0"></div>
-    <button class="btn-primary" onclick="saveEmployee()">儲存資料</button>
-    <button style="width:100%; margin-top:10px; background:transparent; color:var(--red); border:none; font-size:13px;" onclick="deleteEmployee()">刪除人員</button>
+    
+    <form onsubmit="event.preventDefault(); saveEmployee();">
+      <input type="hidden" id="emp-edit-id">
+      <div class="field"><label>姓名</label><input type="text" id="e-name" required></div>
+      <div class="field"><label>職稱</label><input type="text" id="e-role" required></div>
+      <div class="field"><label>底薪 / 基本薪資</label><input type="number" id="e-salary" required inputmode="numeric"></div>
+      <div class="field"><label>本月獎金 / 代墊回補</label><input type="number" id="e-bonus" value="0" inputmode="numeric"></div>
+      <button type="submit" class="btn-primary">儲存資料</button>
+      <button type="button" style="width:100%; margin-top:10px; background:transparent; color:var(--red); border:none; font-size:14px; padding:10px;" onclick="deleteEmployee()">刪除人員</button>
+    </form>
   </div>
 </div>
 
@@ -217,6 +246,10 @@ let employees = JSON.parse(localStorage.getItem('yunyi_emp') || '[]');
 let ledger = JSON.parse(localStorage.getItem('yunyi_ledger') || '[]');
 let trendChart = null;
 let metricsChart = null;
+
+// 長按刪除機制變數
+let pressTimer;
+let targetDeleteIndex = -1;
 
 // 日期狀態管理
 const now = new Date();
@@ -234,7 +267,6 @@ function updateDateUI() {
   $('disp-date').textContent = dateText;
   if($('disp-date-ledger')) $('disp-date-ledger').textContent = dateText;
   
-  // 同步原生 input 的值
   const val = getCurrentMonthStr();
   $('native-month-picker').value = val;
   if($('native-month-picker-ledger')) $('native-month-picker-ledger').value = val;
@@ -242,7 +274,6 @@ function updateDateUI() {
   renderAll();
 }
 
-// 處理原生滾輪選擇器的變更
 function handleNativeDateChange(input) {
   if (!input.value) return;
   const parts = input.value.split('-');
@@ -251,7 +282,6 @@ function handleNativeDateChange(input) {
   updateDateUI();
 }
 
-// 左右滑動切換月份
 function changeMonth(delta) {
   currentMonth += delta;
   if (currentMonth < 1) { currentMonth = 12; currentYear--; }
@@ -260,8 +290,12 @@ function changeMonth(delta) {
 }
 
 function save() {
-  localStorage.setItem('yunyi_emp', JSON.stringify(employees));
-  localStorage.setItem('yunyi_ledger', JSON.stringify(ledger));
+  try {
+    localStorage.setItem('yunyi_emp', JSON.stringify(employees));
+    localStorage.setItem('yunyi_ledger', JSON.stringify(ledger));
+  } catch (error) {
+    alert('儲存失敗！可能是因為您使用了「無痕模式」或手機容量已滿。');
+  }
 }
 
 function goTo(page, el) {
@@ -276,7 +310,7 @@ function openModal(id) { $(id).classList.add('open'); }
 function closeModal(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeModalById(id) { $(id).classList.remove('open'); }
 
-// 滑動手勢支援 (Swipe Left / Right)
+// 左右滑動切換月份 (Swipe Left / Right)
 let touchstartX = 0, touchstartY = 0, touchendX = 0, touchendY = 0;
 document.addEventListener('touchstart', e => {
   if(e.target.closest('.modal-overlay') || e.target.closest('.card')) return; 
@@ -293,18 +327,42 @@ document.addEventListener('touchend', e => {
   let yDiff = touchstartY - touchendY;
   
   if(Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 60) {
-    if(xDiff > 0) changeMonth(1); // 向左滑 -> 下個月
-    else changeMonth(-1); // 向右滑 -> 上個月
+    if(xDiff > 0) changeMonth(1); 
+    else changeMonth(-1); 
   }
 }, { passive: true });
 
+
+// ==== 長按刪除核心邏輯 ====
+function startPress(e, idx) {
+  targetDeleteIndex = idx;
+  pressTimer = setTimeout(() => {
+    // 觸發短暫震動 (Android支援)
+    if(navigator.vibrate) navigator.vibrate(50);
+    openModal('modal-delete');
+  }, 600); // 600毫秒
+}
+
+function cancelPress() {
+  clearTimeout(pressTimer);
+}
+
+function confirmDeleteLedger() {
+  if(targetDeleteIndex !== -1) {
+    ledger.splice(targetDeleteIndex, 1);
+    save();
+    renderAll();
+  }
+  closeModalById('modal-delete');
+}
+// ==========================
 
 function renderEmployees() {
   const el = $('emp-list');
   $('emp-count').textContent = `目前共 ${employees.length} 位人員`;
   if(!employees.length) { el.innerHTML = '<div class="empty">尚未建立人員資料</div>'; return; }
   el.innerHTML = employees.map((e, i) => `
-    <div class="list-row" onclick="editEmployee(${i})">
+    <div class="list-row pressable-row" onclick="editEmployee(${i})">
       <div class="row-left">
         <div class="row-info">
           <div class="row-name">${e.name}</div>
@@ -336,11 +394,12 @@ function editEmployee(i) {
 
 function saveEmployee() {
   const name=$('e-name').value, role=$('e-role').value, salary=$('e-salary').value, bonus=$('e-bonus').value;
-  if(!name || !salary) return alert('請填寫完整');
+  if(!name || !salary) return;
   const id = $('emp-edit-id').value;
-  const data = { name, role, salary: parseInt(salary), bonus: parseInt(bonus) };
+  const data = { name, role, salary: parseInt(salary), bonus: parseInt(bonus)||0 };
   if(id !== '') employees[id] = data; else employees.push(data);
   save(); renderAll(); closeModalById('modal-emp');
+  if(document.activeElement) document.activeElement.blur();
 }
 
 function deleteEmployee() {
@@ -351,19 +410,36 @@ function deleteEmployee() {
 
 function addLedger() {
   const date=$('l-date').value, name=$('l-name').value, amt=$('l-amt').value, cat=$('l-cat').value, proj=$('l-proj').value, pay=$('l-pay').value;
-  if(!name || !amt) return alert('請填寫項目與金額');
+  if(!name || !amt) return;
   ledger.unshift({ date, name, amt: parseInt(amt), cat, proj, pay });
   save(); renderAll(); closeModalById('modal-ledger');
   $('l-name').value = ''; $('l-amt').value = '';
+  if(document.activeElement) document.activeElement.blur();
 }
 
 function renderLedger() {
   const selMonth = getCurrentMonthStr();
-  const filtered = ledger.filter(r => r.date.startsWith(selMonth));
   const el = $('ledger-list');
-  if(!filtered.length) { el.innerHTML = '<div class="empty">本月尚無帳目紀錄</div>'; return; }
-  el.innerHTML = filtered.map(r => `
-    <div class="list-row">
+  
+  // 建立包含原始 index 的陣列，確保刪除時不會刪錯筆
+  const renderedItems = [];
+  ledger.forEach((r, idx) => {
+    if(r.date.startsWith(selMonth)) {
+      renderedItems.push({ ...r, originalIndex: idx });
+    }
+  });
+
+  if(!renderedItems.length) { el.innerHTML = '<div class="empty">本月尚無帳目紀錄</div>'; return; }
+  
+  el.innerHTML = renderedItems.map(r => `
+    <div class="list-row pressable-row"
+         ontouchstart="startPress(event, ${r.originalIndex})" 
+         ontouchend="cancelPress()" 
+         ontouchmove="cancelPress()"
+         onmousedown="startPress(event, ${r.originalIndex})"
+         onmouseup="cancelPress()"
+         onmouseleave="cancelPress()"
+         oncontextmenu="return false;">
       <div class="row-left">
         <div style="width:4px; height:24px; background:${r.cat==='營業收入'?'var(--green)':'var(--red)'}; border-radius:2px;"></div>
         <div class="row-info">
