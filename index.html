@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.13</title>
+<title>Yun Yi Finance v2.14</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,8 +23,8 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .screen { display: none; min-height: 100vh; padding-bottom: 100px; }
 .screen.active { display: block; }
 
-/* 局部轉場動畫專用的 CSS */
-#overview-card { transition: opacity 0.15s ease-out, transform 0.15s ease-out; opacity: 1; transform: translateX(0); }
+/* 局部轉場動畫 */
+.swipeable-card { transition: opacity 0.15s ease-out, transform 0.15s ease-out; opacity: 1; transform: translateX(0); }
 .slide-out-left { opacity: 0 !important; transform: translateX(-30px) !important; }
 .slide-out-right { opacity: 0 !important; transform: translateX(30px) !important; }
 .slide-in-left { opacity: 0 !important; transform: translateX(-30px) !important; transition: none !important; }
@@ -40,13 +40,12 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .dropdown-title .chevron { color: var(--muted); font-size: 12px; margin-top: 2px; }
 .native-date-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
-/* 🌟 全新置中 FAB 底部導覽列 */
+/* FAB 底部導覽列 */
 .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 8px 0 calc(15px + env(safe-area-inset-bottom)); align-items: center; }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; position: relative; }
 .nav-icon { font-size: 20px; color: var(--muted); transition: color 0.2s; }
 .nav-label { font-size: 10px; color: var(--muted); transition: color 0.2s; }
 .nav-item.active .nav-icon, .nav-item.active .nav-label { color: var(--accent2); }
-/* 中央大按鈕 */
 .fab-wrapper { position: absolute; top: -35px; width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; box-shadow: 0 4px 12px rgba(124,106,247,0.4); border: 4px solid var(--bg); transition: transform 0.1s; }
 .fab-wrapper:active { transform: scale(0.92); }
 
@@ -62,7 +61,20 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--muted); margin-right: 4px; }
 .img-thumb { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; border: 0.5px solid var(--border); }
 
-/* 長按互動樣式 */
+/* 🌟 日曆專用樣式 */
+.cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
+.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; font-size: 15px; font-weight: 500; position: relative; cursor: pointer; transition: 0.2s; }
+.cal-day:active { background: rgba(255,255,255,0.05); transform: scale(0.9); }
+.cal-day.empty { visibility: hidden; }
+.cal-day.today { color: var(--accent2); font-weight: 700; border: 1px solid rgba(167, 139, 250, 0.4); }
+.cal-day.active { background: var(--accent); color: white; border-color: var(--accent); }
+.cal-dots { display: flex; gap: 3px; position: absolute; bottom: 4px; }
+.cal-dot { width: 4px; height: 4px; border-radius: 50%; }
+.dot-inc { background: var(--green); }
+.dot-exp { background: var(--red); }
+.cal-day.active .cal-dot { background: white; opacity: 0.8; }
+
 .pressable-row { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; transition: background 0.2s, transform 0.1s; border-radius: 8px; padding: 12px 8px; margin: 0 -8px; }
 .pressable-row:active { background: rgba(255,255,255,0.05); transform: scale(0.98); }
 
@@ -113,7 +125,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
     </div>
   </div>
   
-  <div class="card" id="overview-card" style="padding-top: 20px;">
+  <div class="card swipeable-card" id="overview-card" style="padding-top: 20px;">
     <div class="card-title">本月財務概覽</div>
     <div style="position: relative; height: 200px; display: flex; justify-content: center; align-items: center;">
       <canvas id="metricsChart"></canvas>
@@ -153,7 +165,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="header">
     <div class="header-top">
       <div class="dropdown-title">
-        <span class="muted">收支帳本 /</span>
+        <span class="muted">明細列表 /</span>
         <span class="active-text" id="disp-date-ledger">2026年 05月</span>
         <span class="chevron">▼</span>
         <input type="month" id="native-month-picker-ledger" class="native-date-input" onchange="handleNativeDateChange(this)">
@@ -167,6 +179,29 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   </div>
 </div>
 
+<div class="screen" id="s-calendar">
+  <div class="header">
+    <div class="header-top">
+      <div class="dropdown-title">
+        <span class="muted">記帳本 /</span>
+        <span class="active-text" id="disp-date-calendar">2026年 05月</span>
+        <span class="chevron">▼</span>
+        <input type="month" id="native-month-picker-calendar" class="native-date-input" onchange="handleNativeDateChange(this)">
+      </div>
+      <div class="icon-btn" onclick="prepareAddLedger()">＋</div>
+    </div>
+  </div>
+  
+  <div class="card swipeable-card" id="calendar-card">
+    <div id="calendar-grid-container"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="daily-list-title">本日明細</div>
+    <div id="daily-ledger-list"></div>
+  </div>
+</div>
+
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="goTo('home',this)"><div class="nav-icon">📊</div><div class="nav-label">總覽</div></div>
   <div class="nav-item" onclick="goTo('salary',this)"><div class="nav-icon">👥</div><div class="nav-label">薪資</div></div>
@@ -175,8 +210,8 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
     <div class="fab-wrapper">＋</div>
   </div>
   
-  <div class="nav-item" onclick="goTo('ledger',this)"><div class="nav-icon">📒</div><div class="nav-label">帳本</div></div>
-  <div class="nav-item" onclick="alert('報告與分析功能即將推出！')"><div class="nav-icon">📈</div><div class="nav-label">報表</div></div>
+  <div class="nav-item" onclick="goTo('ledger',this)"><div class="nav-icon">🧾</div><div class="nav-label">明細</div></div>
+  <div class="nav-item" onclick="goTo('calendar',this)"><div class="nav-icon">📅</div><div class="nav-label">記帳本</div></div>
 </nav>
 
 <div class="modal-overlay" id="modal-delete" onclick="closeModal(event,'modal-delete')">
@@ -194,12 +229,10 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 <div class="modal-overlay" id="modal-ledger" onclick="closeModal(event,'modal-ledger')">
   <div class="modal">
     <div class="modal-handle"></div>
-    
     <div class="type-toggle">
       <div class="type-btn active exp" id="tab-exp" onclick="setTxType('expense')">支出</div>
       <div class="type-btn inc" id="tab-inc" onclick="setTxType('income')">收入</div>
     </div>
-
     <form onsubmit="event.preventDefault(); addLedger();">
       <input type="hidden" id="l-type" value="expense">
       <div class="field"><label>金額</label><input type="number" id="l-amt" placeholder="0" required inputmode="numeric" style="font-size:24px; font-weight:700; color:var(--accent2); padding:16px 12px;"></div>
@@ -208,7 +241,6 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
       <div class="field"><label>標籤 (手動填寫)</label><input type="text" id="l-tag" placeholder="例：DV茶會、急件"></div>
       <div class="field"><label>日期</label><input type="date" id="l-date" required></div>
       <div class="field"><label>附加照片 (選填)</label><input type="file" id="l-photo" accept="image/*" style="padding: 8px;"></div>
-      
       <button type="submit" class="btn-primary" style="margin-top:10px;">儲存紀錄</button>
     </form>
   </div>
@@ -242,18 +274,19 @@ let metricsChart = null;
 let pressTimer;
 let targetDeleteIndex = -1;
 let isAnimating = false; 
-let tempPhotoData = null; // 暫存壓縮後的圖片資料
+let tempPhotoData = null; 
 
 const now = new Date();
 let currentYear = now.getFullYear();
 let currentMonth = now.getMonth() + 1;
+// 🌟 日曆專用選中日期
+let selectedCalendarDate = now.toISOString().slice(0,10);
 
-$('l-date').value = now.toISOString().slice(0,10);
+$('l-date').value = selectedCalendarDate;
 
-// 初始化系統
 function init() {
   updateDateUI();
-  updateMemberSelect(); // 更新下拉選單
+  updateMemberSelect(); 
 }
 
 function getCurrentMonthStr() {
@@ -264,9 +297,13 @@ function updateDateUI() {
   const dateText = `${currentYear}年 ${currentMonth.toString().padStart(2, '0')}月`;
   $('disp-date').textContent = dateText;
   if($('disp-date-ledger')) $('disp-date-ledger').textContent = dateText;
+  if($('disp-date-calendar')) $('disp-date-calendar').textContent = dateText;
+  
   const val = getCurrentMonthStr();
   $('native-month-picker').value = val;
   if($('native-month-picker-ledger')) $('native-month-picker-ledger').value = val;
+  if($('native-month-picker-calendar')) $('native-month-picker-calendar').value = val;
+  
   renderAll();
 }
 
@@ -275,13 +312,22 @@ function handleNativeDateChange(input) {
   const parts = input.value.split('-');
   currentYear = parseInt(parts[0], 10);
   currentMonth = parseInt(parts[1], 10);
+  
+  // 切換月份時，若選中日期不在該月，預設跳到該月1號
+  if (!selectedCalendarDate.startsWith(input.value)) {
+    selectedCalendarDate = `${input.value}-01`;
+  }
   updateDateUI(); 
 }
 
 function changeMonth(delta) {
   if (isAnimating) return; 
   isAnimating = true;
-  const targetCard = $('overview-card');
+  
+  // 找出目前畫面中正在顯示的可滑動卡片
+  const targetCard = document.querySelector('.screen.active .swipeable-card');
+  if(!targetCard) { isAnimating = false; return; }
+
   if (delta > 0) targetCard.classList.add('slide-out-left');
   else targetCard.classList.add('slide-out-right');
 
@@ -290,6 +336,9 @@ function changeMonth(delta) {
     if (currentMonth < 1) { currentMonth = 12; currentYear--; }
     else if (currentMonth > 12) { currentMonth = 1; currentYear++; }
     
+    if (!selectedCalendarDate.startsWith(getCurrentMonthStr())) {
+      selectedCalendarDate = `${getCurrentMonthStr()}-01`;
+    }
     updateDateUI(); 
 
     targetCard.classList.remove('slide-out-left', 'slide-out-right');
@@ -326,21 +375,21 @@ function openModal(id) { $(id).classList.add('open'); }
 function closeModal(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeModalById(id) { $(id).classList.remove('open'); }
 
-// 左右滑動防呆機制
+// 左右滑動防呆機制 (支援多個 swipeable-card)
 let touchstartX = 0, touchstartY = 0, swipeDirection = null; 
 document.addEventListener('touchstart', e => {
-  if(e.target.closest('.modal-overlay') || !e.target.closest('#overview-card')) return;
+  if(e.target.closest('.modal-overlay') || !e.target.closest('.swipeable-card')) return;
   touchstartX = e.touches[0].screenX; touchstartY = e.touches[0].screenY; swipeDirection = null; 
 }, { passive: true });
 document.addEventListener('touchmove', e => {
-  if(e.target.closest('.modal-overlay') || !touchstartX || !touchstartY || isAnimating || !e.target.closest('#overview-card')) return;
+  if(e.target.closest('.modal-overlay') || !touchstartX || !touchstartY || isAnimating || !e.target.closest('.swipeable-card')) return;
   let xDiff = Math.abs(touchstartX - e.touches[0].screenX);
   let yDiff = Math.abs(touchstartY - e.touches[0].screenY);
   if (swipeDirection === null && (xDiff > 3 || yDiff > 3)) swipeDirection = (xDiff > yDiff) ? 'H' : 'V'; 
   if (swipeDirection === 'H' && e.cancelable) e.preventDefault();
 }, { passive: false }); 
 document.addEventListener('touchend', e => {
-  if(e.target.closest('.modal-overlay') || !e.target.closest('#overview-card')) return;
+  if(e.target.closest('.modal-overlay') || !e.target.closest('.swipeable-card')) return;
   if (swipeDirection === 'H') {
     let xDiff = touchstartX - e.changedTouches[0].screenX;
     if(Math.abs(xDiff) > 40) { if(xDiff > 0) changeMonth(1); else changeMonth(-1); }
@@ -358,7 +407,6 @@ function confirmDeleteLedger() {
   closeModalById('modal-delete');
 }
 
-// 動態更新下拉選單
 function updateMemberSelect() {
   const select = $('l-member');
   if(!select) return;
@@ -410,11 +458,12 @@ function deleteEmployee() {
   save(); updateMemberSelect(); renderAll(); closeModalById('modal-emp');
 }
 
-// 🌟 新版記一筆面板控制
 function prepareAddLedger() {
-  setTxType('expense'); // 預設為支出
+  setTxType('expense'); 
+  // 讓日期預設為當前日曆選中的日子，記帳更直覺
+  $('l-date').value = selectedCalendarDate;
   $('l-amt').value = ''; $('l-cat').value = ''; $('l-tag').value = ''; $('l-photo').value = '';
-  tempPhotoData = null; // 清空舊照片
+  tempPhotoData = null; 
   openModal('modal-ledger');
 }
 
@@ -430,7 +479,6 @@ function setTxType(type) {
   }
 }
 
-// 照片自動壓縮黑科技
 $('l-photo').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if(!file) return;
@@ -439,13 +487,13 @@ $('l-photo').addEventListener('change', function(e) {
     const img = new Image();
     img.onload = function() {
       const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 250; // 壓縮得很小，純當縮圖
+      const MAX_WIDTH = 250; 
       const scaleSize = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scaleSize;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      tempPhotoData = canvas.toDataURL('image/jpeg', 0.5); // 存成品質較低的 base64 字串
+      tempPhotoData = canvas.toDataURL('image/jpeg', 0.5); 
     };
     img.src = evt.target.result;
   };
@@ -461,7 +509,14 @@ function addLedger() {
   if(!cat || !amt) return;
   
   ledger.unshift({ date, type, amt: parseInt(amt), cat, member, tag, photo: tempPhotoData });
-  save(); renderAll(); closeModalById('modal-ledger');
+  
+  // 新增成功後，自動將日曆跳轉到該天
+  selectedCalendarDate = date;
+  const parts = date.split('-');
+  currentYear = parseInt(parts[0], 10);
+  currentMonth = parseInt(parts[1], 10);
+  
+  save(); updateDateUI(); closeModalById('modal-ledger');
   if(document.activeElement) document.activeElement.blur();
 }
 
@@ -474,7 +529,7 @@ function renderLedger() {
   if(!renderedItems.length) { el.innerHTML = '<div class="empty">本月尚無帳目紀錄</div>'; return; }
   
   el.innerHTML = renderedItems.map(r => {
-    const isInc = r.type === 'income' || (r.type === undefined && r.cat === '營業收入'); // 相容舊資料
+    const isInc = r.type === 'income' || (r.type === undefined && r.cat === '營業收入');
     const color = isInc ? 'var(--green)' : 'var(--red)';
     const tagHtml = r.tag ? `<span class="tag">${r.tag}</span>` : '';
     const memberHtml = r.member ? ` · 👤 ${r.member}` : '';
@@ -494,11 +549,97 @@ function renderLedger() {
   }).join('');
 }
 
+// 🌟 日曆相關渲染函數
+function selectCalendarDate(dateStr) {
+  selectedCalendarDate = dateStr;
+  renderCalendar();
+  renderDailyList();
+}
+
+function renderCalendar() {
+  const year = currentYear;
+  const month = currentMonth;
+  const firstDay = new Date(year, month - 1, 1).getDay(); // 0(Sun) ~ 6(Sat)
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const monthPrefix = `${year}-${month.toString().padStart(2, '0')}`;
+
+  let html = '<div class="cal-header"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div><div class="cal-days">';
+
+  // 填補月初的空白天數
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="cal-day empty"></div>`;
+  }
+
+  // 渲染每一天
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${monthPrefix}-${d.toString().padStart(2, '0')}`;
+    const isSelected = (dateStr === selectedCalendarDate);
+    const isToday = (dateStr === todayStr);
+
+    // 檢查當天有無收支紀錄
+    const dayRecords = ledger.filter(r => r.date === dateStr);
+    let hasInc = dayRecords.some(r => r.type === 'income' || (r.type === undefined && r.cat === '營業收入'));
+    let hasExp = dayRecords.some(r => r.type === 'expense' || (r.type === undefined && r.cat !== '營業收入'));
+
+    let dotsHtml = '';
+    if(hasInc) dotsHtml += '<div class="cal-dot dot-inc"></div>';
+    if(hasExp) dotsHtml += '<div class="cal-dot dot-exp"></div>';
+
+    let classes = 'cal-day';
+    if (isSelected) classes += ' active';
+    if (isToday && !isSelected) classes += ' today';
+
+    html += `
+      <div class="${classes}" onclick="selectCalendarDate('${dateStr}')">
+         ${d}
+         <div class="cal-dots">${dotsHtml}</div>
+      </div>`;
+  }
+  html += '</div>';
+  $('calendar-grid-container').innerHTML = html;
+}
+
+function renderDailyList() {
+  const parts = selectedCalendarDate.split('-');
+  const dateObj = new Date(parts[0], parts[1]-1, parts[2]);
+  const weekDays = ['日','一','二','三','四','五','六'];
+  const weekStr = weekDays[dateObj.getDay()];
+  
+  $('daily-list-title').textContent = `${parts[1]}月${parts[2]}日 星期${weekStr}`;
+  
+  const el = $('daily-ledger-list');
+  const renderedItems = [];
+  ledger.forEach((r, idx) => { if(r.date === selectedCalendarDate) renderedItems.push({ ...r, originalIndex: idx }); });
+
+  if(!renderedItems.length) { el.innerHTML = '<div class="empty">本日無紀錄，點擊下方 ＋ 記一筆</div>'; return; }
+  
+  el.innerHTML = renderedItems.map(r => {
+    const isInc = r.type === 'income' || (r.type === undefined && r.cat === '營業收入');
+    const color = isInc ? 'var(--green)' : 'var(--red)';
+    const tagHtml = r.tag ? `<span class="tag">${r.tag}</span>` : '';
+    const memberHtml = r.member ? ` · 👤 ${r.member}` : '';
+    const photoHtml = r.photo ? `<img src="${r.photo}" class="img-thumb">` : '';
+    
+    return `
+    <div class="list-row pressable-row" ontouchstart="startPress(event, ${r.originalIndex})" ontouchend="cancelPress()" ontouchmove="cancelPress()" onmousedown="startPress(event, ${r.originalIndex})" onmouseup="cancelPress()" onmouseleave="cancelPress()" oncontextmenu="return false;">
+      <div class="row-left">
+        ${photoHtml}
+        <div class="row-info">
+          <div class="row-name">${r.cat}</div>
+          <div class="row-sub">${tagHtml}${r.pay}${memberHtml}</div>
+        </div>
+      </div>
+      <div style="font-weight:700; color:${color}">${isInc?'+':'-'}${fmt(r.amt)}</div>
+    </div>`;
+  }).join('');
+}
+
+
 function renderDashboard() {
   const selMonth = getCurrentMonthStr();
   const filtered = ledger.filter(r => r.date.startsWith(selMonth));
   
-  // 相容新舊資料判斷
   const income = filtered.filter(r => r.type === 'income' || (r.type === undefined && r.cat === '營業收入')).reduce((s, r) => s + r.amt, 0);
   const expense = filtered.filter(r => r.type === 'expense' || (r.type === undefined && r.cat !== '營業收入')).reduce((s, r) => s + r.amt, 0);
   const salTotal = employees.reduce((s, e) => s + e.salary + e.bonus, 0);
@@ -566,7 +707,14 @@ function exportCSV() {
   link.click();
 }
 
-function renderAll() { renderDashboard(); renderEmployees(); renderLedger(); renderChart(); }
+function renderAll() { 
+  renderDashboard(); 
+  renderEmployees(); 
+  renderLedger(); 
+  renderChart(); 
+  renderCalendar(); // 🌟 渲染日曆
+  renderDailyList(); // 🌟 渲染當日明細
+}
 
 init();
 </script>
