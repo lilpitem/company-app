@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.33</title>
+<title>Yun Yi Finance v2.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -22,11 +22,21 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 .sync-ok { color:var(--green); background:rgba(52,211,153,0.1); }
 .sync-err { color:var(--red); background:rgba(248,113,113,0.1); cursor:pointer; }
 @keyframes pulse { 50% { opacity:0.5; } }
+
+/* 月份導覽優化 */
+.month-nav { display:flex; align-items:center; justify-content:center; gap:12px; padding:0 16px 12px; }
+.m-btn { background:var(--card); border:.5px solid var(--border); color:var(--accent2); border-radius:8px; padding:6px 14px; font-size:18px; cursor:pointer; }
+/* 隱藏原生 input 但保留點擊觸發功能 */
+.m-picker-wrapper { position:relative; min-width:120px; text-align:center; }
+#hdr-m { font-size:16px; font-weight:700; color:var(--text); }
+#m-input { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+
 .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:var(--bg2); border-top:.5px solid var(--border); display:flex; z-index:100; padding:10px 0 calc(15px + env(safe-area-inset-bottom)); }
 .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--muted); }
 .nav-item.active { color:var(--accent2); }
 .nav-icon { font-size:20px; } .nav-label { font-size:10px; font-weight:500; }
 .fab { position:absolute; top:-30px; width:56px; height:56px; background:var(--accent); border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; color:#fff; border:4px solid var(--bg); box-shadow:0 4px 15px rgba(124,106,247,.3); }
+
 .card { background:var(--card); border:.5px solid var(--border); border-radius:var(--radius); padding:16px; margin:0 16px 12px; }
 .card-title { font-size:12px; color:var(--muted); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
 .list-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:.5px solid rgba(255,255,255,.03); }
@@ -35,6 +45,7 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 .row-sub { font-size:11px; color:var(--muted); }
 .amt { font-weight:700; font-size:15px; }
 .empty { text-align:center; padding:40px 0; color:var(--muted); font-size:13px; }
+
 .cal-grid { display:flex; flex-wrap:wrap; width:100%; }
 .cal-h, .cal-c { width:14.285%; text-align:center; }
 .cal-h { font-size:11px; color:var(--muted); padding-bottom:8px; }
@@ -44,6 +55,7 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 .cal-d.today:not(.active) { border:1px solid var(--accent2); color:var(--accent2); }
 .dots { display:flex; gap:2px; position:absolute; bottom:3px; }
 .dot { width:3.5px; height:3.5px; border-radius:50%; }
+
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; align-items:flex-end; }
 .modal-overlay.open { display:flex; }
 .modal { background:var(--bg2); border-radius:24px 24px 0 0; padding:20px 20px calc(40px + env(safe-area-inset-bottom)); width:100%; max-height:88vh; overflow-y:auto; }
@@ -56,6 +68,7 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 .field label { font-size:11px; color:var(--muted); display:block; margin-bottom:5px; }
 .field input, .field select { width:100%; padding:12px; background:rgba(255,255,255,.05); border:.5px solid var(--border); border-radius:8px; color:#fff; font-size:15px; outline:none; }
 .btn-p { width:100%; padding:15px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; }
+
 .chart-box { position:relative; height:180px; display:flex; justify-content:center; align-items:center; margin:10px 0; }
 .chart-center { position:absolute; text-align:center; pointer-events:none; }
 .chart-val { font-size:20px; font-weight:700; }
@@ -64,16 +77,20 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 .legend-item div:last-child { font-size:14px; font-weight:700; }
 </style>
 </head>
-<body>
+<body id="swipe-area">
 
 <div class="header">
   <div class="brand">蘊一財務</div>
   <div id="sync-status" onclick="loadCloud()">點擊讀取雲端</div>
 </div>
-<div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:0 16px 8px;">
-  <button onclick="shiftMonth(-1)" style="background:var(--card);border:.5px solid var(--border);color:var(--accent2);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;line-height:1;">‹</button>
-  <span id="hdr-m" style="font-size:15px;font-weight:600;min-width:100px;text-align:center;"></span>
-  <button onclick="shiftMonth(1)" style="background:var(--card);border:.5px solid var(--border);color:var(--accent2);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;line-height:1;">›</button>
+
+<div class="month-nav">
+  <button onclick="shiftMonth(-1)" class="m-btn">‹</button>
+  <div class="m-picker-wrapper">
+    <span id="hdr-m"></span>
+    <input type="month" id="m-input" onchange="pickMonth(this.value)">
+  </div>
+  <button onclick="shiftMonth(1)" class="m-btn">›</button>
   <button onclick="resetMonth()" style="font-size:11px;background:var(--border);color:var(--accent2);border:.5px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;">本月</button>
 </div>
 
@@ -113,7 +130,6 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 <div class="modal-overlay" id="m-del" onclick="closeM(event,'m-del')">
   <div class="modal" style="text-align:center;"><div class="modal-h"></div><div class="modal-title">確定刪除紀錄嗎？</div><div style="display:flex;gap:12px;margin-top:20px;"><button class="btn-p" style="flex:1;background:rgba(255,255,255,.08);" onclick="closeMById('m-del')">取消</button><button class="btn-p" style="flex:1;background:var(--red);" onclick="execDel()">刪除</button></div></div>
 </div>
-
 <div class="modal-overlay" id="m-ldg" onclick="closeM(event,'m-ldg')">
   <div class="modal"><div class="modal-h"></div><div class="t-toggle"><div class="t-btn active exp" id="tb-exp" onclick="setT('expense')">支出</div><div class="t-btn inc" id="tb-inc" onclick="setT('income')">收入</div></div>
   <form onsubmit="event.preventDefault(); saveLdg();"><input type="hidden" id="l-t" value="expense">
@@ -123,7 +139,6 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
   <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
   <button type="submit" class="btn-p">儲存並上傳</button></form></div>
 </div>
-
 <div class="modal-overlay" id="m-emp" onclick="closeM(event,'m-emp')">
   <div class="modal"><div class="modal-h"></div><form onsubmit="event.preventDefault(); saveEmp();">
   <input type="hidden" id="e-id">
@@ -133,7 +148,6 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
   <button type="submit" class="btn-p">儲存</button>
   <button type="button" id="btn-del-emp" style="width:100%;margin-top:10px;background:transparent;color:var(--red);border:none;" onclick="delEmp()">刪除人員</button></form></div>
 </div>
-
 <div class="modal-overlay" id="m-det" onclick="closeM(event,'m-det')">
   <div class="modal"><div class="modal-h"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;"><h2 id="det-n" style="font-size:18px;"></h2><div class="btn-p" id="det-e-btn" style="width:auto;padding:6px 12px;font-size:12px;">✏️ 編輯</div></div><div class="chart-box"><canvas id="c-emp"></canvas></div><div id="det-list"></div></div>
 </div>
@@ -152,10 +166,39 @@ const today = new Date();
 let calYear = today.getFullYear(), calMonth = today.getMonth(), selD = toIsoD(today);
 let charts = {}, delIdx = -1;
 
-// 優化：利用原生 Date 自動處理跨年月邏輯
-const shiftMonth = (delta) => { const d = new Date(calYear, calMonth + delta, 1); calYear = d.getFullYear(); calMonth = d.getMonth(); render(); };
-const resetMonth = () => { const d = new Date(); calYear = d.getFullYear(); calMonth = d.getMonth(); selD = toIsoD(d); render(); };
+// ── 月份切換邏輯 ──
+const shiftMonth = (delta) => { 
+    const d = new Date(calYear, calMonth + delta, 1); 
+    calYear = d.getFullYear(); calMonth = d.getMonth(); 
+    render(); 
+};
+const resetMonth = () => { 
+    const d = new Date(); 
+    calYear = d.getFullYear(); calMonth = d.getMonth(); 
+    selD = toIsoD(d); 
+    render(); 
+};
+// 原生 Picker 選擇邏輯
+const pickMonth = (val) => {
+    if(!val) return;
+    const [y, m] = val.split('-');
+    calYear = parseInt(y); calMonth = parseInt(m) - 1;
+    render();
+};
 
+// ── 左右滑動偵測 ──
+let touchStartX = 0;
+$('swipe-area').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+$('swipe-area').addEventListener('touchend', e => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const diff = touchEndX - touchStartX;
+    // 只有在總覽 (s-home) 或 記帳本 (s-cal) 畫面才啟用滑動切換月份
+    if (Math.abs(diff) > 60 && ($('s-home').classList.contains('active') || $('s-cal').classList.contains('active'))) {
+        shiftMonth(diff > 0 ? -1 : 1); // 右滑回上個月，左滑進下個月
+    }
+}, {passive: true});
+
+// ── 雲端同步與其餘邏輯 (保持優化版) ──
 function jsonpFetch(url) {
     return new Promise((resolve, reject) => {
         const cbName = '_cb_' + Date.now(), script = document.createElement('script');
@@ -167,7 +210,6 @@ function jsonpFetch(url) {
         document.head.appendChild(script);
     });
 }
-
 async function sync() {
     setSync('上傳中...', 'syncing');
     try {
@@ -175,7 +217,6 @@ async function sync() {
         setSync('✅ 雲端已同步', 'sync-ok');
     } catch(e) { setSync('📵 離線儲存', ''); }
 }
-
 async function loadCloud() {
     setSync('讀取中...', 'syncing');
     try {
@@ -190,9 +231,6 @@ async function loadCloud() {
         $('sync-status').onclick = () => alert(`錯誤：${e.message}`);
     }
 }
-
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") loadCloud(); });
-
 const saveLoc = () => { localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); };
 const go = (p, el) => { $$('.screen, .nav-item').forEach(e => e.classList.remove('active')); $(`s-${p}`).classList.add('active'); el.classList.add('active'); };
 const openM = id => $(id).classList.add('open');
@@ -201,7 +239,6 @@ const closeMById = id => $(id).classList.remove('open');
 const setT = t => { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn active exp':'t-btn exp'; $('tb-inc').className=t==='income'?'t-btn active inc':'t-btn inc'; };
 const prepLdg = () => { setT('expense'); $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; openM('m-ldg'); };
 const prepEmp = () => { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; $('btn-del-emp').style.display='none'; openM('m-emp'); };
-
 function saveLdg() { ldg.unshift({date:qV('l-d'), type:qV('l-t'), amt:Number(qV('l-a')), cat:qV('l-c'), mem:qV('l-m')}); updateState('m-ldg'); }
 function saveEmp() { 
   const id = qV('e-id'), d = {name:qV('e-n'), salary:Number(qV('e-s')), bonus:Number(qV('e-b'))}; 
@@ -224,7 +261,10 @@ function showDet(i) {
 function render() {
     const mStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
     const curLdg = ldg.map((r,i)=>({...r, oid:i})).filter(r=>r.date.startsWith(mStr));
+    
+    // 更新標題與同步隱藏的 input 值
     $('hdr-m').textContent = `${calYear}年 ${calMonth+1}月`;
+    $('m-input').value = mStr;
     
     const row = r => `<div class="list-row" ontouchstart="pressT=setTimeout(()=>{delIdx=${r.oid};openM('m-del')},600)" ontouchend="clearTimeout(pressT)"><div class="row-info"><div class="row-main">${r.cat}</div><div class="row-sub">${r.date} · ${r.mem}</div></div><div class="amt" style="color:var(--${r.type==='income'?'green':'red'})">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div></div>`;
     
