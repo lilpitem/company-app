@@ -17,6 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 :root{
   --bg:#0f111a;
   --bg2:#191c29;
@@ -49,10 +50,6 @@ body{
   overscroll-behavior:none;
 }
 
-button,input,select{
-  font-family:inherit;
-}
-
 .screen{
   display:none;
   min-height:100vh;
@@ -74,15 +71,6 @@ button,input,select{
 .brand{
   font-size:20px;
   font-weight:700;
-  letter-spacing:.5px;
-}
-
-.sync{
-  font-size:11px;
-  padding:6px 12px;
-  border-radius:999px;
-  background:rgba(255,255,255,.05);
-  color:var(--muted);
 }
 
 .top-month{
@@ -107,7 +95,9 @@ button,input,select{
 .month-label{
   min-width:120px;
   text-align:center;
-  font-weight:600;
+  font-weight:700;
+  font-size:16px;
+  cursor:pointer;
 }
 
 .card{
@@ -133,21 +123,20 @@ button,input,select{
   position:absolute;
   inset:0;
   display:flex;
-  flex-direction:column;
   justify-content:center;
   align-items:center;
   pointer-events:none;
 }
 
 .net{
-  font-size:28px;
+  font-size:30px;
   font-weight:700;
 }
 
 .legend{
   display:flex;
   justify-content:space-between;
-  margin-top:18px;
+  margin-top:20px;
   gap:10px;
 }
 
@@ -166,46 +155,6 @@ button,input,select{
   font-weight:700;
 }
 
-.list-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 0;
-  border-bottom:1px solid rgba(255,255,255,.04);
-}
-
-.list-row:last-child{
-  border-bottom:none;
-}
-
-.row-info{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.row-main{
-  font-size:15px;
-  font-weight:500;
-}
-
-.row-sub{
-  font-size:11px;
-  color:var(--muted);
-}
-
-.amount{
-  font-size:15px;
-  font-weight:700;
-}
-
-.empty{
-  padding:36px 0;
-  text-align:center;
-  color:var(--muted);
-  font-size:13px;
-}
-
 .bottom-nav{
   position:fixed;
   bottom:0;
@@ -218,7 +167,7 @@ button,input,select{
   background:var(--bg2);
   border-top:1px solid var(--border);
   padding:10px 0 calc(14px + env(safe-area-inset-bottom));
-  z-index:99;
+  z-index:999;
 }
 
 .nav-item{
@@ -228,7 +177,6 @@ button,input,select{
   align-items:center;
   gap:4px;
   color:var(--muted);
-  cursor:pointer;
 }
 
 .nav-item.active{
@@ -255,103 +203,12 @@ button,input,select{
   transform:translateX(-50%);
   width:58px;
   height:58px;
+  border:none;
   border-radius:50%;
-  border:none;
   background:var(--accent);
   color:#fff;
-  font-size:30px;
-  cursor:pointer;
+  font-size:28px;
   box-shadow:0 10px 25px rgba(124,106,247,.35);
-}
-
-.modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  display:none;
-  align-items:flex-end;
-  z-index:999;
-}
-
-.modal-overlay.open{
-  display:flex;
-}
-
-.modal{
-  width:100%;
-  background:var(--bg2);
-  border-radius:26px 26px 0 0;
-  padding:22px 20px calc(40px + env(safe-area-inset-bottom));
-  max-height:88vh;
-  overflow-y:auto;
-}
-
-.modal-handle{
-  width:42px;
-  height:5px;
-  border-radius:999px;
-  background:rgba(255,255,255,.1);
-  margin:0 auto 18px;
-}
-
-.field{
-  margin-bottom:14px;
-}
-
-.field label{
-  display:block;
-  font-size:11px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-.field input,
-.field select{
-  width:100%;
-  border:none;
-  border-radius:12px;
-  padding:14px;
-  background:rgba(255,255,255,.06);
-  color:#fff;
-  font-size:15px;
-}
-
-.btn{
-  width:100%;
-  border:none;
-  border-radius:14px;
-  padding:15px;
-  background:var(--accent);
-  color:#fff;
-  font-size:15px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.toggle{
-  display:flex;
-  gap:8px;
-  margin-bottom:16px;
-}
-
-.toggle button{
-  flex:1;
-  border:none;
-  border-radius:10px;
-  padding:12px;
-  background:rgba(255,255,255,.05);
-  color:var(--muted);
-  cursor:pointer;
-}
-
-.toggle button.active.expense{
-  background:var(--red);
-  color:#fff;
-}
-
-.toggle button.active.income{
-  background:var(--green);
-  color:#fff;
 }
 
 .cal-grid{
@@ -369,12 +226,11 @@ button,input,select{
 .cal-day{
   aspect-ratio:1;
   border-radius:14px;
+  background:rgba(255,255,255,.03);
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   position:relative;
-  background:rgba(255,255,255,.02);
-  cursor:pointer;
 }
 
 .cal-day.active{
@@ -387,7 +243,7 @@ button,input,select{
 
 .dot-wrap{
   position:absolute;
-  bottom:6px;
+  bottom:5px;
   display:flex;
   gap:3px;
 }
@@ -398,6 +254,179 @@ button,input,select{
   border-radius:50%;
 }
 
+.list-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+
+.row-info{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.row-main{
+  font-size:15px;
+}
+
+.row-sub{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.amount{
+  font-weight:700;
+}
+
+.empty{
+  padding:36px 0;
+  text-align:center;
+  color:var(--muted);
+}
+
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  align-items:flex-end;
+  z-index:3000;
+}
+
+.modal-overlay.open{
+  display:flex;
+}
+
+.modal{
+  width:100%;
+  background:var(--bg2);
+  border-radius:28px 28px 0 0;
+  padding:20px 20px calc(40px + env(safe-area-inset-bottom));
+}
+
+.modal-handle{
+  width:42px;
+  height:5px;
+  border-radius:999px;
+  background:rgba(255,255,255,.1);
+  margin:0 auto 18px;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+.field label{
+  display:block;
+  margin-bottom:6px;
+  font-size:11px;
+  color:var(--muted);
+}
+
+.field input,
+.field select{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  color:#fff;
+}
+
+.btn{
+  width:100%;
+  border:none;
+  border-radius:14px;
+  padding:15px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+}
+
+/* iOS Picker */
+
+.picker-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  display:none;
+  align-items:flex-end;
+  z-index:5000;
+}
+
+.picker-overlay.open{
+  display:flex;
+}
+
+.picker-modal{
+  width:100%;
+  background:var(--bg2);
+  border-radius:28px 28px 0 0;
+  padding:20px 20px calc(40px + env(safe-area-inset-bottom));
+}
+
+.picker-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.picker-btn{
+  border:none;
+  background:none;
+  color:var(--accent2);
+  font-size:16px;
+}
+
+.picker-wheel-wrap{
+  display:flex;
+  gap:12px;
+}
+
+.picker-wheel{
+  flex:1;
+  height:240px;
+  overflow-y:auto;
+  scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch;
+  position:relative;
+  scrollbar-width:none;
+}
+
+.picker-wheel::-webkit-scrollbar{
+  display:none;
+}
+
+.picker-item{
+  height:48px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  scroll-snap-align:center;
+  color:var(--muted);
+  font-size:20px;
+}
+
+.picker-item.active{
+  color:#fff;
+  font-weight:700;
+}
+
+.picker-highlight{
+  position:absolute;
+  left:0;
+  right:0;
+  top:96px;
+  height:48px;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  pointer-events:none;
+}
+
 </style>
 </head>
 
@@ -405,33 +434,36 @@ button,input,select{
 
 <div class="header">
   <div class="brand">蘊一財務</div>
-  <div class="sync" id="syncStatus">本地模式</div>
 </div>
 
 <div class="top-month">
   <button class="month-btn" id="prevMonth">‹</button>
+
   <div class="month-label" id="monthLabel"></div>
+
   <button class="month-btn" id="nextMonth">›</button>
 </div>
 
-<!-- HOME -->
 <section class="screen active" id="screen-home">
 
   <div class="card">
 
     <div class="card-title">
-      本月財務總覽
+      本月財務概覽
     </div>
 
     <div class="chart-box">
+
       <canvas id="mainChart"></canvas>
 
       <div class="chart-center">
         <div class="net" id="netValue">$0</div>
       </div>
+
     </div>
 
     <div class="legend">
+
       <div class="legend-item">
         <div class="legend-label">收入</div>
         <div class="legend-value" id="incomeValue">$0</div>
@@ -446,13 +478,13 @@ button,input,select{
         <div class="legend-label">薪資</div>
         <div class="legend-value" id="salaryValue">$0</div>
       </div>
+
     </div>
 
   </div>
 
 </section>
 
-<!-- CALENDAR -->
 <section class="screen" id="screen-calendar">
 
   <div class="card">
@@ -460,114 +492,65 @@ button,input,select{
   </div>
 
   <div class="card">
-    <div class="card-title" id="dayTitle">
-      今日明細
-    </div>
-
+    <div class="card-title" id="dayTitle"></div>
     <div id="dayList"></div>
   </div>
 
 </section>
 
-<!-- LEDGER -->
-<section class="screen" id="screen-ledger">
-
-  <div class="card">
-    <div class="card-title">
-      本月帳目
-    </div>
-
-    <div id="ledgerList"></div>
-  </div>
-
-</section>
-
-<!-- STAFF -->
-<section class="screen" id="screen-staff">
-
-  <div class="card">
-    <div id="staffList"></div>
-
-    <button
-      class="btn"
-      style="margin-top:16px;background:rgba(124,106,247,.1);color:var(--accent2)"
-      id="addStaffBtn"
-    >
-      ＋ 新增人員
-    </button>
-  </div>
-
-</section>
-
-<!-- NAV -->
 <nav class="bottom-nav">
 
-  <div class="nav-item active" data-screen="home">
+  <div class="nav-item active">
     <div class="nav-icon">📊</div>
     <div class="nav-label">總覽</div>
   </div>
 
-  <div class="nav-item" data-screen="calendar">
+  <div class="nav-item">
     <div class="nav-icon">📅</div>
     <div class="nav-label">日曆</div>
   </div>
 
   <div class="fab-wrap">
-    <button class="fab" id="addLedgerBtn">＋</button>
-  </div>
-
-  <div class="nav-item" data-screen="ledger">
-    <div class="nav-icon">🧾</div>
-    <div class="nav-label">帳目</div>
-  </div>
-
-  <div class="nav-item" data-screen="staff">
-    <div class="nav-icon">👥</div>
-    <div class="nav-label">薪資</div>
+    <button class="fab" id="addBtn">＋</button>
   </div>
 
 </nav>
 
-<!-- LEDGER MODAL -->
-<div class="modal-overlay" id="ledgerModal">
+<!-- iOS Picker -->
 
-  <div class="modal">
+<div class="picker-overlay" id="pickerOverlay">
 
-    <div class="modal-handle"></div>
+  <div class="picker-modal">
 
-    <div class="toggle">
-      <button class="active expense" data-type="expense">
-        支出
+    <div class="picker-top">
+
+      <button class="picker-btn" id="pickerCancel">
+        取消
       </button>
 
-      <button data-type="income">
-        收入
+      <div>
+        選擇年月
+      </div>
+
+      <button class="picker-btn" id="pickerDone">
+        完成
       </button>
+
     </div>
 
-    <div class="field">
-      <label>金額</label>
-      <input type="number" id="ledgerAmount" />
-    </div>
+    <div style="position:relative">
 
-    <div class="field">
-      <label>項目</label>
-      <input type="text" id="ledgerCategory" />
-    </div>
+      <div class="picker-highlight"></div>
 
-    <div class="field">
-      <label>成員</label>
-      <select id="ledgerMember"></select>
-    </div>
+      <div class="picker-wheel-wrap">
 
-    <div class="field">
-      <label>日期</label>
-      <input type="date" id="ledgerDate" />
-    </div>
+        <div class="picker-wheel" id="yearWheel"></div>
 
-    <button class="btn" id="saveLedgerBtn">
-      儲存
-    </button>
+        <div class="picker-wheel" id="monthWheel"></div>
+
+      </div>
+
+    </div>
 
   </div>
 
@@ -576,183 +559,95 @@ button,input,select{
 <script>
 
 const state = {
-  emp: JSON.parse(localStorage.getItem('yy_emp') || '[]'),
-  ldg: JSON.parse(localStorage.getItem('yy_ldg') || '[]'),
 
-  selectedDate: today(),
-  currentYear: new Date().getFullYear(),
-  currentMonth: new Date().getMonth(),
+  currentYear:new Date().getFullYear(),
+  currentMonth:new Date().getMonth(),
 
-  ledgerType: 'expense',
+  selectedDate:new Date()
+    .toISOString()
+    .slice(0,10),
 
-  charts: {}
+  ldg:[],
+
+  charts:{}
+
 }
 
-const DOM = {
-  monthLabel: el('monthLabel'),
-
-  netValue: el('netValue'),
-  incomeValue: el('incomeValue'),
-  expenseValue: el('expenseValue'),
-  salaryValue: el('salaryValue'),
-
-  ledgerList: el('ledgerList'),
-  staffList: el('staffList'),
-  calendar: el('calendar'),
-  dayList: el('dayList'),
-  dayTitle: el('dayTitle'),
-
-  ledgerModal: el('ledgerModal'),
-
-  ledgerAmount: el('ledgerAmount'),
-  ledgerCategory: el('ledgerCategory'),
-  ledgerMember: el('ledgerMember'),
-  ledgerDate: el('ledgerDate'),
-
-  mainChart: el('mainChart')
-}
-
-function el(id){
-  return document.getElementById(id)
-}
-
-function today(){
-  return new Date().toISOString().slice(0,10)
-}
+const el = id => document.getElementById(id)
 
 function money(n){
-  return '$' + Math.round(n).toLocaleString()
-}
 
-function saveLocal(){
-  localStorage.setItem('yy_emp',JSON.stringify(state.emp))
-  localStorage.setItem('yy_ldg',JSON.stringify(state.ldg))
-}
-
-function getCurrentMonthString(){
-  return `${state.currentYear}-${String(state.currentMonth+1).padStart(2,'0')}`
-}
-
-function getCurrentMonthRecords(){
-  return state.ldg.filter(v =>
-    v.date.startsWith(getCurrentMonthString())
-  )
-}
-
-function getDateMap(){
-
-  const map = {}
-
-  getCurrentMonthRecords().forEach(item => {
-
-    if(!map[item.date]){
-      map[item.date] = []
-    }
-
-    map[item.date].push(item)
-
-  })
-
-  return map
-}
-
-function switchScreen(name){
-
-  document.querySelectorAll('.screen').forEach(v => {
-    v.classList.remove('active')
-  })
-
-  document.querySelectorAll('.nav-item').forEach(v => {
-    v.classList.remove('active')
-  })
-
-  el(`screen-${name}`).classList.add('active')
-
-  document.querySelector(`[data-screen="${name}"]`)
-    ?.classList.add('active')
-}
-
-function render(){
-
-  renderMonth()
-  renderSummary()
-  renderLedger()
-  renderStaff()
-  renderCalendar()
-  renderDayDetail()
-  renderMemberOptions()
+  return '$' + Math.round(n)
+    .toLocaleString()
 
 }
 
 function renderMonth(){
 
-  DOM.monthLabel.textContent =
-    `${state.currentYear} 年 ${state.currentMonth + 1} 月`
+  el('monthLabel').textContent =
+    `${state.currentYear} 年 ${state.currentMonth+1} 月`
 
 }
 
 function renderSummary(){
 
-  const records = getCurrentMonthRecords()
-
   let income = 0
   let expense = 0
 
-  records.forEach(r => {
+  state.ldg.forEach(v=>{
 
-    if(r.type === 'income'){
-      income += r.amount
+    if(v.type === 'income'){
+      income += v.amount
     }else{
-      expense += r.amount
+      expense += v.amount
     }
 
   })
 
-  const salary = state.emp.reduce((a,b)=>
-    a + b.salary + b.bonus
-  ,0)
+  const net = income - expense
 
-  const net = income - expense - salary
+  el('incomeValue').textContent = money(income)
+  el('expenseValue').textContent = money(expense)
+  el('salaryValue').textContent = money(0)
 
-  DOM.netValue.textContent = money(net)
-  DOM.netValue.style.color =
-    net >= 0 ? 'var(--accent2)' : 'var(--red)'
-
-  DOM.incomeValue.textContent = money(income)
-  DOM.expenseValue.textContent = money(expense)
-  DOM.salaryValue.textContent = money(salary)
+  el('netValue').textContent = money(net)
 
   if(!state.charts.main){
 
-    state.charts.main = new Chart(DOM.mainChart,{
-      type:'doughnut',
+    state.charts.main =
+      new Chart(el('mainChart'),{
 
-      data:{
-        datasets:[{
-          data:[expense,salary,income || 1],
-          backgroundColor:[
-            '#f87171',
-            '#fbbf24',
-            '#34d399'
-          ],
-          borderWidth:0
-        }]
-      },
+        type:'doughnut',
 
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        cutout:'82%'
-      }
-    })
+        data:{
+          datasets:[{
+            data:[
+              expense,
+              income || 1
+            ],
+            backgroundColor:[
+              '#f87171',
+              '#34d399'
+            ],
+            borderWidth:0
+          }]
+        },
+
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          cutout:'82%'
+        }
+
+      })
 
   }else{
 
-    state.charts.main.data.datasets[0].data = [
-      expense,
-      salary,
-      income || 1
-    ]
+    state.charts.main
+      .data.datasets[0].data = [
+        expense,
+        income || 1
+      ]
 
     state.charts.main.update()
 
@@ -760,93 +655,7 @@ function renderSummary(){
 
 }
 
-function renderLedger(){
-
-  const records = getCurrentMonthRecords()
-
-  if(!records.length){
-
-    DOM.ledgerList.innerHTML =
-      `<div class="empty">本月尚無紀錄</div>`
-
-    return
-  }
-
-  DOM.ledgerList.innerHTML = records
-    .map((r,index)=>{
-
-      return `
-      <div class="list-row">
-
-        <div class="row-info">
-          <div class="row-main">${r.category}</div>
-
-          <div class="row-sub">
-            ${r.date} ・ ${r.member}
-          </div>
-        </div>
-
-        <div
-          class="amount"
-          style="
-            color:${
-              r.type === 'income'
-              ? 'var(--green)'
-              : 'var(--red)'
-            }
-          "
-        >
-          ${
-            r.type === 'income'
-            ? '+'
-            : '-'
-          }
-          ${money(r.amount)}
-        </div>
-
-      </div>
-      `
-    })
-    .join('')
-
-}
-
-function renderStaff(){
-
-  if(!state.emp.length){
-
-    DOM.staffList.innerHTML =
-      `<div class="empty">尚未新增人員</div>`
-
-    return
-  }
-
-  DOM.staffList.innerHTML = state.emp
-    .map(v=>{
-
-      return `
-      <div class="list-row">
-
-        <div class="row-info">
-          <div class="row-main">
-            ${v.name}
-          </div>
-
-          <div class="row-sub">
-            預算 ${money(v.salary + v.bonus)}
-          </div>
-        </div>
-
-      </div>
-      `
-    })
-    .join('')
-
-}
-
 function renderCalendar(){
-
-  const dateMap = getDateMap()
 
   const firstDay =
     new Date(
@@ -858,7 +667,7 @@ function renderCalendar(){
   const totalDays =
     new Date(
       state.currentYear,
-      state.currentMonth + 1,
+      state.currentMonth+1,
       0
     ).getDate()
 
@@ -867,64 +676,23 @@ function renderCalendar(){
   `
 
   ;['日','一','二','三','四','五','六']
-    .forEach(v => {
-
-      html += `
-      <div class="cal-head">${v}</div>
-      `
-
-    })
-
-  for(let i=0;i<firstDay;i++){
-
-    html += `<div></div>`
-
-  }
-
-  const todayStr = today()
-
-  for(let day=1;day<=totalDays;day++){
-
-    const ds = `
-      ${getCurrentMonthString()}-${String(day).padStart(2,'0')}
-    `.trim()
-
-    const items = dateMap[ds] || []
-
-    const hasIncome =
-      items.some(v => v.type === 'income')
-
-    const hasExpense =
-      items.some(v => v.type === 'expense')
+  .forEach(v=>{
 
     html += `
-    <div
-      class="
-        cal-day
-        ${state.selectedDate === ds ? 'active':''}
-        ${todayStr === ds ? 'today':''}
-      "
-      onclick="selectDate('${ds}')"
-    >
+    <div class="cal-head">${v}</div>
+    `
 
-      ${day}
+  })
 
-      <div class="dot-wrap">
+  for(let i=0;i<firstDay;i++){
+    html += `<div></div>`
+  }
 
-        ${
-          hasIncome
-          ? `<div class="dot" style="background:var(--green)"></div>`
-          : ''
-        }
+  for(let d=1;d<=totalDays;d++){
 
-        ${
-          hasExpense
-          ? `<div class="dot" style="background:var(--red)"></div>`
-          : ''
-        }
-
-      </div>
-
+    html += `
+    <div class="cal-day">
+      ${d}
     </div>
     `
 
@@ -932,258 +700,251 @@ function renderCalendar(){
 
   html += `</div>`
 
-  DOM.calendar.innerHTML = html
+  el('calendar').innerHTML = html
 
 }
 
-function renderDayDetail(){
+function render(){
 
-  const items = state.ldg.filter(v =>
-    v.date === state.selectedDate
-  )
+  renderMonth()
+  renderSummary()
+  renderCalendar()
 
-  const [y,m,d] =
-    state.selectedDate.split('-')
+}
 
-  DOM.dayTitle.textContent =
-    `${m} 月 ${d} 日`
+function prevMonth(){
 
-  if(!items.length){
+  state.currentMonth--
 
-    DOM.dayList.innerHTML =
-      `<div class="empty">本日沒有紀錄</div>`
+  if(state.currentMonth < 0){
 
-    return
+    state.currentMonth = 11
+    state.currentYear--
+
   }
-
-  DOM.dayList.innerHTML = items
-    .map(v=>{
-
-      return `
-      <div class="list-row">
-
-        <div class="row-info">
-          <div class="row-main">
-            ${v.category}
-          </div>
-
-          <div class="row-sub">
-            ${v.member}
-          </div>
-        </div>
-
-        <div
-          class="amount"
-          style="
-            color:${
-              v.type === 'income'
-              ? 'var(--green)'
-              : 'var(--red)'
-            }
-          "
-        >
-          ${
-            v.type === 'income'
-            ? '+'
-            : '-'
-          }
-          ${money(v.amount)}
-        </div>
-
-      </div>
-      `
-
-    })
-    .join('')
-
-}
-
-function renderMemberOptions(){
-
-  DOM.ledgerMember.innerHTML =
-    `
-    <option value="公司">
-      公司帳戶
-    </option>
-    `
-    +
-    state.emp.map(v=>`
-      <option value="${v.name}">
-        ${v.name}
-      </option>
-    `).join('')
-
-}
-
-function openLedgerModal(){
-
-  DOM.ledgerModal.classList.add('open')
-
-  DOM.ledgerDate.value = state.selectedDate
-  DOM.ledgerAmount.value = ''
-  DOM.ledgerCategory.value = ''
-
-}
-
-function closeLedgerModal(){
-
-  DOM.ledgerModal.classList.remove('open')
-
-}
-
-function saveLedger(){
-
-  const amount =
-    Number(DOM.ledgerAmount.value)
-
-  const category =
-    DOM.ledgerCategory.value.trim()
-
-  if(!amount || !category){
-
-    alert('請完整填寫')
-
-    return
-  }
-
-  state.ldg.unshift({
-
-    type:state.ledgerType,
-    amount,
-    category,
-
-    member:DOM.ledgerMember.value,
-
-    date:DOM.ledgerDate.value
-
-  })
-
-  saveLocal()
 
   render()
 
-  closeLedgerModal()
-
 }
 
-function selectDate(date){
+function nextMonth(){
 
-  state.selectedDate = date
+  state.currentMonth++
 
-  renderCalendar()
+  if(state.currentMonth > 11){
 
-  renderDayDetail()
+    state.currentMonth = 0
+    state.currentYear++
+
+  }
+
+  render()
 
 }
-
-document
-  .querySelectorAll('.nav-item')
-  .forEach(v=>{
-
-    v.addEventListener('click',()=>{
-
-      switchScreen(v.dataset.screen)
-
-    })
-
-  })
 
 el('prevMonth')
-  .addEventListener('click',()=>{
-
-    state.currentMonth--
-
-    if(state.currentMonth < 0){
-
-      state.currentMonth = 11
-      state.currentYear--
-
-    }
-
-    render()
-
-  })
+  .addEventListener('click',prevMonth)
 
 el('nextMonth')
-  .addEventListener('click',()=>{
+  .addEventListener('click',nextMonth)
 
-    state.currentMonth++
+/* Swipe */
 
-    if(state.currentMonth > 11){
+let touchStartX = 0
+let touchEndX = 0
 
-      state.currentMonth = 0
-      state.currentYear++
+el('screen-home')
+.addEventListener('touchstart',(e)=>{
 
-    }
+  touchStartX =
+    e.changedTouches[0].screenX
 
-    render()
+},{passive:true})
+
+el('screen-home')
+.addEventListener('touchend',(e)=>{
+
+  touchEndX =
+    e.changedTouches[0].screenX
+
+  const diff =
+    touchEndX - touchStartX
+
+  if(Math.abs(diff) < 60) return
+
+  if(diff < 0){
+
+    nextMonth()
+
+  }else{
+
+    prevMonth()
+
+  }
+
+},{passive:true})
+
+/* Picker */
+
+const pickerOverlay = el('pickerOverlay')
+const yearWheel = el('yearWheel')
+const monthWheel = el('monthWheel')
+
+let pickerYear = state.currentYear
+let pickerMonth = state.currentMonth
+
+function buildPicker(){
+
+  let yearHTML =
+    '<div style="height:96px"></div>'
+
+  for(let y=2020;y<=2045;y++){
+
+    yearHTML += `
+    <div
+      class="
+        picker-item
+        ${y===pickerYear?'active':''}
+      "
+      data-year="${y}"
+    >
+      ${y}年
+    </div>
+    `
+
+  }
+
+  yearHTML +=
+    '<div style="height:96px"></div>'
+
+  yearWheel.innerHTML = yearHTML
+
+  let monthHTML =
+    '<div style="height:96px"></div>'
+
+  for(let m=1;m<=12;m++){
+
+    monthHTML += `
+    <div
+      class="
+        picker-item
+        ${m-1===pickerMonth?'active':''}
+      "
+      data-month="${m-1}"
+    >
+      ${m}月
+    </div>
+    `
+
+  }
+
+  monthHTML +=
+    '<div style="height:96px"></div>'
+
+  monthWheel.innerHTML = monthHTML
+
+  requestAnimationFrame(()=>{
+
+    yearWheel.scrollTop =
+      (pickerYear - 2020) * 48
+
+    monthWheel.scrollTop =
+      pickerMonth * 48
 
   })
 
-el('addLedgerBtn')
-  .addEventListener('click',openLedgerModal)
+}
 
-DOM.ledgerModal
-  .addEventListener('click',(e)=>{
+function openPicker(){
 
-    if(e.target === DOM.ledgerModal){
+  pickerYear = state.currentYear
+  pickerMonth = state.currentMonth
 
-      closeLedgerModal()
+  buildPicker()
 
-    }
+  pickerOverlay.classList.add('open')
 
-  })
+}
 
-document
-  .querySelectorAll('.toggle button')
-  .forEach(btn=>{
+function closePicker(){
 
-    btn.addEventListener('click',()=>{
+  pickerOverlay.classList.remove('open')
 
-      document
-        .querySelectorAll('.toggle button')
-        .forEach(v=>v.classList.remove('active'))
+}
 
-      btn.classList.add('active')
+function bindWheel(wheel,type){
 
-      state.ledgerType = btn.dataset.type
+  wheel.addEventListener('scroll',()=>{
 
-      btn.classList.add(
-        btn.dataset.type
+    clearTimeout(wheel.timer)
+
+    wheel.timer = setTimeout(()=>{
+
+      const index =
+        Math.round(wheel.scrollTop / 48)
+
+      const items =
+        wheel.querySelectorAll('.picker-item')
+
+      items.forEach(v=>
+        v.classList.remove('active')
       )
 
-    })
+      const target = items[index]
+
+      if(!target) return
+
+      target.classList.add('active')
+
+      if(type === 'year'){
+
+        pickerYear =
+          Number(target.dataset.year)
+
+      }else{
+
+        pickerMonth =
+          Number(target.dataset.month)
+
+      }
+
+    },40)
 
   })
 
-el('saveLedgerBtn')
-  .addEventListener('click',saveLedger)
+}
 
-el('addStaffBtn')
-  .addEventListener('click',()=>{
+bindWheel(yearWheel,'year')
+bindWheel(monthWheel,'month')
 
-    const name =
-      prompt('姓名')
+el('monthLabel')
+.addEventListener('click',openPicker)
 
-    if(!name) return
+el('pickerCancel')
+.addEventListener('click',closePicker)
 
-    const salary =
-      Number(prompt('底薪') || 0)
+el('pickerDone')
+.addEventListener('click',()=>{
 
-    const bonus =
-      Number(prompt('獎金') || 0)
+  state.currentYear = pickerYear
+  state.currentMonth = pickerMonth
 
-    state.emp.push({
-      name,
-      salary,
-      bonus
-    })
+  render()
 
-    saveLocal()
+  closePicker()
 
-    render()
+})
 
-  })
+pickerOverlay
+.addEventListener('click',(e)=>{
+
+  if(e.target === pickerOverlay){
+
+    closePicker()
+
+  }
+
+})
 
 render()
 
