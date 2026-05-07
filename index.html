@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.18</title>
+<title>Yun Yi Finance v2.19</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -56,15 +56,15 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .pressable-row { -webkit-touch-callout: none; user-select: none; transition: 0.2s; border-radius: 8px; padding: 12px 8px; margin: 0 -8px; }
 .pressable-row:active { background: rgba(255,255,255,0.05); transform: scale(0.98); }
 
-/* Calendar */
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px 0; justify-items: center; align-items: center; }
-.cal-head { font-size: 12px; color: var(--muted); font-weight: 500; padding-bottom: 6px; }
-.cal-day { width: 36px; height: 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; font-size: 15px; font-weight: 500; position: relative; transition: 0.2s; }
+/* 🌟 全新 Flexbox 日曆引擎 (徹底根除 Safari 跑位 Bug) */
+.cal-grid { display: flex; flex-wrap: wrap; width: 100%; }
+.cal-head { width: 14.285%; font-size: 12px; color: var(--muted); font-weight: 500; text-align: center; padding-bottom: 8px; }
+.cal-cell { width: 14.285%; height: 44px; display: flex; justify-content: center; align-items: flex-start; }
+.cal-day { width: 34px; height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; font-size: 15px; font-weight: 500; position: relative; cursor: pointer; transition: 0.2s; }
 .cal-day:active { background: rgba(255,255,255,0.05); transform: scale(0.9); }
-.cal-day.empty { visibility: hidden; pointer-events: none; }
 .cal-day.today { color: var(--accent2); font-weight: 700; border: 1px solid rgba(167, 139, 250, 0.4); }
 .cal-day.active { background: var(--accent); color: white; border-color: var(--accent); }
-.cal-dots { display: flex; gap: 3px; position: absolute; bottom: 4px; }
+.cal-dots { display: flex; gap: 3px; position: absolute; bottom: 3px; }
 .cal-dot { width: 4px; height: 4px; border-radius: 50%; }
 .dot-inc { background: var(--green); } .dot-exp { background: var(--red); }
 .cal-day.active .cal-dot { background: white; opacity: 0.8; }
@@ -293,7 +293,6 @@ function openM(id) { $(id).classList.add('open'); }
 function closeM(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeMById(id) { $(id).classList.remove('open'); }
 
-// 🌟 抽離共用 HTML 模板 (瘦身核心)
 function getTxHTML(r, isPressable=true) {
   const isInc = r.type === 'income' || (!r.type && r.cat === '營業收入');
   const tag = r.tag ? `<span class="tag">${r.tag}</span>` : '';
@@ -372,20 +371,20 @@ function renderAll() {
   if(charts['m']) charts['m'].destroy();
   charts['m'] = new Chart($('metricsChart').getContext('2d'), { type:'doughnut', data:{datasets:[{data:[exp,sal,inc], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'75%'} });
 
-  // 日曆視圖
+  // 🌟 全新 Flexbox 日曆渲染邏輯
   const dInM = new Date(cYear, cMonth, 0).getDate();
   const fDay = new Date(cYear, cMonth-1, 1).getDay();
   let calHtml = '<div class="cal-grid">' + ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-head">${w}</div>`).join('');
   let cCnt = 0;
-  for(let i=0; i<fDay; i++) { calHtml += '<div class="cal-day empty"></div>'; cCnt++; }
+  for(let i=0; i<fDay; i++) { calHtml += '<div class="cal-cell"></div>'; cCnt++; }
   for(let d=1; d<=dInM; d++) {
     const dStr = `${curStr}-${d.toString().padStart(2,'0')}`;
     const rcs = curLdg.filter(r=>r.date===dStr);
     let dotHtml = (rcs.some(r=>r.type==='income'||r.cat==='營業收入')?'<div class="cal-dot dot-inc"></div>':'') + (rcs.some(r=>r.type==='expense'||(r.type!=='income'&&r.cat!=='營業收入'))?'<div class="cal-dot dot-exp"></div>':'');
-    calHtml += `<div class="cal-day ${dStr===selDate?'active':''} ${dStr===now.toISOString().slice(0,10)&&dStr!==selDate?'today':''}" onclick="selDate='${dStr}';renderAll();">${d}<div class="cal-dots">${dotHtml}</div></div>`;
+    calHtml += `<div class="cal-cell"><div class="cal-day ${dStr===selDate?'active':''} ${dStr===now.toISOString().slice(0,10)&&dStr!==selDate?'today':''}" onclick="selDate='${dStr}';renderAll();">${d}<div class="cal-dots">${dotHtml}</div></div></div>`;
     cCnt++;
   }
-  while(cCnt<42) { calHtml += '<div class="cal-day empty"></div>'; cCnt++; }
+  while(cCnt<42) { calHtml += '<div class="cal-cell"></div>'; cCnt++; }
   $('cal-grid-container').innerHTML = calHtml + '</div>';
 
   // 本日明細
