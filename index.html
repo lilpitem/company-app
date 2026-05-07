@@ -6,151 +6,150 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
-<title>Yun Yi Finance v3.6.1 | Pro Edition</title>
+<title>Yun Yi Finance v3.6.5 | Profile Fix</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-/* ── iOS 標準色彩系統 (Dark Mode) ── */
-:root { --bg:#000000; --bg-elevated:#1C1C1E; --bg-grouped:#1C1C1E; --card:#1C1C1E; --bg-modal:#2C2C2E; --input-bg:#3A3A3C; --accent:#5E5CE6; --accent-light:#7D7AFF; --green:#32D74B; --red:#FF453A; --amber:#FF9F0A; --text:#FFFFFF; --muted:#8E8E93; --muted-light:#C7C7CC; --border:rgba(255,255,255,0.15); --radius-card:14px; --radius-btn:12px; --radius-input:10px; }
+/* ── iOS 標準色彩系統 ── */
+:root { --bg:#000000; --bg-elevated:#1C1C1E; --card:#1C1C1E; --bg-modal:rgba(44,44,46,0.92); --input-bg:#3A3A3C; --accent:#5E5CE6; --green:#32D74B; --red:#FF453A; --amber:#FF9F0A; --text:#FFFFFF; --muted:#8E8E93; --border:rgba(255,255,255,0.12); --radius-card:14px; --radius-btn:12px; }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; outline:none; }
-body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:430px; margin:0 auto; overflow-x:hidden; line-height:1.4; -webkit-font-smoothing:antialiased; }
+body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:430px; margin:0 auto; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
 
 /* ── 啟動畫面 ── */
 #splash-screen { position: fixed; inset: 0; background:#000; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: opacity 0.6s; }
 .splash-logo { width: 90px; animation: splashAnim 1.8s forwards; }
 @keyframes splashAnim { 0% { opacity: 0; transform: scale(0.96); } 30%, 85% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.02); } }
 
-/* ── 側邊選單 (Drawer) ── */
-.drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; display:none; opacity:0; transition:0.3s; }
-.drawer { position:fixed; top:0; left:0; width:280px; height:100%; background:var(--bg-elevated); z-index:1001; transform:translateX(-100%); transition:0.3s cubic-bezier(0.4, 0, 0.2, 1); padding:60px 20px; }
-.drawer.open { transform:translateX(0); }
-.drawer-item { display:flex; align-items:center; gap:15px; padding:15px; color:var(--text); border-radius:10px; margin-bottom:10px; cursor:pointer; }
-.drawer-item svg { width:22px; height:22px; stroke:var(--accent); fill:none; stroke-width:2; }
-
 /* ── Header ── */
 .header { padding:56px 20px 10px; display:flex; justify-content:space-between; align-items:center; }
 .menu-trigger { padding:10px; margin-left:-10px; cursor:pointer; }
-#sync-status { font-size:11px; padding:6px 12px; border-radius:20px; background:var(--input-bg); font-weight:600; transition: 0.3s; }
-.syncing { color: var(--amber); }
-.sync-ok { color:var(--green); background:rgba(50,215,75,.1); }
-.sync-err { color:var(--red); background:rgba(255,69,58,.1); }
+#sync-status { font-size:11px; padding:6px 12px; border-radius:20px; background:var(--input-bg); font-weight:600; }
+.sync-ok { color:var(--green); background:rgba(50,215,75,0.1); }
 
-/* ── 月份導覽 ── */
-.month-nav { display:flex; align-items:center; justify-content:center; gap:8px; padding:10px 16px 20px; }
-.m-btn { background:none; border:none; color:var(--accent); font-size:24px; cursor:pointer; font-weight:300; }
-.m-picker-wrapper { position:relative; text-align:center; padding:8px 16px; background:var(--bg-modal); border-radius:12px; }
-#hdr-m { font-size:17px; font-weight:600; color:var(--accent); }
-#m-input { position:absolute; inset:0; opacity:0; cursor:pointer; }
-
-/* ── IG Style "我的" ── */
-.profile-header { padding:20px 16px; }
-.profile-main { display:flex; align-items:center; gap:25px; margin-bottom:18px; }
-.avatar-wrap { position:relative; width:86px; height:86px; border-radius:50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding:3px; cursor:pointer; }
-.avatar { width:100%; height:100%; border-radius:50%; background:#111; border:3px solid #000; display:flex; justify-content:center; align-items:center; font-weight:700; font-size:24px; }
-.stats { display:flex; flex:1; justify-content:space-around; text-align:center; }
-.stat-item { flex: 1; }
-.stat-val { font-size:17px; font-weight:700; }
-.stat-lab { font-size:12px; color:var(--muted); }
-.profile-bio { font-size:14px; margin-bottom:20px; line-height:1.5; min-height: 60px; }
-.bio-name { font-weight:700; font-size:17px; margin-bottom:4px; }
-.profile-actions { display:flex; gap:8px; margin-bottom:25px; }
-.act-btn { flex:1; background:var(--input-bg); border:none; color:#fff; padding:8px; border-radius:8px; font-size:14px; font-weight:600; }
-.post-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; border-top: 0.5px solid var(--border); padding-top: 2px; }
-.post-item { aspect-ratio:1; background:var(--input-bg); opacity:0.1; }
-
-/* ── 通用元件 ── */
-.screen { display:none; min-height:100vh; padding-bottom:120px; }
+/* ── 通用頁面 ── */
+.screen { display:none; min-height:100vh; padding-bottom:140px; }
 .screen.active { display:block; }
 .card { background:var(--card); border-radius:var(--radius-card); padding:18px; margin:0 16px 12px; }
-.list-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:.5px solid var(--border); }
-.row-info { display:flex; flex-direction:column; gap:2px; }
+.card-title { font-size:14px; color:var(--muted); margin-bottom:15px; font-weight:600; letter-spacing:0.5px; }
+
+/* ── 甜甜圈圖版型 ── */
+.chart-box { position:relative; height:200px; width:100%; display:flex; justify-content:center; align-items:center; margin:10px 0; }
+.chart-center { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; pointer-events:none; z-index:1; }
+.chart-val { font-size:24px; font-weight:800; letter-spacing:-0.5px; }
+
+/* ── 日曆網格版型 ── */
+.cal-grid { display:flex; flex-wrap:wrap; width:100%; padding: 5px 0; }
+.cal-h, .cal-c { width: 14.285%; text-align:center; flex-shrink: 0; }
+.cal-h { font-size:12px; color:var(--muted); padding-bottom:12px; font-weight:700; }
+.cal-c { height:50px; display:flex; justify-content:center; align-items:center; }
+.cal-d { width:38px; height:38px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:50%; font-size:17px; position:relative; }
+.cal-d.active { background:var(--accent); color:#fff; font-weight:600; }
+.dots { display:flex; gap:2.5px; position:absolute; bottom:4px; }
+.dot { width:4px; height:4px; border-radius:50%; }
+
+/* ── 「我的」IG 風格修正版型 ── */
+.profile-header { padding:20px 20px 10px; }
+.profile-main { display:flex; align-items:center; gap:20px; margin-bottom:18px; }
+.avatar-wrap { position:relative; width:82px; height:82px; border-radius:50%; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); padding:3px; cursor:pointer; flex-shrink: 0; }
+.avatar { width:100%; height:100%; border-radius:50%; background:#111; border:2px solid #000; display:flex; justify-content:center; align-items:center; font-weight:700; font-size:22px; color:#fff; }
+.stats { display:flex; flex:1; justify-content:space-between; text-align:center; padding-right: 5px; }
+.stat-item { flex: 1; }
+.stat-val { font-size:16px; font-weight:700; color:var(--text); display: block; }
+.stat-lab { font-size:12px; color:var(--muted); display: block; margin-top: 2px; }
+.profile-bio { margin-bottom:20px; padding: 0 4px; }
+.bio-name { font-weight:700; font-size:16px; margin-bottom:5px; color:var(--text); }
+.bio-text { font-size:14px; color:var(--text); line-height:1.4; white-space: pre-wrap; }
+.profile-actions { display:flex; gap:8px; margin-bottom:25px; }
+.act-btn { flex:1; background:var(--input-bg); border:none; color:#fff; padding:9px; border-radius:8px; font-size:14px; font-weight:600; }
+.post-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; border-top: 0.5px solid var(--border); }
+.post-item { aspect-ratio:1; background:var(--input-bg); opacity:0.1; }
+
+/* ── Apple 原生 Action Sheet ── */
+.action-sheet-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:3000; align-items:flex-end; opacity:0; transition:0.3s; padding:10px; }
+.action-sheet-overlay.open { display:flex; opacity:1; }
+.action-sheet { width:100%; max-width:410px; margin:0 auto; transform:translateY(100%); transition:0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.action-sheet-overlay.open .action-sheet { transform:translateY(0); }
+.as-group { background:var(--bg-modal); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px); border-radius:14px; overflow:hidden; margin-bottom:10px; }
+.as-item { padding:18px; text-align:center; font-size:18px; color:#0A84FF; border-bottom:0.5px solid rgba(255,255,255,0.1); cursor:pointer; }
+.as-item:active { background:rgba(255,255,255,0.1); }
+.as-cancel { background:#FFFFFF; color:#000; font-weight:600; border-radius:14px; padding:18px; text-align:center; font-size:18px; cursor:pointer; margin-bottom:calc(env(safe-area-inset-bottom) + 5px); }
+
+/* ── 列表 UI ── */
+.list-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:0.5px solid var(--border); }
 .amt { font-weight:600; font-size:17px; }
 
-/* ── 底部導覽列 ── */
-.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(10,10,10,0.95); border-top:.5px solid var(--border); display:flex; z-index:100; padding:8px 0 calc(env(safe-area-inset-bottom) + 8px); backdrop-filter:blur(20px); }
+/* ── 底部導覽 ── */
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(10,10,10,0.92); border-top:0.5px solid var(--border); display:flex; z-index:100; padding:8px 0 calc(env(safe-area-inset-bottom) + 8px); backdrop-filter:blur(20px); }
 .nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--muted); }
 .nav-item.active { color:var(--accent); }
 .nav-icon-svg { width:24px; height:24px; stroke:currentColor; stroke-width:2; fill:none; }
-.fab { width:54px; height:54px; background:var(--accent); border-radius:50%; display:flex; justify-content:center; align-items:center; border:4px solid #000; margin-top:-28px; box-shadow:0 4px 15px rgba(94,92,230,0.3); }
+.fab { width:56px; height:56px; background:var(--accent); border-radius:50%; display:flex; justify-content:center; align-items:center; border:4px solid #000; margin-top:-32px; box-shadow:0 4px 15px rgba(94,92,230,0.3); }
 
-/* ── Modal & Form ── */
+/* ── 記帳彈窗 ── */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:flex-end; opacity:0; transition:0.3s; }
 .modal-overlay.open { display:flex; opacity:1; }
-.modal { background:var(--bg-modal); border-radius:20px 20px 0 0; padding:20px 20px calc(20px + env(safe-area-inset-bottom)); width:100%; max-height:90vh; overflow-y:auto; transform:translateY(100%); transition:0.3s; }
+.modal { background:var(--bg-elevated); border-radius:20px 20px 0 0; padding:20px 20px calc(20px + env(safe-area-inset-bottom)); width:100%; max-height:90vh; overflow-y:auto; transform:translateY(100%); transition:0.3s; }
 .modal-overlay.open .modal { transform:translateY(0); }
-.modal-h { width:36px; height:5px; background:var(--muted); border-radius:3px; margin:0 auto 20px; opacity:0.5; }
-.modal-actions { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
-.t-toggle { display:flex; background:rgba(118,118,128,0.24); border-radius:9px; padding:2px; margin-bottom:25px; }
-.t-btn { flex:1; padding:8px; font-size:14px; border-radius:7px; color:var(--text); font-weight:600; border:none; background:none; }
-.t-btn.active { background:rgba(255,255,255,0.12); }
-.t-btn.active.exp { color:var(--red); }
-.t-btn.active.inc { color:var(--green); }
-.field { margin-bottom:20px; }
-.field label { font-size:12px; color:var(--muted); display:block; margin-bottom:6px; }
-.field input, .field select { width:100%; height:48px; padding:0 16px; background:var(--input-bg); border:none; border-radius:10px; color:#fff; font-size:16px; }
-.btn-p { width:100%; padding:16px; background:var(--accent); color:#fff; border:none; border-radius:12px; font-size:17px; font-weight:700; cursor:pointer; }
+.field { margin-bottom:18px; }
+.field label { font-size:12px; color:var(--muted); display:block; margin-bottom:6px; margin-left:4px; text-transform:uppercase; }
+.field input, .field select { width:100%; height:48px; padding:0 16px; background:var(--input-bg); border:none; border-radius:10px; color:#fff; font-size:16px; -webkit-appearance:none; }
 </style>
 </head>
 <body>
 
 <div id="splash-screen"><img src="蘊一記帳小卡.png" class="splash-logo"></div>
 
-<div class="drawer-overlay" id="d-overlay" onclick="toggleDrawer(false)"></div>
-<div class="drawer" id="drawer">
-  <div class="drawer-item" onclick="go('ldg'); toggleDrawer(false);"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>帳目明細</span></div>
-  <div class="drawer-item" onclick="go('pay'); toggleDrawer(false);"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>人員管理</span></div>
-</div>
-
 <div class="header">
   <div class="menu-trigger" onclick="toggleDrawer(true)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
-  <div id="sync-status" onclick="loadCloud()">點擊讀取雲端</div>
+  <div id="sync-status" onclick="loadCloud()">讀取雲端</div>
 </div>
 
 <div id="s-home" class="screen active">
-  <div class="month-nav">
-    <button onclick="shiftMonth(-1)" class="m-btn">‹</button>
-    <div class="m-picker-wrapper"><span id="hdr-m"></span><input type="month" id="m-input" onchange="pickMonth(this.value)"></div>
-    <button onclick="shiftMonth(1)" class="m-btn">›</button>
+  <div class="month-nav" style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px;">
+    <button onclick="shiftMonth(-1)" style="background:none; border:none; color:var(--accent); font-size:24px;">‹</button>
+    <div style="position:relative; background:var(--bg-elevated); padding:8px 16px; border-radius:12px;">
+      <span id="hdr-m" style="font-weight:600; color:var(--accent);"></span>
+      <input type="month" id="m-input" onchange="pickMonth(this.value)" style="position:absolute; inset:0; opacity:0;">
+    </div>
+    <button onclick="shiftMonth(1)" style="background:none; border:none; color:var(--accent); font-size:24px;">›</button>
   </div>
   <div class="card">
-    <div style="height:180px; position:relative; display:flex; justify-content:center; align-items:center;">
-        <canvas id="c-main"></canvas>
-        <div style="position:absolute; text-align:center;"><div id="val-p" style="font-size:24px; font-weight:800;">$0</div></div>
+    <div class="card-title">本月盈餘概覽</div>
+    <div class="chart-box">
+      <canvas id="c-main"></canvas>
+      <div class="chart-center"><div class="chart-val" id="val-p">$0</div></div>
     </div>
   </div>
 </div>
 
 <div id="s-cal" class="screen">
-    <div class="card"><div id="cal-grid"></div></div>
-    <div class="card"><div class="card-title" id="cal-title" style="color:var(--text); font-size:17px; text-transform:none;"></div><div id="cal-list"></div></div>
+  <div class="card"><div id="cal-grid"></div></div>
+  <div class="card"><div class="card-title" id="cal-title" style="color:var(--text); font-size:17px; text-transform:none;"></div><div id="cal-list"></div></div>
 </div>
 
 <div id="s-search" class="screen">
-    <div class="card" style="margin-top:10px;"><input type="text" placeholder="搜尋項目、成員或備註..." oninput="handleSearch(this.value)" style="width:100%; background:var(--input-bg); border:none; padding:12px; border-radius:10px; color:#fff;"></div>
-    <div class="card"><div id="search-list"></div></div>
+  <div class="card" style="margin-top:10px;"><input type="text" placeholder="搜尋項目、成員或備註..." oninput="handleSearch(this.value)" style="width:100%; background:var(--input-bg); border:none; padding:12px; border-radius:10px; color:#fff;"></div>
+  <div class="card"><div id="search-list"></div></div>
 </div>
 
 <div id="s-me" class="screen">
-    <div class="profile-header">
-        <div class="profile-main">
-            <div class="avatar-wrap" onclick="openProfilePicker()"><div class="avatar" id="me-avatar-txt">蘊</div></div>
-            <div class="stats">
-                <div class="stat-item"><div class="stat-val" id="stat-count">0</div><div class="stat-lab">總計</div></div>
-                <div class="stat-item"><div class="stat-val" id="stat-inc">0</div><div class="stat-lab">收入</div></div>
-                <div class="stat-item"><div class="stat-val" id="stat-exp">0</div><div class="stat-lab">支出</div></div>
-            </div>
-        </div>
-        <div class="profile-bio">
-            <div class="bio-name" id="me-name">蘊一創意</div>
-            <div id="me-desc" style="font-size:14px; color:var(--muted); white-space: pre-wrap;"></div>
-        </div>
-        <div class="profile-actions"><button class="act-btn">編輯檔案</button><button class="act-btn">分享檔案</button></div>
+  <div class="profile-header">
+    <div class="profile-main">
+      <div class="avatar-wrap" onclick="openProfilePicker()"><div class="avatar" id="me-avatar-txt">蘊</div></div>
+      <div class="stats">
+        <div class="stat-item"><span class="stat-val" id="stat-count">0</span><span class="stat-lab">總計</span></div>
+        <div class="stat-item"><span class="stat-val" id="stat-inc">0</span><span class="stat-lab">收入</span></div>
+        <div class="stat-item"><span class="stat-val" id="stat-exp">0</span><span class="stat-lab">支出</span></div>
+      </div>
     </div>
-    <div class="post-grid"><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div></div>
+    <div class="profile-bio">
+      <div class="bio-name" id="me-name">蘊一創意</div>
+      <div class="bio-text" id="me-desc"></div>
+    </div>
+    <div class="profile-actions"><button class="act-btn">編輯檔案</button><button class="act-btn">分享檔案</button></div>
+  </div>
+  <div class="post-grid"><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div></div>
 </div>
-
-<div id="s-ldg" class="screen"><div class="card"><div id="ldg-list"></div></div></div>
-<div id="s-pay" class="screen"><div class="card"><div id="emp-list"></div><button class="btn-p" style="margin-top:15px; background:var(--input-bg);" onclick="prepEmp()">＋ 新增人員</button></div></div>
 
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="go('home',this)"><svg class="nav-icon-svg"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
@@ -160,6 +159,12 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
   <div class="nav-item" onclick="resetAndGoMe(this)"><svg class="nav-icon-svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
 </nav>
 
+<div class="drawer-overlay" id="d-overlay" onclick="toggleDrawer(false)"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-item" onclick="go('ldg'); toggleDrawer(false);"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>帳目明細</span></div>
+  <div class="drawer-item" onclick="go('pay'); toggleDrawer(false);"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg><span>人員管理</span></div>
+</div>
+
 <div class="modal-overlay" id="m-ldg" onclick="closeM(event,'m-ldg')">
     <div class="modal">
         <div class="modal-h"></div>
@@ -167,7 +172,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
         <form id="ldg-form" onsubmit="event.preventDefault(); saveLdg();">
             <input type="hidden" id="l-t" value="expense">
             <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
-            <div class="t-toggle"><button type="button" class="t-btn active exp" id="tb-exp" onclick="setT('expense')">支出</button><button type="button" class="t-btn inc" id="tb-inc" onclick="setT('income')">收入</button></div>
+            <div class="t-toggle" style="display:flex; background:rgba(118,118,128,0.24); border-radius:9px; padding:2px; margin-bottom:25px;"><button type="button" class="t-btn active exp" id="tb-exp" onclick="setT('expense')" style="flex:1; padding:8px; font-size:14px; border-radius:7px; color:#fff; font-weight:600; border:none; background:none;">支出</button><button type="button" class="t-btn inc" id="tb-inc" onclick="setT('income')" style="flex:1; padding:8px; font-size:14px; border-radius:7px; color:#fff; font-weight:600; border:none; background:none;">收入</button></div>
             <div class="field"><label>金額</label><input type="number" id="l-a" placeholder="$0" required inputmode="numeric"></div>
             <div class="field"><label>項目內容</label><input type="text" id="l-c" placeholder="例如：租金" required></div>
             <div class="field"><label>歸屬成員</label><select id="l-m"></select></div>
@@ -179,18 +184,22 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
     </div>
 </div>
 
-<div class="modal-overlay" id="m-picker" onclick="closeM(event,'m-picker')">
-    <div class="modal"><div style="text-align:center; padding-bottom:15px; font-weight:700; border-bottom:0.5px solid var(--border);">切換身分</div><div id="picker-list"></div><button class="btn-p" style="margin-top:15px; background:var(--input-bg);" onclick="closeMById('m-picker')">取消</button></div>
+<div class="action-sheet-overlay" id="as-picker" onclick="closeAS(event)">
+    <div class="action-sheet">
+        <div class="as-group"><div class="as-title">切換身分</div><div id="as-list"></div></div>
+        <div class="as-cancel" onclick="closeASById()">取消</div>
+    </div>
 </div>
+
+<div id="s-ldg" class="screen"><div class="card"><div id="ldg-list"></div></div></div>
+<div id="s-pay" class="screen"><div class="card"><div id="emp-list"></div></div></div>
 
 <script>
 const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
 let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
 let charts = {}, calYear = new Date().getFullYear(), calMonth = new Date().getMonth(), selD = new Date().toISOString().split('T')[0], currentMe = "蘊一創意";
 
 const fmtK = n => n >= 1000 ? (n / 1000).toFixed(1) + 'k' : n;
-const setSync = (txt, cls) => { const s = $('sync-status'); s.textContent = txt; s.className = cls; };
 
 const toggleDrawer = (open) => {
     const d = $('drawer'), o = $('d-overlay');
@@ -198,17 +207,14 @@ const toggleDrawer = (open) => {
     else { d.classList.remove('open'); o.style.opacity='0'; setTimeout(()=>o.style.display='none',300); }
 };
 
-const jsonpFetch = url => new Promise((res, rej) => {
-    const cb = '_cb_' + Date.now(), s = document.createElement('script'), t = setTimeout(() => clean(rej(new Error('逾時'))), 10000);
-    const clean = () => { clearTimeout(t); delete window[cb]; s.remove(); };
-    window[cb] = d => clean(res(d)); s.onerror = () => clean(rej(new Error('失敗')));
-    s.src = `${url}${url.includes('?')?'&':'?'}callback=${cb}`; document.head.appendChild(s);
-});
+const go = (p, el) => {
+    $$('.screen, .nav-item').forEach(e => e.classList.remove('active'));
+    $(`s-${p}`).classList.add('active');
+    if(el) el.classList.add('active');
+    if(p === 'me') updateMeUI();
+    render();
+};
 
-async function sync() { setSync('上傳中...', 'syncing'); try { await fetch(GAS_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({emp, ldg})}); setSync('✅ 已儲存', 'sync-ok'); } catch(e) { setSync('📵 離線中', 'sync-err'); } }
-async function loadCloud() { setSync('讀取中...', 'syncing'); try { const d = await jsonpFetch(GAS_URL); if (d?.emp || d?.ldg) { emp = d.emp || []; ldg = d.ldg || []; localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); render(); setSync('✅ 雲端同步', 'sync-ok'); } } catch(e) { setSync('⚠️ 讀取失敗', 'sync-err'); } }
-
-const go = (p, el) => { $$('.screen, .nav-item').forEach(e => e.classList.remove('active')); $(`s-${p}`).classList.add('active'); if(el) el.classList.add('active'); if(p === 'me') updateMeUI(); render(); };
 const resetAndGoMe = (el) => { currentMe = "蘊一創意"; go('me', el); };
 
 function updateMeUI() {
@@ -218,7 +224,7 @@ function updateMeUI() {
     let exp = fLdg.filter(r => r.type === 'expense').reduce((a, b) => a + b.amt, 0);
     $('stat-count').textContent = fmtK(fLdg.length); $('stat-inc').textContent = fmtK(inc); $('stat-exp').textContent = fmtK(exp);
     if(isDefault) { $('me-avatar-txt').textContent = "蘊"; $('me-name').textContent = "蘊一創意"; $('me-desc').innerHTML = ""; } 
-    else { $('me-avatar-txt').textContent = currentMe.charAt(0); $('me-name').textContent = currentMe; $('me-desc').innerHTML = `團隊成員\n月薪預算：$${emp.find(e=>e.name===currentMe)?.salary.toLocaleString()}`; }
+    else { $('me-avatar-txt').textContent = currentMe.charAt(0); $('me-name').textContent = currentMe; const e = emp.find(x=>x.name===currentMe); $('me-desc').innerHTML = e ? `團隊成員\n月薪預算：$${e.salary.toLocaleString()}` : ""; }
 }
 
 function render() {
@@ -227,8 +233,9 @@ function render() {
     let inc=0, exp=0, dots={};
     ldg.filter(r => r.date.startsWith(mStr)).forEach(r => { if(r.type==='income') inc+=r.amt; else exp+=r.amt; dots[r.date] = true; });
     $('val-p').textContent = `$${(inc-exp).toLocaleString()}`;
+    
     if(charts.m) charts.m.destroy();
-    charts.m = new Chart($('c-main'), { type:'doughnut', data:{ datasets:[{ data:[exp, inc||1], backgroundColor:['#FF453A','#32D74B'], borderWidth:0 }] }, options:{ cutout:'85%', responsive:true } });
+    charts.m = new Chart($('c-main'), { type:'doughnut', data:{ datasets:[{ data:[exp, inc||1], backgroundColor:['#FF453A','#32D74B'], borderWidth:0 }] }, options:{ cutout:'85%', responsive:true, maintainAspectRatio:false } });
 
     const dInM = new Date(calYear, calMonth+1, 0).getDate(), fDay = new Date(calYear, calMonth, 1).getDay();
     let calH = '<div class="cal-grid">' + ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-h">${w}</div>`).join('') + '<div class="cal-c"></div>'.repeat(fDay);
@@ -239,33 +246,37 @@ function render() {
     $('cal-grid').innerHTML = calH + '</div>';
     $('cal-title').textContent = selD;
     $('cal-list').innerHTML = ldg.filter(r => r.date === selD).map(r => `<div class="list-row"><div class="row-info"><b>${r.cat}</b><small>${r.mem}</small></div><b>$${r.amt.toLocaleString()}</b></div>`).join('') || '<div style="padding:20px; text-align:center; color:var(--muted);">本日無紀錄</div>';
-    $('ldg-list').innerHTML = ldg.map(r => `<div class="list-row"><div class="row-info"><b>${r.cat}</b><small>${r.mem}</small></div><b>$${r.amt.toLocaleString()}</b></div>`).join('');
-    $('emp-list').innerHTML = emp.map(e => `<div class="list-row"><div>${e.name}</div><small>$${e.salary.toLocaleString()}</small></div>`).join('');
 }
+
+const openProfilePicker = () => {
+    let h = emp.map(e => `<div class="as-item" onclick="selectMe('${e.name}')">${e.name}</div>`).join('');
+    $('as-list').innerHTML = h || '<div class="as-item" style="color:var(--muted)">請先新增人員</div>';
+    $('as-picker').classList.add('open');
+};
+const selectMe = (n) => { currentMe = n; updateMeUI(); closeASById(); };
+const closeASById = () => { $('as-picker').classList.remove('open'); };
+const closeAS = (e) => { if(e.target === $('as-picker')) closeASById(); };
 
 const prepLdg = () => { $('ldg-form').reset(); setT('expense'); $('l-d').value = selD; $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e => `<option value="${e.name}">👤 ${e.name}</option>`).join(''); $('m-ldg').classList.add('open'); };
 const setT = t => { $('l-t').value = t; $('tb-exp').className = t === 'expense' ? 't-btn active exp' : 't-btn'; $('tb-inc').className = t === 'income' ? 't-btn active inc' : 't-btn'; };
+const closeMById = id => $(id).classList.remove('open');
+const closeM = (e, id) => { if(e.target === $(id)) $(id).classList.remove('open'); };
 
 function saveLdg() {
     ldg.unshift({ date: $('l-d').value, type: $('l-t').value, amt: Number($('l-a').value), cat: $('l-c').value, mem: $('l-m').value, inv: $('l-inv').value, clm: $('l-clm').value, vt: $('l-vt').value, note: $('l-n').value });
-    localStorage.setItem('yl', JSON.stringify(ldg));
-    closeMById('m-ldg'); sync(); render();
+    localStorage.setItem('yl', JSON.stringify(ldg)); closeMById('m-ldg'); render();
 }
 
 function handleSearch(v) {
     const list = $('search-list'); if(!v) { list.innerHTML=''; return; }
-    const res = ldg.filter(r => r.cat.includes(v) || r.mem.includes(v) || (r.note && r.note.includes(v)));
+    const res = ldg.filter(r => r.cat.includes(v) || r.mem.includes(v));
     list.innerHTML = res.map(r => `<div class="list-row"><div class="row-info"><b>${r.cat}</b><small>${r.date}</small></div><b>$${r.amt.toLocaleString()}</b></div>`).join('');
 }
 
 const shiftMonth = (d) => { const dt = new Date(calYear, calMonth+d, 1); calYear=dt.getFullYear(); calMonth=dt.getMonth(); render(); };
 const pickMonth = (v) => { if(!v) return; const [y, m] = v.split('-'); calYear = parseInt(y); calMonth = parseInt(m)-1; render(); };
-const openProfilePicker = () => { let h = emp.map(e => `<div class="picker-item" onclick="selectMe('${e.name}')">👤 ${e.name}</div>`).join(''); $('picker-list').innerHTML = h || '<div class="picker-item">請先新增人員</div>'; $('m-picker').classList.add('open'); };
-const selectMe = (n) => { currentMe = n; updateMeUI(); closeMById('m-picker'); };
-const closeMById = id => $(id).classList.remove('open');
-const closeM = (e, id) => { if(e.target === $(id)) $(id).classList.remove('open'); };
 
-window.onload = () => { loadCloud(); render(); setTimeout(() => { $('splash-screen').style.opacity='0'; setTimeout(()=>$('splash-screen').style.display='none', 600); }, 1500); };
+window.onload = () => { render(); setTimeout(() => { $('splash-screen').style.opacity='0'; setTimeout(()=>$('splash-screen').style.display='none', 600); }, 1500); };
 </script>
 </body>
 </html>
