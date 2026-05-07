@@ -206,16 +206,19 @@ body.nav-active .global-nav { display:flex; }
 .divider-label { font-size:12px; color:var(--muted); padding:8px 16px 4px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
 .icon-btn { background:var(--input-bg); color:var(--accent); border:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
 
-/* ── 長按回饋樣式 ── */
+/* ── 長按回饋樣式 (防呆與原生體驗) ── */
 .long-pressable {
-  -webkit-touch-callout: none; /* iOS Safari 禁用系統彈出選單 */
-  -webkit-user-select: none; /* Safari 禁用文字選取 */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, background-color 0.2s;
   cursor: pointer;
 }
 @media (hover: none) {
-  .long-pressable:active { opacity: 0.6; }
+  .long-pressable:active { 
+    opacity: 0.6; 
+    background-color: rgba(255,255,255,0.05);
+  }
 }
 </style>
 </head>
@@ -401,6 +404,15 @@ body.nav-active .global-nav { display:flex; }
   </div>
 </div>
 
+<div class="action-sheet-overlay" id="as-delete-proj" onclick="closeAS(event, 'as-delete-proj')">
+  <div class="action-sheet">
+    <div class="as-group">
+      <div class="as-item" style="color:var(--red); font-weight:600;" onclick="executeDeleteProj()">刪除此專案</div>
+    </div>
+    <div class="as-cancel" onclick="closeASById('as-delete-proj')">取消</div>
+  </div>
+</div>
+
 <script>
 const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
@@ -440,12 +452,9 @@ const toggleDrawer = open => {
 };
 
 async function loadCloud() {
-  // 先立即渲染本地資料，避免畫面空白
   render(); 
   setSync('同步中...','syncing');
   const cb = '_cb_'+Date.now(), s = document.createElement('script');
-  
-  // 放寬超時至 15 秒，並確保即使超時使用者也能用本機資料操作
   let timeout = setTimeout(()=>{
     setSync('⚠️ 離線模式 (本機)','sync-err'); 
     delete window[cb]; s.remove();
@@ -464,7 +473,6 @@ async function loadCloud() {
   s.src = `${GAS_URL}?callback=${cb}`; document.head.appendChild(s);
 }
 
-// 統整重新渲染邏輯，方便刪除後一次刷新所有狀態
 function fullRender() {
   render();
   if($('s-payroll').classList.contains('active')) renderPayroll();
@@ -520,14 +528,14 @@ function render() {
   
   // 渲染日曆的每日明細 (支援長按刪除)
   $('cal-list').innerHTML=ldg.map((r,i)=>({...r,_o:i})).filter(r=>r.date===selD).map(r=>`
-    <div class="long-pressable" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${r._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" oncontextmenu="event.preventDefault()">
+    <div class="long-pressable" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${r._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
       <div>${r.cat} <small style="color:var(--muted)">${r.mem}</small></div>
       <b style="color:${r.type==='income'?'var(--green)':'#fff'}">${r.type==='income'?'+':'-'}$${r.amt.toLocaleString()}</b>
     </div>`).join('')||'<div style="padding:20px;text-align:center;color:var(--muted);">本日無紀錄</div>';
   
   // 渲染帳目明細 (支援長按刪除)
   $('ldg-list').innerHTML=ldg.map((r,i)=>`
-    <div class="long-pressable" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${i})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" oncontextmenu="event.preventDefault()">
+    <div class="long-pressable" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${i})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
       <div>${r.cat}<br><small style="color:var(--muted)">${r.date} · ${r.mem} ${r.proj?`[${r.proj}]`:''}</small></div>
       <b style="color:${r.type==='income'?'var(--green)':'#fff'}">${r.type==='income'?'+':'-'}$${r.amt.toLocaleString()}</b>
     </div>`).join('');
@@ -581,7 +589,7 @@ function saveLdg(){
 function handleSearch(v){
   if(!v){$('search-list').innerHTML='';return;}
   $('search-list').innerHTML=ldg.map((r,i)=>({...r,_o:i})).filter(r=>r.cat.includes(v)||r.mem.includes(v)).map(r=>`
-    <div class="long-pressable" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${r._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" oncontextmenu="event.preventDefault()">
+    <div class="long-pressable" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${r._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
       <div>${r.cat}<br><small>${r.date}</small></div>
       <b style="color:${r.type==='income'?'var(--green)':'#fff'}">$${r.amt.toLocaleString()}</b>
     </div>`).join('');
@@ -590,8 +598,10 @@ function handleSearch(v){
 // ── 長按刪除 (Apple Native Feel) 邏輯 ──
 let lpTimer = null;
 let deleteTargetIdx = null;
+let deleteProjTarget = null;
 
 function startLP(idx) {
+  cancelLP(); // 先清空可能殘留的計時
   lpTimer = setTimeout(() => {
     if(navigator.vibrate) navigator.vibrate(50); // 震動回饋
     deleteTargetIdx = idx;
@@ -599,6 +609,16 @@ function startLP(idx) {
   }, 500); // 500ms 即視為長按
 }
 
+function startLPProj(pName) {
+  cancelLP();
+  lpTimer = setTimeout(() => {
+    if(navigator.vibrate) navigator.vibrate(50);
+    deleteProjTarget = pName;
+    $('as-delete-proj').classList.add('open');
+  }, 500);
+}
+
+// 防止滑動時觸發長按 (Native Experience)
 function cancelLP() {
   if(lpTimer) clearTimeout(lpTimer);
 }
@@ -611,6 +631,17 @@ function executeDelete() {
     fullRender(); // 重新計算所有報表、預算、毛利
     closeASById('as-delete');
     deleteTargetIdx = null;
+  }
+}
+
+function executeDeleteProj() {
+  if(deleteProjTarget !== null) {
+    delete projs[deleteProjTarget];
+    localStorage.setItem('yp', JSON.stringify(projs));
+    if(currentProject === deleteProjTarget) currentProject = Object.keys(projs)[0] || "";
+    renderProject(); // 刷新專案表
+    closeASById('as-delete-proj');
+    deleteProjTarget = null;
   }
 }
 
@@ -645,8 +676,14 @@ function renderProject() {
   const pKeys = Object.keys(projs);
   if(pKeys.length && !pKeys.includes(currentProject)) currentProject = pKeys[0];
   
+  // 渲染專案 Tabs，支援長按刪除整包專案
   $('proj-tabs').innerHTML = pKeys.map(p =>
-    `<div class="proj-tab ${p===currentProject?'active':''}" onclick="switchProject('${p.replace(/'/g,"\\'")}')">📦 ${p}</div>`
+    `<div class="proj-tab ${p===currentProject?'active':''} long-pressable" 
+          onclick="switchProject('${p.replace(/'/g,"\\'")}')"
+          onpointerdown="startLPProj('${p.replace(/'/g,"\\'")}')"
+          onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
+       📦 ${p}
+     </div>`
   ).join('');
 
   if(!currentProject) {
@@ -656,7 +693,7 @@ function renderProject() {
   }
 
   const proj = projs[currentProject];
-  // 記錄原始 index 以便刪除
+  // 記錄原始 index 以便刪除連動
   let relatedLdg = ldg.map((r, i) => ({...r, _o: i})).filter(r => r.proj === currentProject);
   let totalActual = relatedLdg.filter(r=>r.type==='expense').reduce((s,i)=>s+i.amt, 0);
   
@@ -683,9 +720,9 @@ function renderProject() {
   if(items.length) {
     html += `<div class="proj-section-hdr">實際記帳項目 (由明細自動匯入)</div>`;
     items.forEach(item => {
-      // 支援長按刪除
+      // 支援專案細項長按刪除
       html += `
-      <div class="proj-item long-pressable" onpointerdown="startLP(${item._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" oncontextmenu="event.preventDefault()">
+      <div class="proj-item long-pressable" onpointerdown="startLP(${item._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
         <div class="proj-item-left">
           <div class="proj-item-name" style="color:${item.type==='income'?'var(--green)':'inherit'}">${item.name} ${item.type==='income'?'(收入)':''}</div>
           <div class="proj-item-meta">
@@ -748,9 +785,9 @@ function renderInvoice() {
   let html = '';
   displayList.forEach(item => {
     let isInc = item.type==='income';
-    // 支援長按刪除
+    // 支援長按刪除，加入 ontouchmove="cancelLP()" 防止滾動誤觸
     html += `
-    <div class="inv-item long-pressable" onpointerdown="startLP(${item._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" oncontextmenu="event.preventDefault()">
+    <div class="inv-item long-pressable" onpointerdown="startLP(${item._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
       <div class="inv-item-left">
         <div class="inv-item-desc">${item.cat}</div>
         <div class="inv-item-meta">
