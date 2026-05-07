@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.20</title>
+<title>Yun Yi Finance v2.21</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -67,7 +67,6 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .cal-dots { display: flex; gap: 3px; position: absolute; bottom: 3px; }
 .cal-dot { width: 4px; height: 4px; border-radius: 50%; }
 .dot-inc { background: var(--green); } .dot-exp { background: var(--red); }
-.cal-day.active .cal-dot { background: white; opacity: 0.8; }
 
 /* Buttons & Forms */
 .icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; }
@@ -86,42 +85,25 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 /* Type Toggle */
 .type-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 4px; margin-bottom: 16px; }
-.type-btn { flex: 1; text-align: center; padding: 10px; font-size: 14px; font-weight: 600; border-radius: 8px; transition: 0.2s; color: var(--muted); }
+.type-btn { flex: 1; text-align: center; padding: 10px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.2s; color: var(--muted); }
 .type-btn.active.exp { background: var(--red); color: white; }
 .type-btn.active.inc { background: var(--green); color: white; }
 
-/* Doughnut Legend */
+/* Doughnut & Chart */
+.chart-container { position: relative; height: 180px; display: flex; justify-content: center; align-items: center; margin: 10px 0; }
 .chart-center-text { position: absolute; text-align: center; pointer-events: none; }
-.chart-center-text .label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
-.chart-center-text .value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-.doughnut-legend { display: flex; justify-content: space-around; margin-top: 20px; text-align: center; padding-top: 16px; border-top: 0.5px solid var(--border); }
-.doughnut-legend .ml { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-.doughnut-legend .mv { font-size: 16px; font-weight: 700; }
+.chart-center-text .label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.chart-center-text .value { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.doughnut-legend { display: flex; justify-content: space-around; margin-top: 15px; text-align: center; padding-top: 12px; border-top: 0.5px solid var(--border); }
+.doughnut-legend .ml { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.doughnut-legend .mv { font-size: 14px; font-weight: 700; }
 </style>
 </head>
 <body>
 
 <div class="screen active" id="s-home">
-  <div class="header">
-    <div class="header-top">
-      <div class="dropdown-title">
-        <span class="muted">蘊一財務 /</span><span class="active-text date-sync-text"></span><span class="chevron">▼</span>
-        <input type="month" class="native-date-input date-sync-input" onchange="handleDateChange(this)">
-      </div>
-    </div>
-  </div>
-  <div class="card swipeable-card" id="overview-card" style="padding-top: 20px;">
-    <div class="card-title">本月財務概覽</div>
-    <div style="position: relative; height: 200px; display: flex; justify-content: center; align-items: center;">
-      <canvas id="metricsChart"></canvas>
-      <div class="chart-center-text"><div class="label">本月淨利</div><div class="value" id="m-profit" style="color:var(--accent2)">$0</div></div>
-    </div>
-    <div class="doughnut-legend">
-      <div><div class="ml">本月收入</div><div class="mv" style="color:var(--green)" id="m-income">$0</div></div>
-      <div><div class="ml">本月支出</div><div class="mv" style="color:var(--red)" id="m-expense">$0</div></div>
-      <div><div class="ml">薪資預算</div><div class="mv" style="color:var(--amber)" id="m-salary">$0</div></div>
-    </div>
-  </div>
+  <div class="header"><div class="header-top"><div class="dropdown-title"><span class="muted">蘊一財務 /</span><span class="active-text date-sync-text"></span><span class="chevron">▼</span><input type="month" class="native-date-input date-sync-input" onchange="handleDateChange(this)"></div></div></div>
+  <div class="card swipeable-card" id="overview-card" style="padding-top: 20px;"><div class="card-title">本月財務概覽</div><div class="chart-container"><canvas id="metricsChart"></canvas><div class="chart-center-text"><div class="label">本月淨利</div><div class="value" id="m-profit" style="color:var(--accent2)">$0</div></div></div><div class="doughnut-legend"><div><div class="ml">本月收入</div><div class="mv" style="color:var(--green)" id="m-income">$0</div></div><div><div class="ml">本月支出</div><div class="mv" style="color:var(--red)" id="m-expense">$0</div></div><div><div class="ml">薪資預算</div><div class="mv" style="color:var(--amber)" id="m-salary">$0</div></div></div></div>
   <div class="card" style="padding-top: 20px;"><div class="card-title">近半年收支趨勢</div><div style="height: 160px;"><canvas id="trendChart"></canvas></div></div>
 </div>
 
@@ -131,28 +113,12 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <div class="screen" id="s-ledger">
-  <div class="header">
-    <div class="header-top">
-      <div class="dropdown-title">
-        <span class="muted">明細列表 /</span><span class="active-text date-sync-text"></span><span class="chevron">▼</span>
-        <input type="month" class="native-date-input date-sync-input" onchange="handleDateChange(this)">
-      </div>
-      <div class="icon-btn" onclick="exportCSV()">💾</div>
-    </div>
-    <div style="font-size: 11px; color: var(--muted); margin-top: 8px; margin-left: 8px;">💡 提示：長按紀錄可進行刪除</div>
-  </div>
+  <div class="header"><div class="header-top"><div class="dropdown-title"><span class="muted">明細列表 /</span><span class="active-text date-sync-text"></span><span class="chevron">▼</span><input type="month" class="native-date-input date-sync-input" onchange="handleDateChange(this)"></div><div class="icon-btn" onclick="exportCSV()">💾</div></div><div style="font-size: 11px; color: var(--muted); margin-top: 8px; margin-left: 8px;">💡 提示：長按紀錄可進行刪除</div></div>
   <div class="card" style="margin-bottom: 24px;"><div id="ledger-list"></div></div>
 </div>
 
 <div class="screen" id="s-calendar">
-  <div class="header">
-    <div class="header-top">
-      <div class="dropdown-title">
-        <span class="muted">記帳本 /</span><span class="active-text date-sync-text"></span><span class="chevron">▼</span>
-        <input type="month" class="native-date-input date-sync-input" onchange="handleDateChange(this)">
-      </div>
-    </div>
-  </div>
+  <div class="header"><div class="header-top"><div class="dropdown-title"><span class="muted">記帳本 /</span><span class="active-text date-sync-text"></span><span class="chevron">▼</span><input type="month" class="native-date-input date-sync-input" onchange="handleDateChange(this)"></div></div></div>
   <div class="card swipeable-card"><div id="cal-grid-container"></div></div>
   <div class="card"><div class="card-title" id="daily-list-title">本日明細</div><div id="daily-ledger-list"></div></div>
 </div>
@@ -160,61 +126,37 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="go('home',this)"><div class="nav-icon">📊</div><div class="nav-label">總覽</div></div>
   <div class="nav-item" onclick="go('calendar',this)"><div class="nav-icon">📅</div><div class="nav-label">記帳本</div></div>
-  
   <div class="nav-item" style="flex: 0.5;" onclick="prepLedger()"><div class="fab-wrapper">＋</div></div>
-  
   <div class="nav-item" onclick="go('ledger',this)"><div class="nav-icon">🧾</div><div class="nav-label">明細</div></div>
   <div class="nav-item" onclick="go('salary',this)"><div class="nav-icon">👥</div><div class="nav-label">薪資</div></div>
 </nav>
 
 <div class="modal-overlay" id="m-del" onclick="closeM(event,'m-del')">
-  <div class="modal" style="text-align: center;">
-    <div class="modal-handle"></div><div class="modal-title" style="margin-bottom:10px; font-weight:700;">刪除這筆紀錄</div>
-    <p style="color:var(--muted); font-size:14px; margin-bottom:24px;">確定要刪除這筆帳目嗎？此動作無法復原。</p>
-    <div style="display: flex; gap: 12px;">
-      <button class="btn-primary" style="flex:1; background:rgba(255,255,255,0.08); color:var(--text);" onclick="closeMById('m-del')">取消</button>
-      <button class="btn-primary" style="flex:1; background:var(--red);" onclick="execDel()">刪除</button>
-    </div>
-  </div>
+  <div class="modal" style="text-align: center;"><div class="modal-handle"></div><div class="modal-title" style="margin-bottom:10px; font-weight:700;">刪除紀錄</div><p style="color:var(--muted); font-size:14px; margin-bottom:24px;">確定要刪除嗎？此動作無法復原。</p><div style="display: flex; gap: 12px;"><button class="btn-primary" style="flex:1; background:rgba(255,255,255,0.08); color:var(--text);" onclick="closeMById('m-del')">取消</button><button class="btn-primary" style="flex:1; background:var(--red);" onclick="execDel()">刪除</button></div></div>
 </div>
 
 <div class="modal-overlay" id="m-ldg" onclick="closeM(event,'m-ldg')">
-  <div class="modal"><div class="modal-handle"></div>
-    <div class="type-toggle">
-      <div class="type-btn active exp" id="tab-exp" onclick="setType('expense')">支出</div>
-      <div class="type-btn inc" id="tab-inc" onclick="setType('income')">收入</div>
-    </div>
-    <form onsubmit="event.preventDefault(); saveLdg();">
-      <input type="hidden" id="l-type" value="expense">
-      <div class="field"><label>金額</label><input type="number" id="l-amt" required inputmode="numeric" style="font-size:24px; font-weight:700; color:var(--accent2); padding:16px 12px;"></div>
-      <div class="field"><label>類別 (手動填寫)</label><input type="text" id="l-cat" placeholder="例：辦公用品、餐飲" required></div>
-      <div class="field"><label>成員 (關聯人員/帳戶)</label><select id="l-member"></select></div>
-      <div class="field"><label>標籤 (手動填寫)</label><input type="text" id="l-tag" placeholder="例：DV茶會、急件"></div>
-      <div class="field"><label>日期</label><input type="date" id="l-date" required></div>
-      <div class="field"><label>附加照片 (選填)</label><input type="file" id="l-photo" accept="image/*" style="padding: 8px;"></div>
-      <button type="submit" class="btn-primary">儲存紀錄</button>
-    </form>
-  </div>
+  <div class="modal"><div class="modal-handle"></div><div class="type-toggle"><div class="type-btn active exp" id="tab-exp" onclick="setType('expense')">支出</div><div class="type-btn inc" id="tab-inc" onclick="setType('income')">收入</div></div><form onsubmit="event.preventDefault(); saveLdg();"><input type="hidden" id="l-type" value="expense"><div class="field"><label>金額</label><input type="number" id="l-amt" required inputmode="numeric" style="font-size:24px; font-weight:700; color:var(--accent2); padding:16px 12px;"></div><div class="field"><label>類別</label><input type="text" id="l-cat" placeholder="辦公、餐飲" required></div><div class="field"><label>成員</label><select id="l-member"></select></div><div class="field"><label>標籤</label><input type="text" id="l-tag" placeholder="DV茶會"></div><div class="field"><label>日期</label><input type="date" id="l-date" required></div><div class="field"><label>照片</label><input type="file" id="l-photo" accept="image/*"></div><button type="submit" class="btn-primary">儲存紀錄</button></form></div>
 </div>
 
 <div class="modal-overlay" id="m-emp" onclick="closeM(event,'m-emp')">
-  <div class="modal"><div class="modal-handle"></div><div id="emp-modal-title" style="margin-bottom:15px; font-weight:700;">新增人員</div>
-    <form onsubmit="event.preventDefault(); saveEmp();">
-      <input type="hidden" id="e-id">
-      <div class="field"><label>姓名</label><input type="text" id="e-name" required></div>
-      <div class="field"><label>職稱</label><input type="text" id="e-role" required></div>
-      <div class="field"><label>底薪</label><input type="number" id="e-salary" required inputmode="numeric"></div>
-      <div class="field"><label>獎金 / 代墊</label><input type="number" id="e-bonus" value="0" inputmode="numeric"></div>
-      <button type="submit" class="btn-primary">儲存資料</button>
-      <button type="button" style="width:100%; margin-top:10px; background:transparent; color:var(--red); border:none; font-size:14px; padding:10px;" onclick="delEmp()">刪除人員</button>
-    </form>
+  <div class="modal"><div class="modal-handle"></div><div id="emp-modal-title" style="margin-bottom:15px; font-weight:700;">人員設定</div><form onsubmit="event.preventDefault(); saveEmp();"><input type="hidden" id="e-id"><div class="field"><label>姓名</label><input type="text" id="e-name" required></div><div class="field"><label>職稱</label><input type="text" id="e-role" required></div><div class="field"><label>底薪</label><input type="number" id="e-salary" required inputmode="numeric"></div><div class="field"><label>獎金</label><input type="number" id="e-bonus" value="0" inputmode="numeric"></div><button type="submit" class="btn-primary">儲存資料</button><button type="button" style="width:100%; margin-top:10px; background:transparent; color:var(--red); border:none; font-size:14px; padding:10px;" onclick="delEmp()">刪除人員</button></form></div>
+</div>
+
+<div class="modal-overlay" id="m-emp-detail" onclick="closeM(event,'m-emp-detail')">
+  <div class="modal"><div class="modal-handle"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h2 id="det-name" style="font-size:20px; font-weight:700;"></h2>
+      <div class="icon-btn" id="det-edit-btn" style="width:32px; height:32px; font-size:14px;">✏️</div>
+    </div>
+    <div class="card" style="margin:0 0 15px 0;"><div class="card-title">本月薪資結構</div><div class="chart-container"><canvas id="empChart"></canvas></div><div class="doughnut-legend"><div><div class="ml">基本薪資</div><div class="mv" style="color:var(--accent)" id="det-base">$0</div></div><div><div class="ml">獎金代墊</div><div class="mv" style="color:var(--amber)" id="det-bonus">$0</div></div></div></div>
+    <div class="card" style="margin:0 0 15px 0;"><div class="card-title">本月相關帳目 (標記成員)</div><div id="det-ldg-list"></div></div>
+    <button class="btn-primary" style="background:rgba(255,255,255,0.1); color:var(--text);" onclick="closeMById('m-emp-detail')">關閉詳情</button>
   </div>
 </div>
 
 <script>
-// 共用工具庫
-const $ = id => document.getElementById(id);
-const $$ = sel => document.querySelectorAll(sel);
+const $ = id => document.getElementById(id), $$ = sel => document.querySelectorAll(sel);
 const fmt = n => '$' + Math.round(n).toLocaleString();
 const parseNum = val => parseInt(val) || 0;
 
@@ -226,173 +168,120 @@ let pressTimer, delIdx = -1, isAnim = false, tempPic = null;
 const now = new Date();
 let cYear = now.getFullYear(), cMonth = now.getMonth() + 1;
 let selDate = now.toISOString().slice(0,10);
-$('l-date').value = selDate;
 
-// --- 核心邏輯 ---
 function getMonthStr() { return `${cYear}-${cMonth.toString().padStart(2, '0')}`; }
-
 function updateUI() {
-  const mStr = getMonthStr();
-  const text = `${cYear}年 ${cMonth.toString().padStart(2, '0')}月`;
+  const mStr = getMonthStr(), text = `${cYear}年 ${cMonth.toString().padStart(2, '0')}月`;
   $$('.date-sync-text').forEach(el => el.textContent = text);
   $$('.date-sync-input').forEach(el => el.value = mStr);
   renderAll();
 }
-
-function handleDateChange(el) {
-  if(!el.value) return;
-  [cYear, cMonth] = el.value.split('-').map(Number);
-  if(!selDate.startsWith(el.value)) selDate = `${el.value}-01`;
-  updateUI();
-}
-
+function handleDateChange(el) { if(!el.value) return; [cYear, cMonth] = el.value.split('-').map(Number); if(!selDate.startsWith(el.value)) selDate = `${el.value}-01`; updateUI(); }
 function doSwipe(delta) {
   if (isAnim) return; isAnim = true;
   const target = document.querySelector('.screen.active .swipeable-card');
   if(!target) { isAnim = false; return; }
-  
   target.classList.add(delta > 0 ? 'slide-out-left' : 'slide-out-right');
   setTimeout(() => {
-    cMonth += delta;
-    if (cMonth < 1) { cMonth = 12; cYear--; } else if (cMonth > 12) { cMonth = 1; cYear++; }
+    cMonth += delta; if (cMonth < 1) { cMonth = 12; cYear--; } else if (cMonth > 12) { cMonth = 1; cYear++; }
     if (!selDate.startsWith(getMonthStr())) selDate = `${getMonthStr()}-01`;
     updateUI();
-    
     target.classList.remove('slide-out-left', 'slide-out-right');
     target.classList.add(delta > 0 ? 'slide-in-right' : 'slide-in-left');
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      target.classList.remove('slide-in-right', 'slide-in-left');
-      setTimeout(() => isAnim = false, 150);
-    }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { target.classList.remove('slide-in-right', 'slide-in-left'); setTimeout(() => isAnim = false, 150); }));
   }, 150);
 }
 
-// 防抖手勢
+// 手勢引擎
 let sx=0, sy=0, dir=null; 
-document.addEventListener('touchstart', e => {
-  if(e.target.closest('.modal-overlay') || !e.target.closest('.swipeable-card')) return;
-  sx = e.touches[0].screenX; sy = e.touches[0].screenY; dir = null; 
-}, {passive:true});
-document.addEventListener('touchmove', e => {
-  if(e.target.closest('.modal-overlay') || !sx || !sy || isAnim || !e.target.closest('.swipeable-card')) return;
-  let dx = Math.abs(sx - e.touches[0].screenX), dy = Math.abs(sy - e.touches[0].screenY);
-  if (!dir && (dx>3 || dy>3)) dir = dx>dy ? 'H' : 'V'; 
-  if (dir==='H' && e.cancelable) e.preventDefault();
-}, {passive:false}); 
-document.addEventListener('touchend', e => {
-  if(e.target.closest('.modal-overlay') || !e.target.closest('.swipeable-card')) return;
-  if (dir==='H') {
-    let dx = sx - e.changedTouches[0].screenX;
-    if(Math.abs(dx)>40) doSwipe(dx>0?1:-1);
-  }
-  sx=0; sy=0; dir=null;
-}, {passive:true});
+document.addEventListener('touchstart', e => { if(e.target.closest('.modal-overlay') || !e.target.closest('.swipeable-card')) return; sx = e.touches[0].screenX; sy = e.touches[0].screenY; dir = null; }, {passive:true});
+document.addEventListener('touchmove', e => { if(e.target.closest('.modal-overlay') || !sx || !sy || isAnim || !e.target.closest('.swipeable-card')) return; let dx = Math.abs(sx - e.touches[0].screenX), dy = Math.abs(sy - e.touches[0].screenY); if (!dir && (dx>3 || dy>3)) dir = dx>dy ? 'H' : 'V'; if (dir==='H' && e.cancelable) e.preventDefault(); }, {passive:false}); 
+document.addEventListener('touchend', e => { if(e.target.closest('.modal-overlay') || !e.target.closest('.swipeable-card')) return; if (dir==='H') { let dx = sx - e.changedTouches[0].screenX; if(Math.abs(dx)>40) doSwipe(dx>0?1:-1); } sx=0; sy=0; dir=null; }, {passive:true});
 
-// 儲存與路由
-function save() { try{ localStorage.setItem('yunyi_emp', JSON.stringify(emp)); localStorage.setItem('yunyi_ledger', JSON.stringify(ldg)); }catch(e){alert('儲存失敗，手機空間不足');} }
+function save() { try{ localStorage.setItem('yunyi_emp', JSON.stringify(emp)); localStorage.setItem('yunyi_ledger', JSON.stringify(ldg)); }catch(e){alert('儲存失敗');} }
 function go(page, el) { $$('.screen').forEach(s => s.classList.remove('active')); $$('.nav-item').forEach(n => n.classList.remove('active')); $('s-'+page).classList.add('active'); if(el) el.classList.add('active'); renderAll(); }
 function openM(id) { $(id).classList.add('open'); }
 function closeM(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeMById(id) { $(id).classList.remove('open'); }
 
-// 抽離共用 HTML 模板
 function getTxHTML(r, isPressable=true) {
   const isInc = r.type === 'income' || (!r.type && r.cat === '營業收入');
-  const tag = r.tag ? `<span class="tag">${r.tag}</span>` : '';
-  const mem = r.member ? ` · 👤 ${r.member}` : '';
-  const pic = r.photo ? `<img src="${r.photo}" class="img-thumb">` : '';
-  const evt = isPressable ? `ontouchstart="startPress(event,${r.oid})" ontouchend="cancelPress()" ontouchmove="cancelPress()" onmousedown="startPress(event,${r.oid})" onmouseup="cancelPress()"` : '';
-  
-  return `<div class="list-row pressable-row" ${evt} oncontextmenu="return false;">
-    <div class="row-left">${pic}<div class="row-info"><div class="row-name">${r.cat}</div><div class="row-sub">${tag}${r.date}${mem}</div></div></div>
+  const evt = isPressable ? `ontouchstart="startPress(event,${r.oid})" ontouchend="cancelPress()" ontouchmove="cancelPress()"` : '';
+  return `<div class="list-row pressable-row" ${evt}>
+    <div class="row-left">${r.photo?`<img src="${r.photo}" class="img-thumb">`:''}<div class="row-info"><div class="row-name">${r.cat}</div><div class="row-sub">${r.tag?`<span class="tag">${r.tag}</span>`:''}${r.date}${r.member?' · 👤'+r.member:''}</div></div></div>
     <div style="font-weight:700; color:${isInc?'var(--green)':'var(--red)'}">${isInc?'+':'-'}${fmt(r.amt)}</div>
   </div>`;
 }
 
-// 長按與刪除
 function startPress(e, idx) { delIdx = idx; pressTimer = setTimeout(()=>{ if(navigator.vibrate) navigator.vibrate(50); openM('m-del'); }, 600); }
 function cancelPress() { clearTimeout(pressTimer); }
 function execDel() { if(delIdx !== -1) { ldg.splice(delIdx,1); save(); renderAll(); } closeMById('m-del'); }
 
-// --- 員工管理 ---
-function updateMemSelect() {
-  if(!$('l-member')) return;
-  $('l-member').innerHTML = '<option value="公司">🏛 公司</option>' + emp.map(e => `<option value="${e.name}">👤 ${e.name}</option>`).join('');
-}
+function updateMemSelect() { if($('l-member')) $('l-member').innerHTML = '<option value="公司">🏛 公司</option>' + emp.map(e => `<option value="${e.name}">👤 ${e.name}</option>`).join(''); }
 function prepEmp() { $('emp-modal-title').textContent='新增人員'; $('e-id').value=''; $('e-name').value=''; $('e-role').value=''; $('e-salary').value=''; $('e-bonus').value=0; openM('m-emp'); }
+
+// 🌟 人員詳情邏輯
+function showEmpDetail(i) {
+  const e = emp[i];
+  $('det-name').textContent = e.name + ' (' + e.role + ')';
+  $('det-base').textContent = fmt(e.salary);
+  $('det-bonus').textContent = fmt(e.bonus);
+  
+  // 個人詳情內的圖表
+  if(charts['e']) charts['e'].destroy();
+  charts['e'] = new Chart($('empChart').getContext('2d'), { type:'doughnut', data:{datasets:[{data:[e.salary, e.bonus], backgroundColor:['#7c6af7','#fbbf24'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'75%'} });
+
+  // 過濾與該成員相關的本月帳目
+  const curStr = getMonthStr();
+  const personalLdg = ldg.filter(r => r.member === e.name && r.date.startsWith(curStr));
+  $('det-ldg-list').innerHTML = personalLdg.length ? personalLdg.map(r => getTxHTML(r, false)).join('') : '<div class="empty">本月查無相關紀錄</div>';
+
+  $('det-edit-btn').onclick = () => { closeMById('m-emp-detail'); editEmployee(i); };
+  openM('m-emp-detail');
+}
+
 function editEmployee(i) { const e = emp[i]; $('emp-modal-title').textContent='編輯資料'; $('e-id').value=i; $('e-name').value=e.name; $('e-role').value=e.role; $('e-salary').value=e.salary; $('e-bonus').value=e.bonus; openM('m-emp'); }
 function saveEmp() {
   const n=$('e-name').value, r=$('e-role').value, s=parseNum($('e-salary').value), b=parseNum($('e-bonus').value);
   if(!n||!s) return;
   const id = $('e-id').value;
-  if(id) emp[id]={name:n,role:r,salary:s,bonus:b}; else emp.push({name:n,role:r,salary:s,bonus:b});
-  save(); updateMemSelect(); renderAll(); closeMById('m-emp'); if(document.activeElement) document.activeElement.blur();
+  if(id!=='') emp[id]={name:n,role:r,salary:s,bonus:b}; else emp.push({name:n,role:r,salary:s,bonus:b});
+  save(); updateMemSelect(); renderAll(); closeMById('m-emp');
 }
 function delEmp() { if(confirm('確定刪除？')) { emp.splice($('e-id').value,1); save(); updateMemSelect(); renderAll(); closeMById('m-emp'); } }
 
-// --- 記帳管理 ---
 function prepLedger() { setType('expense'); $('l-date').value=selDate; $('l-amt').value=''; $('l-cat').value=''; $('l-tag').value=''; $('l-photo').value=''; tempPic=null; openM('m-ldg'); }
-function setType(type) {
-  $('l-type').value=type;
-  if(type==='expense'){ $('tab-exp').className='type-btn active exp'; $('tab-inc').className='type-btn inc'; $('l-amt').style.color='var(--red)'; }
-  else { $('tab-inc').className='type-btn active inc'; $('tab-exp').className='type-btn exp'; $('l-amt').style.color='var(--green)'; }
-}
-$('l-photo').addEventListener('change', e => {
-  const f=e.target.files[0]; if(!f) return;
-  const rd = new FileReader();
-  rd.onload = e => { const img=new Image(); img.onload=() => { const cvs=document.createElement('canvas'), ctx=cvs.getContext('2d'); cvs.width=250; cvs.height=img.height*(250/img.width); ctx.drawImage(img,0,0,cvs.width,cvs.height); tempPic=cvs.toDataURL('image/jpeg',0.5); }; img.src=e.target.result; };
-  rd.readAsDataURL(f);
-});
+function setType(t) { $('l-type').value=t; if(t==='expense'){ $('tab-exp').className='type-btn active exp'; $('tab-inc').className='type-btn inc'; $('l-amt').style.color='var(--red)'; } else { $('tab-inc').className='type-btn active inc'; $('tab-exp').className='type-btn exp'; $('l-amt').style.color='var(--green)'; } }
+$('l-photo').addEventListener('change', e => { const f=e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>{ const img=new Image(); img.onload=()=>{ const cvs=document.createElement('canvas'), ctx=cvs.getContext('2d'); cvs.width=250; cvs.height=img.height*(250/img.width); ctx.drawImage(img,0,0,cvs.width,cvs.height); tempPic=cvs.toDataURL('image/jpeg',0.5); }; img.src=e.target.result; }; rd.readAsDataURL(f); });
 function saveLdg() {
-  const date=$('l-date').value, amt=$('l-amt').value, cat=$('l-cat').value;
-  if(!cat||!amt) return;
-  ldg.unshift({date, type:$('l-type').value, amt:parseNum(amt), cat, member:$('l-member').value, tag:$('l-tag').value.trim(), photo:tempPic});
-  selDate = date; [cYear, cMonth] = date.split('-').map(Number);
-  save(); updateUI(); closeMById('m-ldg'); if(document.activeElement) document.activeElement.blur();
+  const d=$('l-date').value, a=$('l-amt').value, c=$('l-cat').value; if(!c||!a) return;
+  ldg.unshift({date:d, type:$('l-type').value, amt:parseNum(a), cat:c, member:$('l-member').value, tag:$('l-tag').value.trim(), photo:tempPic});
+  selDate = d; [cYear, cMonth] = d.split('-').map(Number); save(); updateUI(); closeMById('m-ldg'); if(document.activeElement) document.activeElement.blur();
 }
 
-// --- 渲染畫面 ---
 function renderAll() {
-  const curStr = getMonthStr();
-  const curLdg = ldg.map((r,i)=>({...r, oid:i})).filter(r => r.date.startsWith(curStr));
-  
-  // 員工清單
+  const curStr = getMonthStr(), curLdg = ldg.map((r,i)=>({...r, oid:i})).filter(r => r.date.startsWith(curStr));
   $('emp-count').textContent = `共 ${emp.length} 人`;
-  $('emp-list').innerHTML = emp.length ? emp.map((e,i)=>`<div class="list-row pressable-row" onclick="editEmployee(${i})"><div class="row-left"><div class="row-info"><div class="row-name">${e.name}</div><div class="row-sub">${e.role} · 底薪 ${fmt(e.salary)}</div></div></div><div style="text-align:right; font-weight:700; color:var(--accent2)">${fmt(e.salary+e.bonus)}<div class="row-sub">含獎金代墊</div></div></div>`).join('') : '<div class="empty">尚未建立</div>';
-
-  // 帳本清單
+  // 🌟 修改員工清單點擊事件
+  $('emp-list').innerHTML = emp.length ? emp.map((e,i)=>`<div class="list-row pressable-row" onclick="showEmpDetail(${i})"><div class="row-left"><div class="row-info"><div class="row-name">${e.name}</div><div class="row-sub">${e.role} · 底薪 ${fmt(e.salary)}</div></div></div><div style="text-align:right; font-weight:700; color:var(--accent2)">${fmt(e.salary+e.bonus)}<div class="row-sub">總計</div></div></div>`).join('') : '<div class="empty">尚未建立</div>';
   $('ledger-list').innerHTML = curLdg.length ? curLdg.map(r => getTxHTML(r)).join('') : '<div class="empty">本月無紀錄</div>';
-
-  // 儀表板數據
-  let inc=0, exp=0;
-  curLdg.forEach(r=>{ if(r.type==='income'||(!r.type&&r.cat==='營業收入')) inc+=r.amt; else exp+=r.amt; });
-  let sal = emp.reduce((s,e)=>s+e.salary+e.bonus, 0);
-  let pft = inc-exp-sal;
-  $('m-income').textContent=fmt(inc); $('m-expense').textContent=fmt(exp); $('m-salary').textContent=fmt(sal);
-  $('m-profit').textContent=fmt(pft); $('m-profit').style.color = pft>=0?'var(--accent2)':'var(--red)';
-  
+  let inc=0, exp=0; curLdg.forEach(r=>{ if(r.type==='income'||(!r.type&&r.cat==='營業收入')) inc+=r.amt; else exp+=r.amt; });
+  let sal = emp.reduce((s,e)=>s+e.salary+e.bonus, 0), pft = inc-exp-sal;
+  $('m-income').textContent=fmt(inc); $('m-expense').textContent=fmt(exp); $('m-salary').textContent=fmt(sal); $('m-profit').textContent=fmt(pft); $('m-profit').style.color = pft>=0?'var(--accent2)':'var(--red)';
   if(charts['m']) charts['m'].destroy();
   charts['m'] = new Chart($('metricsChart').getContext('2d'), { type:'doughnut', data:{datasets:[{data:[exp,sal,inc], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'75%'} });
-
-  // 日曆視圖
-  const dInM = new Date(cYear, cMonth, 0).getDate();
-  const fDay = new Date(cYear, cMonth-1, 1).getDay();
-  let calHtml = '<div class="cal-grid">' + ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-head">${w}</div>`).join('');
-  let cCnt = 0;
+  const dInM = new Date(cYear, cMonth, 0).getDate(), fDay = new Date(cYear, cMonth-1, 1).getDay();
+  let calHtml = '<div class="cal-grid">' + ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-head">${w}</div>`).join(''), cCnt = 0;
   for(let i=0; i<fDay; i++) { calHtml += '<div class="cal-cell"></div>'; cCnt++; }
   for(let d=1; d<=dInM; d++) {
-    const dStr = `${curStr}-${d.toString().padStart(2,'0')}`;
-    const rcs = curLdg.filter(r=>r.date===dStr);
-    let dotHtml = (rcs.some(r=>r.type==='income'||r.cat==='營業收入')?'<div class="cal-dot dot-inc"></div>':'') + (rcs.some(r=>r.type==='expense'||(r.type!=='income'&&r.cat!=='營業收入'))?'<div class="cal-dot dot-exp"></div>':'');
-    calHtml += `<div class="cal-cell"><div class="cal-day ${dStr===selDate?'active':''} ${dStr===now.toISOString().slice(0,10)&&dStr!==selDate?'today':''}" onclick="selDate='${dStr}';renderAll();">${d}<div class="cal-dots">${dotHtml}</div></div></div>`;
+    const dStr = `${curStr}-${d.toString().padStart(2,'0')}`, rcs = curLdg.filter(r=>r.date===dStr);
+    let dots = (rcs.some(r=>r.type==='income'||r.cat==='營業收入')?'<div class="cal-dot dot-inc"></div>':'') + (rcs.some(r=>r.type==='expense'||(r.type!=='income'&&r.cat!=='營業收入'))?'<div class="cal-dot dot-exp"></div>':'');
+    calHtml += `<div class="cal-cell"><div class="cal-day ${dStr===selDate?'active':''} ${dStr===now.toISOString().slice(0,10)&&dStr!==selDate?'today':''}" onclick="selDate='${dStr}';renderAll();">${d}<div class="cal-dots">${dots}</div></div></div>`;
     cCnt++;
   }
   while(cCnt<42) { calHtml += '<div class="cal-cell"></div>'; cCnt++; }
   $('cal-grid-container').innerHTML = calHtml + '</div>';
-
-  // 本日明細
-  const [y,m,d] = selDate.split('-');
-  $('daily-list-title').textContent = `${m}月${d}日 星期${['日','一','二','三','四','五','六'][new Date(y,m-1,d).getDay()]}`;
+  const [y,m,day] = selDate.split('-'); $('daily-list-title').textContent = `${m}月${day}日 星期${['日','一','二','三','四','五','六'][new Date(y,m-1,day).getDay()]}`;
   const dayLdg = curLdg.filter(r=>r.date===selDate);
   $('daily-ledger-list').innerHTML = dayLdg.length ? dayLdg.map(r => getTxHTML(r)).join('') : '<div class="empty">本日無紀錄</div>';
 }
