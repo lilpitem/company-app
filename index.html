@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.32</title>
+<title>Yun Yi Finance v2.33</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -79,7 +79,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 <div class="header">
   <div class="brand">蘊一財務 / <span id="hdr-m"></span></div>
-  <div id="sync-status" onclick="loadCloud()">讀取雲端...</div>
+  <div id="sync-status" onclick="loadCloud()">點擊讀取雲端</div>
 </div>
 
 <div id="s-home" class="screen active">
@@ -144,7 +144,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <script>
-// 🌟 核心網址
+// 🌟 網址確認不變
 const URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
 
 const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
@@ -152,27 +152,30 @@ const fmt = n => '$' + Math.round(n).toLocaleString();
 let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
 let now = new Date(), selD = now.toISOString().slice(0,10), charts = {}, delIdx = -1;
 
-// 雲端同步系統 (加強版)
 async function sync() {
     if(!URL) return; 
     const st = $('sync-status'); st.textContent='上傳中...'; st.className='syncing';
     try { 
         await fetch(URL, {method:'POST', mode:'no-cors', body:JSON.stringify({emp,ldg})});
         st.textContent='雲端已同步'; st.className='sync-ok'; 
-    } catch(e){ st.textContent='離線模式'; st.className=''; }
+    } catch(e){ st.textContent='離線儲存'; st.className=''; }
 }
 
 async function loadCloud() {
-    const st = $('sync-status'); st.textContent='讀取雲端...'; st.className='syncing';
+    const st = $('sync-status'); st.textContent='讀取中...'; st.className='syncing';
     try { 
-        // 加入 redirect: 'follow' 解決 Safari CORS 跨網域阻擋
-        const res = await fetch(URL, { redirect: 'follow' }); 
+        // 拿掉 redirect 參數，改用最原始的 GET 請求避免 Safari CORS 殺掉
+        const res = await fetch(URL); 
+        
+        if (!res.ok) {
+            throw new Error(`HTTP 錯誤碼: ${res.status}`);
+        }
+
         const text = await res.text();
         
-        if (text.includes('<html') || text.includes('Sign in')) {
-            st.textContent='⚠️ 權限錯誤(點我)'; st.className='sync-err';
-            st.onclick = () => alert('Google 權限未開放！\n請回到 Google Apps Script 重新部署\n並將「誰可以存取」改為【所有人 (Anyone)】！');
-            return;
+        // 抓出 HTML 代表跑到登入頁面
+        if (text.includes('<html')) {
+            throw new Error('被重新導向到 Google 登入頁！請檢查「所有人」權限');
         }
 
         if (!text || text.trim() === "") { sync(); return; }
@@ -182,12 +185,13 @@ async function loadCloud() {
             emp=d.emp||[]; ldg=d.ldg||[]; 
             saveLoc(); render(); updateMem(); 
             st.textContent='雲端已同步'; st.className='sync-ok'; 
-            st.onclick = loadCloud; // 恢復正常點擊更新功能
+            st.onclick = loadCloud; 
         }
     } catch(e){ 
-        console.error("Fetch Error: ", e);
-        st.textContent='⚠️ 讀取失敗(點我)'; st.className='sync-err'; 
-        st.onclick = () => alert('網路阻擋或權限未開。請確認是否已發布為「新版本」且權限設為「所有人」。');
+        // 🕵️‍♂️ 醫療級錯誤雷達：把真實的錯誤吐出來
+        console.error(e);
+        st.textContent='⚠️ 讀取失敗(看原因)'; st.className='sync-err'; 
+        st.onclick = () => alert('錯誤代碼：\n' + e.message + '\n\n如果是 Failed to fetch，代表 Safari 的防追蹤擋住了，或是你的 Google Script 沒有發布為【新版本】！');
     }
 }
 
@@ -249,7 +253,7 @@ function render() {
     $('cal-list').innerHTML = ldg.map((r,ix)=>({...r,oid:ix})).filter(r=>r.date===selD).map(row).join('') || '<div class="empty">本日無紀錄</div>';
 }
 
-window.onload = async () => { render(); updateMem(); await loadCloud(); };
+window.onload = () => { render(); updateMem(); loadCloud(); };
 </script>
 </body>
 </html>
