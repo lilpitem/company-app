@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.15</title>
+<title>Yun Yi Finance v2.16</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -61,11 +61,11 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--muted); margin-right: 4px; }
 .img-thumb { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; border: 0.5px solid var(--border); }
 
-/* 🌟 修復日曆溢出版 CSS */
-.cal-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 11px; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
-.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px 0; } /* 增加垂直間距避免擁擠 */
+/* 🌟 強制對齊版日曆 CSS (Single Grid) */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px 0; justify-items: center; }
+.cal-head { font-size: 12px; color: var(--muted); font-weight: 500; padding-bottom: 4px; }
 .cal-day { 
-  width: 40px; height: 40px; margin: 0 auto; /* 固定尺寸，徹底根除 iOS 計算失效 Bug */
+  width: 38px; height: 38px; 
   display: flex; flex-direction: column; align-items: center; justify-content: center; 
   border-radius: 50%; font-size: 15px; font-weight: 500; position: relative; cursor: pointer; transition: 0.2s; 
 }
@@ -283,7 +283,6 @@ let tempPhotoData = null;
 const now = new Date();
 let currentYear = now.getFullYear();
 let currentMonth = now.getMonth() + 1;
-// 日曆專用選中日期
 let selectedCalendarDate = now.toISOString().slice(0,10);
 
 $('l-date').value = selectedCalendarDate;
@@ -548,6 +547,7 @@ function renderLedger() {
   }).join('');
 }
 
+// 🌟 全新對齊版的日曆渲染邏輯
 function selectCalendarDate(dateStr) {
   selectedCalendarDate = dateStr;
   renderCalendar();
@@ -562,12 +562,21 @@ function renderCalendar() {
   const todayStr = new Date().toISOString().slice(0, 10);
   const monthPrefix = `${year}-${month.toString().padStart(2, '0')}`;
 
-  let html = '<div class="cal-header"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div><div class="cal-days">';
+  // 開頭宣告 Single Grid 容器
+  let html = '<div class="cal-grid">';
+  
+  // 渲染表頭的星期幾 (在同一個 Grid 裡面)
+  const weekDays = ['日','一','二','三','四','五','六'];
+  weekDays.forEach(wd => {
+    html += `<div class="cal-head">${wd}</div>`;
+  });
 
+  // 填補月初的空白天數
   for (let i = 0; i < firstDay; i++) {
     html += `<div class="cal-day empty"></div>`;
   }
 
+  // 渲染每一天
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${monthPrefix}-${d.toString().padStart(2, '0')}`;
     const isSelected = (dateStr === selectedCalendarDate);
@@ -591,7 +600,7 @@ function renderCalendar() {
          <div class="cal-dots">${dotsHtml}</div>
       </div>`;
   }
-  html += '</div>';
+  html += '</div>'; // Grid 結尾
   $('calendar-grid-container').innerHTML = html;
 }
 
