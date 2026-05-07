@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.29</title>
+<title>Yun Yi Finance v2.31</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -22,6 +22,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 #sync-status { font-size: 10px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); transition: 0.3s; }
 .syncing { color: var(--amber); animation: pulse 1s infinite; }
 .sync-ok { color: var(--green); background: rgba(52,211,153,0.1); }
+.sync-err { color: var(--red); background: rgba(248,113,113,0.1); }
 @keyframes pulse { 50% { opacity: 0.5; } }
 
 /* Bottom Nav */
@@ -31,7 +32,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .nav-icon { font-size: 20px; } .nav-label { font-size: 10px; font-weight: 500; }
 .fab { position: absolute; top: -30px; width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: #fff; border: 4px solid var(--bg); box-shadow: 0 4px 15px rgba(124,106,247,0.3); }
 
-/* Components */
+/* List Style */
 .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 0 16px 12px; }
 .card-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 .list-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 0.5px solid rgba(255,255,255,0.03); }
@@ -41,7 +42,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .amt { font-weight: 700; font-size: 15px; }
 .empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
 
-/* Calendar Engine */
+/* Calendar Engine (Flex Engine) */
 .cal-grid { display: flex; flex-wrap: wrap; width: 100%; }
 .cal-h { width: 14.285%; font-size: 11px; color: var(--muted); text-align: center; padding-bottom: 8px; }
 .cal-c { width: 14.285%; height: 45px; display: flex; justify-content: center; align-items: flex-start; }
@@ -78,7 +79,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 <div class="header">
   <div class="brand">蘊一財務 / <span id="hdr-m"></span></div>
-  <div id="sync-status">雲端同步中</div>
+  <div id="sync-status" onclick="loadCloud()">讀取雲端...</div>
 </div>
 
 <div id="s-home" class="screen active">
@@ -99,7 +100,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <div id="s-ldg" class="screen">
-  <div class="card"><div class="card-title">帳目明細 <span style="font-size:10px; color:var(--muted); font-weight:normal;">(已自動同步雲端)</span></div><div id="ldg-list"></div></div>
+  <div class="card"><div class="card-title">帳目明細 <span style="font-size:10px; color:var(--muted); font-weight:normal;">(自動同步)</span></div><div id="ldg-list"></div></div>
 </div>
 
 <div id="s-pay" class="screen">
@@ -125,7 +126,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="field"><label>項目內容</label><input type="text" id="l-c" placeholder="例如：場地費" required></div>
   <div class="field"><label>歸屬成員</label><select id="l-m"></select></div>
   <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
-  <button type="submit" class="btn-p">儲存</button></form></div>
+  <button type="submit" class="btn-p">儲存並上傳</button></form></div>
 </div>
 
 <div class="modal-overlay" id="m-emp" onclick="closeM(event,'m-emp')">
@@ -134,7 +135,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div class="field"><label>姓名</label><input type="text" id="e-n" required></div>
   <div class="field"><label>底薪</label><input type="number" id="e-s" required inputmode="numeric"></div>
   <div class="field"><label>獎金代墊</label><input type="number" id="e-b" value="0" inputmode="numeric"></div>
-  <button type="submit" class="btn-p">儲存</button>
+  <button type="submit" class="btn-p">儲存設定</button>
   <button type="button" id="btn-del-emp" style="width:100%;margin-top:10px;background:transparent;color:var(--red);border:none;" onclick="delEmp()">刪除人員</button></form></div>
 </div>
 
@@ -143,15 +144,18 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <script>
+// 🌟 核心 Google 網址
 const URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
+
 const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
 const fmt = n => '$' + Math.round(n).toLocaleString();
 let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
 let now = new Date(), selD = now.toISOString().slice(0,10), charts = {}, delIdx = -1;
 
-// 🌟 雲端雙向同步系統
+// 雲端同步系統
 async function sync() {
-    if(!URL) return; const st = $('sync-status'); st.textContent='同步中...'; st.className='syncing';
+    if(!URL) return; 
+    const st = $('sync-status'); st.textContent='同步中...'; st.className='syncing';
     try { 
         await fetch(URL, {method:'POST', mode:'no-cors', body:JSON.stringify({emp,ldg})});
         st.textContent='雲端已同步'; st.className='sync-ok'; 
@@ -159,19 +163,24 @@ async function sync() {
 }
 
 async function loadCloud() {
-    const st = $('sync-status'); st.textContent='更新資料...'; st.className='syncing';
+    const st = $('sync-status'); st.textContent='讀取中...'; st.className='syncing';
     try { 
-        const res = await fetch(URL); const d = await res.json(); 
-        if(d){ emp=d.emp||[]; ldg=d.ldg||[]; saveLoc(); render(); updateMem(); st.textContent='雲端已同步'; st.className='sync-ok'; }
-    } catch(e){ st.textContent='同步失敗'; st.className=''; }
+        const res = await fetch(URL); 
+        const text = await res.text();
+        if (text.includes('<html')) {
+            st.textContent='權限錯誤'; st.className='sync-err'; return;
+        }
+        if (!text || text.trim() === "") { sync(); return; }
+        const d = JSON.parse(text); 
+        if(d){ 
+            emp=d.emp||[]; ldg=d.ldg||[]; 
+            saveLoc(); render(); updateMem(); 
+            st.textContent='雲端已同步'; st.className='sync-ok'; 
+        }
+    } catch(e){ st.textContent='讀取失敗'; st.className='sync-err'; }
 }
 
-// 🌟 自動喚醒更新機制 (App 從背景回到畫面時自動抓資料)
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-        loadCloud();
-    }
-});
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") loadCloud(); });
 
 function saveLoc() { localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); }
 function go(p, el) { $$('.screen').forEach(s=>s.classList.remove('active')); $$('.nav-item').forEach(n=>n.classList.remove('active')); $(`s-${p}`).classList.add('active'); el.classList.add('active'); }
@@ -182,20 +191,18 @@ function setT(t) { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn 
 function prepLdg() { setT('expense'); $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; openM('m-ldg'); }
 function prepEmp() { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; $('btn-del-emp').style.display='none'; openM('m-emp'); }
 
-// 🌟 任何儲存動作都會觸發 sync()
 function saveLdg() { 
-  ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); 
-  saveLoc(); sync(); render(); $('m-ldg').classList.remove('open'); 
+    ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); 
+    saveLoc(); sync(); render(); $('m-ldg').classList.remove('open'); 
 }
 function saveEmp() { 
-  const id=$('e-id').value, d={name:$('e-n').value, salary:Number($('e-s').value), bonus:Number($('e-b').value)}; 
-  if(id!=='') emp[id]=d; else emp.push(d); 
-  saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); 
+    const id=$('e-id').value, d={name:$('e-n').value, salary:Number($('e-s').value), bonus:Number($('e-b').value)}; 
+    if(id!=='') emp[id]=d; else emp.push(d); 
+    saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); 
 }
 function delEmp() { if(confirm('確定刪除人員？')){ emp.splice($('e-id').value,1); saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); } }
 function execDel() { if(delIdx!==-1){ ldg.splice(delIdx,1); saveLoc(); sync(); render(); } closeMById('m-del'); }
-
-function updateMem() { $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">${e.name}</option>`).join(''); }
+function updateMem() { $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">👤 ${e.name}</option>`).join(''); }
 
 function showDet(i) {
     const e = emp[i]; $('det-n').textContent = e.name;
@@ -228,7 +235,7 @@ function render() {
     }
     $('cal-grid').innerHTML = calH+'</div>';
     const [yr,m,dy] = selD.split('-'); $('cal-title').textContent = `${m}月${dy}日 星期${['日','一','二','三','四','五','六'][new Date(yr,m-1,dy).getDay()]}`;
-    $('cal-list').innerHTML = ldg.map((r,i)=>({...r,oid:i})).filter(r=>r.date===selD).map(row).join('') || '<div class="empty">本日無紀錄</div>';
+    $('cal-list').innerHTML = ldg.map((r,ix)=>({...r,oid:ix})).filter(r=>r.date===selD).map(row).join('') || '<div class="empty">本日無紀錄</div>';
 }
 
 window.onload = async () => { render(); updateMem(); await loadCloud(); };
