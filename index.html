@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.19</title>
+<title>Yun Yi Finance v2.20</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -56,7 +56,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 .pressable-row { -webkit-touch-callout: none; user-select: none; transition: 0.2s; border-radius: 8px; padding: 12px 8px; margin: 0 -8px; }
 .pressable-row:active { background: rgba(255,255,255,0.05); transform: scale(0.98); }
 
-/* 🌟 全新 Flexbox 日曆引擎 (徹底根除 Safari 跑位 Bug) */
+/* Flexbox 日曆引擎 */
 .cal-grid { display: flex; flex-wrap: wrap; width: 100%; }
 .cal-head { width: 14.285%; font-size: 12px; color: var(--muted); font-weight: 500; text-align: center; padding-bottom: 8px; }
 .cal-cell { width: 14.285%; height: 44px; display: flex; justify-content: center; align-items: flex-start; }
@@ -159,10 +159,12 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="go('home',this)"><div class="nav-icon">📊</div><div class="nav-label">總覽</div></div>
-  <div class="nav-item" onclick="go('salary',this)"><div class="nav-icon">👥</div><div class="nav-label">薪資</div></div>
-  <div class="nav-item" style="flex: 0.5;" onclick="prepLedger()"><div class="fab-wrapper">＋</div></div>
-  <div class="nav-item" onclick="go('ledger',this)"><div class="nav-icon">🧾</div><div class="nav-label">明細</div></div>
   <div class="nav-item" onclick="go('calendar',this)"><div class="nav-icon">📅</div><div class="nav-label">記帳本</div></div>
+  
+  <div class="nav-item" style="flex: 0.5;" onclick="prepLedger()"><div class="fab-wrapper">＋</div></div>
+  
+  <div class="nav-item" onclick="go('ledger',this)"><div class="nav-icon">🧾</div><div class="nav-label">明細</div></div>
+  <div class="nav-item" onclick="go('salary',this)"><div class="nav-icon">👥</div><div class="nav-label">薪資</div></div>
 </nav>
 
 <div class="modal-overlay" id="m-del" onclick="closeM(event,'m-del')">
@@ -293,6 +295,7 @@ function openM(id) { $(id).classList.add('open'); }
 function closeM(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeMById(id) { $(id).classList.remove('open'); }
 
+// 抽離共用 HTML 模板
 function getTxHTML(r, isPressable=true) {
   const isInc = r.type === 'income' || (!r.type && r.cat === '營業收入');
   const tag = r.tag ? `<span class="tag">${r.tag}</span>` : '';
@@ -371,7 +374,7 @@ function renderAll() {
   if(charts['m']) charts['m'].destroy();
   charts['m'] = new Chart($('metricsChart').getContext('2d'), { type:'doughnut', data:{datasets:[{data:[exp,sal,inc], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'75%'} });
 
-  // 🌟 全新 Flexbox 日曆渲染邏輯
+  // 日曆視圖
   const dInM = new Date(cYear, cMonth, 0).getDate();
   const fDay = new Date(cYear, cMonth-1, 1).getDay();
   let calHtml = '<div class="cal-grid">' + ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-head">${w}</div>`).join('');
