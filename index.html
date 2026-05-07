@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
-<title>Yun Yi Finance v3.6.6 | Cloud Fix</title>
+<title>Yun Yi Finance v3.6.7 | Calendar Fix</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -23,22 +23,30 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
 /* ── Header ── */
 .header { padding:56px 20px 10px; display:flex; justify-content:space-between; align-items:center; }
 .menu-trigger { padding:10px; margin-left:-10px; cursor:pointer; }
-#sync-status { font-size:11px; padding:6px 12px; border-radius:20px; background:var(--input-bg); font-weight:600; cursor:pointer; transition:0.3s; }
+#sync-status { font-size:11px; padding:6px 12px; border-radius:20px; background:var(--input-bg); font-weight:600; cursor:pointer; }
 .sync-ok { color:var(--green); background:rgba(50,215,75,0.1); }
 .sync-err { color:var(--red); background:rgba(255,69,58,0.1); }
-.syncing { color:var(--amber); }
+
+/* ── 全域月份/年份導覽 (修正重點) ── */
+.global-nav { display: none; justify-content:center; align-items:center; gap:10px; padding: 10px 16px 15px; }
+body.nav-active .global-nav { display: flex; }
+.m-btn { background:none; border:none; color:var(--accent); font-size:24px; cursor:pointer; width: 40px; height: 40px; display: flex; align-items:center; justify-content:center; }
+.m-picker-wrapper { position:relative; background:var(--bg-elevated); padding:8px 18px; border-radius:12px; min-width: 130px; text-align: center; }
+#hdr-m { font-weight:600; color:var(--accent); font-size: 17px; }
+#m-input { position:absolute; inset:0; opacity:0; width:100%; cursor:pointer; }
 
 /* ── 通用頁面 ── */
 .screen { display:none; min-height:100vh; padding-bottom:140px; }
 .screen.active { display:block; }
 .card { background:var(--card); border-radius:var(--radius-card); padding:18px; margin:0 16px 12px; }
+.card-title { font-size:14px; color:var(--muted); margin-bottom:15px; font-weight:600; }
 
 /* ── 甜甜圈圖版型 ── */
 .chart-box { position:relative; height:200px; width:100%; display:flex; justify-content:center; align-items:center; margin:10px 0; }
 .chart-center { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; pointer-events:none; z-index:1; }
-.chart-val { font-size:24px; font-weight:800; letter-spacing:-0.5px; }
+.chart-val { font-size:24px; font-weight:800; }
 
-/* ── 日曆網格 ── */
+/* ── 日曆網格版型 ── */
 .cal-grid { display:flex; flex-wrap:wrap; width:100%; padding: 5px 0; }
 .cal-h, .cal-c { width: 14.285%; text-align:center; flex-shrink: 0; }
 .cal-h { font-size:12px; color:var(--muted); padding-bottom:12px; font-weight:700; }
@@ -60,7 +68,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
 .profile-bio { margin-bottom:20px; padding: 0 4px; }
 .bio-name { font-weight:700; font-size:16px; margin-bottom:5px; }
 .bio-text { font-size:14px; line-height:1.4; white-space: pre-wrap; }
-.profile-actions { display:flex; gap:8px; margin-bottom:25px; }
 .act-btn { flex:1; background:var(--input-bg); border:none; color:#fff; padding:9px; border-radius:8px; font-size:14px; font-weight:600; }
 .post-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1px; border-top: 0.5px solid var(--border); }
 .post-item { aspect-ratio:1; background:var(--input-bg); opacity:0.1; }
@@ -82,19 +89,18 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
 .nav-icon-svg { width:24px; height:24px; stroke:currentColor; stroke-width:2; fill:none; }
 .fab { width:56px; height:56px; background:var(--accent); border-radius:50%; display:flex; justify-content:center; align-items:center; border:4px solid #000; margin-top:-32px; box-shadow:0 4px 15px rgba(94,92,230,0.3); }
 
-/* ── 彈窗與表單 ── */
+/* ── 彈窗 ── */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:flex-end; opacity:0; transition:0.3s; }
 .modal-overlay.open { display:flex; opacity:1; }
 .modal { background:var(--bg-elevated); border-radius:20px 20px 0 0; padding:20px 20px calc(20px + env(safe-area-inset-bottom)); width:100%; max-height:90vh; overflow-y:auto; transform:translateY(100%); transition:0.3s; }
 .modal-overlay.open .modal { transform:translateY(0); }
-.modal-h { width:36px; height:5px; background:var(--muted); border-radius:3px; margin:0 auto 20px; opacity:0.5; }
 .field { margin-bottom:18px; }
 .field label { font-size:12px; color:var(--muted); display:block; margin-bottom:6px; margin-left:4px; text-transform:uppercase; }
 .field input, .field select { width:100%; height:48px; padding:0 16px; background:var(--input-bg); border:none; border-radius:10px; color:#fff; font-size:16px; -webkit-appearance:none; }
 .btn-p { width:100%; padding:16px; background:var(--accent); color:#fff; border:none; border-radius:12px; font-size:17px; font-weight:700; cursor:pointer; }
 </style>
 </head>
-<body>
+<body class="nav-active">
 
 <div id="splash-screen"><img src="蘊一記帳小卡.png" class="splash-logo"></div>
 
@@ -103,16 +109,18 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
   <div id="sync-status" onclick="loadCloud()">讀取雲端</div>
 </div>
 
-<div id="s-home" class="screen active">
-  <div class="month-nav" style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:10px;">
-    <button onclick="shiftMonth(-1)" style="background:none; border:none; color:var(--accent); font-size:24px;">‹</button>
-    <div style="position:relative; background:var(--bg-elevated); padding:8px 16px; border-radius:12px;">
-      <span id="hdr-m" style="font-weight:600; color:var(--accent);"></span>
-      <input type="month" id="m-input" onchange="pickMonth(this.value)" style="position:absolute; inset:0; opacity:0; width:100%;">
-    </div>
-    <button onclick="shiftMonth(1)" style="background:none; border:none; color:var(--accent); font-size:24px;">›</button>
+<div class="global-nav">
+  <button onclick="shiftMonth(-1)" class="m-btn">‹</button>
+  <div class="m-picker-wrapper">
+    <span id="hdr-m"></span>
+    <input type="month" id="m-input" onchange="pickMonth(this.value)">
   </div>
+  <button onclick="shiftMonth(1)" class="m-btn">›</button>
+</div>
+
+<div id="s-home" class="screen active">
   <div class="card">
+    <div class="card-title">本月盈餘概覽</div>
     <div class="chart-box">
       <canvas id="c-main"></canvas>
       <div class="chart-center"><div class="chart-val" id="val-p">$0</div></div>
@@ -122,7 +130,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
 
 <div id="s-cal" class="screen">
   <div class="card"><div id="cal-grid"></div></div>
-  <div class="card"><div class="card-title" id="cal-title" style="color:var(--text); font-size:17px;"></div><div id="cal-list"></div></div>
+  <div class="card"><div class="card-title" id="cal-title" style="color:var(--text); font-size:17px; text-transform:none;"></div><div id="cal-list"></div></div>
 </div>
 
 <div id="s-search" class="screen">
@@ -141,7 +149,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
       </div>
     </div>
     <div class="profile-bio"><div class="bio-name" id="me-name">蘊一創意</div><div class="bio-text" id="me-desc"></div></div>
-    <div class="profile-actions"><button class="act-btn">編輯檔案</button><button class="act-btn">分享檔案</button></div>
+    <div class="profile-actions" style="display:flex; gap:8px;"><button class="act-btn">編輯檔案</button><button class="act-btn">分享檔案</button></div>
   </div>
   <div class="post-grid"><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div></div>
 </div>
@@ -186,8 +194,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC",s
     </div>
 </div>
 
-<div id="s-ldg" class="screen"><div class="card"><div id="ldg-list"></div></div></div>
-<div id="s-pay" class="screen"><div class="card"><div id="emp-list"></div></div></div>
+<div id="s-ldg" class="screen"><div class="card"><div class="card-title">明細</div><div id="ldg-list"></div></div></div>
+<div id="s-pay" class="screen"><div class="card"><div class="card-title">名單</div><div id="emp-list"></div></div></div>
 
 <script>
 const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
@@ -196,7 +204,6 @@ let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(local
 let charts = {}, calYear = new Date().getFullYear(), calMonth = new Date().getMonth(), selD = new Date().toISOString().split('T')[0], currentMe = "蘊一創意";
 
 const fmtK = n => n >= 1000 ? (n / 1000).toFixed(1) + 'k' : n;
-const setSync = (txt, cls) => { const s = $('sync-status'); if(s){ s.textContent = txt; s.className = cls; } };
 
 const toggleDrawer = (open) => {
     const d = $('drawer'), o = $('d-overlay');
@@ -204,30 +211,21 @@ const toggleDrawer = (open) => {
     else { d.classList.remove('open'); o.style.opacity='0'; setTimeout(()=>o.style.display='none',300); }
 };
 
-const jsonpFetch = url => new Promise((res, rej) => {
-    const cb = '_cb_' + Date.now(), s = document.createElement('script'), t = setTimeout(() => clean(rej(new Error('逾時'))), 10000);
-    const clean = () => { clearTimeout(t); delete window[cb]; s.remove(); };
-    window[cb] = d => clean(res(d));
-    s.onerror = () => clean(rej(new Error('失敗')));
-    s.src = `${url}${url.includes('?')?'&':'?'}callback=${cb}`;
-    document.head.appendChild(s);
-});
+const go = (p, el) => {
+    $$('.screen, .nav-item').forEach(e => e.classList.remove('active'));
+    $(`s-${p}`).classList.add('active');
+    if(el) el.classList.add('active');
+    // 控制月份導覽列的顯示與隱藏 (僅在首頁與日曆顯示)
+    if(p === 'home' || p === 'cal') document.body.classList.add('nav-active');
+    else document.body.classList.remove('nav-active');
+    if(p === 'me') updateMeUI();
+    render();
+};
 
-async function sync() { setSync('上傳中...', 'syncing'); try { await fetch(GAS_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({emp, ldg})}); setSync('✅ 已同步', 'sync-ok'); } catch(e) { setSync('📵 離線', 'sync-err'); } }
-async function loadCloud() { setSync('讀取中...', 'syncing'); try { const d = await jsonpFetch(GAS_URL); if (d?.emp || d?.ldg) { emp = d.emp || []; ldg = d.ldg || []; localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); render(); setSync('✅ 已同步', 'sync-ok'); } } catch(e) { setSync('⚠️ 失敗', 'sync-err'); } }
-
-const go = (p, el) => { $$('.screen, .nav-item').forEach(e => e.classList.remove('active')); const target = $(`s-${p}`); if(target) target.classList.add('active'); if(el) el.classList.add('active'); if(p === 'me') updateMeUI(); render(); };
 const resetAndGoMe = (el) => { currentMe = "蘊一創意"; go('me', el); };
 
-function updateMeUI() {
-    const isDefault = currentMe === "蘊一創意";
-    let fLdg = isDefault ? ldg : ldg.filter(r => r.mem === currentMe);
-    let inc = fLdg.filter(r => r.type === 'income').reduce((a, b) => a + b.amt, 0);
-    let exp = fLdg.filter(r => r.type === 'expense').reduce((a, b) => a + b.amt, 0);
-    $('stat-count').textContent = fmtK(fLdg.length); $('stat-inc').textContent = fmtK(inc); $('stat-exp').textContent = fmtK(exp);
-    if(isDefault) { $('me-avatar-txt').textContent = "蘊"; $('me-name').textContent = "蘊一創意"; $('me-desc').innerHTML = ""; } 
-    else { $('me-avatar-txt').textContent = currentMe.charAt(0); $('me-name').textContent = currentMe; const e = emp.find(x=>x.name===currentMe); $('me-desc').innerHTML = e ? `團隊成員\n月薪：$${e.salary.toLocaleString()}` : ""; }
-}
+const shiftMonth = (d) => { const dt = new Date(calYear, calMonth+d, 1); calYear=dt.getFullYear(); calMonth=dt.getMonth(); render(); };
+const pickMonth = (v) => { if(!v) return; const [y, m] = v.split('-'); calYear = parseInt(y); calMonth = parseInt(m)-1; render(); };
 
 function render() {
     const mStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
@@ -248,8 +246,20 @@ function render() {
     $('cal-grid').innerHTML = calH + '</div>';
     $('cal-title').textContent = selD;
     $('cal-list').innerHTML = ldg.filter(r => r.date === selD).map(r => `<div class="list-row"><div class="row-info"><b>${r.cat}</b><small>${r.mem}</small></div><b>$${r.amt.toLocaleString()}</b></div>`).join('') || '<div style="padding:20px; text-align:center; color:var(--muted);">無紀錄</div>';
+    
+    // 同步其他清單
     $('ldg-list').innerHTML = ldg.map(r => `<div class="list-row"><div class="row-info"><b>${r.cat}</b><small>${r.mem} · ${r.date}</small></div><b>$${r.amt.toLocaleString()}</b></div>`).join('');
     $('emp-list').innerHTML = emp.map(e => `<div class="list-row"><div>${e.name}</div><small>$${e.salary.toLocaleString()}</small></div>`).join('');
+}
+
+function updateMeUI() {
+    const isDefault = currentMe === "蘊一創意";
+    let fLdg = isDefault ? ldg : ldg.filter(r => r.mem === currentMe);
+    let inc = fLdg.filter(r => r.type === 'income').reduce((a, b) => a + b.amt, 0);
+    let exp = fLdg.filter(r => r.type === 'expense').reduce((a, b) => a + b.amt, 0);
+    $('stat-count').textContent = fmtK(fLdg.length); $('stat-inc').textContent = fmtK(inc); $('stat-exp').textContent = fmtK(exp);
+    if(isDefault) { $('me-avatar-txt').textContent = "蘊"; $('me-name').textContent = "蘊一創意"; $('me-desc').innerHTML = ""; } 
+    else { $('me-avatar-txt').textContent = currentMe.charAt(0); $('me-name').textContent = currentMe; const e = emp.find(x=>x.name===currentMe); $('me-desc').innerHTML = e ? `團隊成員\n月薪：$${e.salary.toLocaleString()}` : ""; }
 }
 
 const openProfilePicker = () => {
@@ -266,6 +276,9 @@ const setT = t => { $('l-t').value = t; $('tb-exp').className = t === 'expense' 
 const closeMById = id => $(id).classList.remove('open');
 const closeM = (e, id) => { if(e.target === $(id)) $(id).classList.remove('open'); };
 
+async function sync() { try { await fetch(GAS_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({emp, ldg})}); } catch(e) {} }
+async function loadCloud() { try { const cb = '_cb_' + Date.now(), s = document.createElement('script'); window[cb] = (d) => { if(d){ emp=d.emp||[]; ldg=d.ldg||[]; localStorage.setItem('ye',JSON.stringify(emp)); localStorage.setItem('yl',JSON.stringify(ldg)); render(); } }; s.src = `${GAS_URL}?callback=${cb}`; document.head.appendChild(s); } catch(e) {} }
+
 function saveLdg() {
     ldg.unshift({ date: $('l-d').value, type: $('l-t').value, amt: Number($('l-a').value), cat: $('l-c').value, mem: $('l-m').value, inv: $('l-inv').value, clm: $('l-clm').value, vt: $('l-vt').value, note: $('l-n').value });
     localStorage.setItem('yl', JSON.stringify(ldg)); closeMById('m-ldg'); sync(); render();
@@ -277,10 +290,7 @@ function handleSearch(v) {
     list.innerHTML = res.map(r => `<div class="list-row"><div class="row-info"><b>${r.cat}</b><small>${r.date}</small></div><b>$${r.amt.toLocaleString()}</b></div>`).join('');
 }
 
-const shiftMonth = (d) => { const dt = new Date(calYear, calMonth+d, 1); calYear=dt.getFullYear(); calMonth=dt.getMonth(); render(); };
-const pickMonth = (v) => { if(!v) return; const [y, m] = v.split('-'); calYear = parseInt(y); calMonth = parseInt(m)-1; render(); };
-
-window.onload = () => { loadCloud(); render(); setTimeout(() => { $('splash-screen').style.opacity='0'; setTimeout(()=>$('splash-screen').style.display='none', 600); }, 1500); };
+window.onload = () => { render(); setTimeout(() => { $('splash-screen').style.opacity='0'; setTimeout(()=>$('splash-screen').style.display='none', 600); }, 1500); };
 </script>
 </body>
 </html>
