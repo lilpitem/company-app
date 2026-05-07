@@ -5,265 +5,178 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.24 (Cloud Sync)</title>
+<title>Yun Yi Finance v2.26</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root { --bg: #0f0f1a; --bg2: #1a1a2e; --bg3: #16213e; --card: #1e1e35; --accent: #7c6af7; --accent2: #a78bfa; --green: #34d399; --red: #f87171; --amber: #fbbf24; --text: #f0f0ff; --muted: #8888aa; --border: rgba(124,106,247,0.2); --radius: 16px; --radius-sm: 10px; }
+:root { --bg: #0f0f1a; --bg2: #1a1a2e; --card: #1e1e35; --accent: #7c6af7; --accent2: #a78bfa; --green: #34d399; --red: #f87171; --amber: #fbbf24; --text: #f0f0ff; --muted: #8888aa; --border: rgba(124,106,247,0.15); --radius: 16px; }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; overscroll-behavior-y: none; }
-.screen { display: none; min-height: 100vh; padding-bottom: 100px; }
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; }
+.screen { display: none; min-height: 100vh; padding-bottom: 110px; animation: fadeIn 0.3s; }
 .screen.active { display: block; }
-.empty { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Sync Indicator */
-#sync-status { font-size: 10px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--muted); transition: 0.3s; }
-.syncing { color: var(--amber) !important; animation: pulse 1s infinite; }
-.sync-success { color: var(--green) !important; background: rgba(52, 211, 153, 0.1) !important; }
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+/* Header & Nav */
+.header { padding: 56px 20px 20px; background: linear-gradient(180deg, var(--bg2), transparent); display: flex; justify-content: space-between; align-items: center; }
+.brand-title { font-size: 18px; font-weight: 700; }
+#sync-status { font-size: 10px; padding: 3px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--muted); }
+.syncing { color: var(--amber)!important; } .sync-ok { color: var(--green)!important; background: rgba(52,211,153,0.1)!important; }
 
-/* Header */
-.header { padding: 56px 20px 20px; background: linear-gradient(180deg, var(--bg2) 0%, transparent 100%); }
-.header-top { display: flex; justify-content: space-between; align-items: center; }
-.dropdown-title { display: inline-flex; align-items: center; gap: 6px; font-size: 18px; font-weight: 700; }
-.date-label { color: var(--muted); font-weight: 400; margin-right: 4px; }
+.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 10px 0 calc(15px + env(safe-area-inset-bottom)); }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--muted); }
+.nav-item.active { color: var(--accent2); }
+.nav-icon { font-size: 20px; } .nav-label { font-size: 10px; font-weight: 500; }
+.fab { position: absolute; top: -30px; width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: #fff; border: 4px solid var(--bg); box-shadow: 0 4px 15px rgba(124,106,247,0.3); }
 
-/* Bottom Nav */
-.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 8px 0 calc(15px + env(safe-area-inset-bottom)); align-items: center; }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
-.nav-icon { font-size: 20px; color: var(--muted); }
-.nav-label { font-size: 10px; color: var(--muted); }
-.nav-item.active .nav-icon, .nav-item.active .nav-label { color: var(--accent2); }
-.fab-wrapper { position: absolute; top: -35px; width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: white; box-shadow: 0 4px 12px rgba(124,106,247,0.4); border: 4px solid var(--bg); }
-
-/* Card Style */
+/* Components */
 .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 0 16px 12px; }
-.card-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; }
+.card-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; }
+.list-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 0.5px solid rgba(255,255,255,0.03); }
+.row-main { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+.row-sub { font-size: 11px; color: var(--muted); }
+.amt { font-weight: 700; font-size: 15px; }
+.empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
 
-/* List Style */
-.list-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
-.row-info { display: flex; flex-direction: column; gap: 2px; }
-.row-name { font-size: 15px; font-weight: 500; }
-.row-sub { font-size: 12px; color: var(--muted); }
+/* Calendar (Flex Engine) */
+.cal-grid { display: flex; flex-wrap: wrap; width: 100%; }
+.cal-h { width: 14.285%; font-size: 11px; color: var(--muted); text-align: center; padding-bottom: 8px; }
+.cal-c { width: 14.285%; height: 45px; display: flex; justify-content: center; align-items: flex-start; }
+.cal-d { width: 34px; height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; position: relative; }
+.cal-d.active { background: var(--accent); color: #fff; }
+.cal-d.today:not(.active) { border: 1px solid var(--accent2); color: var(--accent2); }
+.dots { display: flex; gap: 2px; position: absolute; bottom: 3px; }
+.dot { width: 3px; height: 3px; border-radius: 50%; }
 
-/* Buttons & Forms */
-.btn-primary { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 600; margin-top: 10px; transition: 0.1s; }
-.btn-primary:active { transform: scale(0.98); opacity: 0.9; }
-.field { margin-bottom: 16px; }
-.field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px; }
-.field input, .field select { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; outline: none; }
-
-/* Modals */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: flex-end; }
+/* Forms & Modals */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: flex-end; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 24px 20px calc(45px + env(safe-area-inset-bottom)); width: 100%; max-height: 90vh; overflow-y: auto; }
-.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 20px 20px calc(40px + env(safe-area-inset-bottom)); width: 100%; max-height: 85vh; overflow-y: auto; }
+.modal-h { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.t-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 4px; margin-bottom: 15px; }
+.t-btn { flex: 1; text-align: center; padding: 10px; font-size: 14px; border-radius: 7px; color: var(--muted); }
+.t-btn.active.exp { background: var(--red); color: #fff; }
+.t-btn.active.inc { background: var(--green); color: #fff; }
+.field { margin-bottom: 15px; }
+.field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
+.field input, .field select { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: 8px; color: #fff; font-size: 15px; outline: none; }
+.btn-p { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; }
 
-/* Toggle */
-.type-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 4px; margin-bottom: 20px; }
-.type-btn { flex: 1; text-align: center; padding: 10px; font-size: 14px; font-weight: 600; border-radius: 8px; color: var(--muted); }
-.type-btn.active.exp { background: var(--red); color: white; }
-.type-btn.active.inc { background: var(--green); color: white; }
-
-.chart-container { position: relative; height: 200px; display: flex; justify-content: center; align-items: center; margin: 10px 0; }
-.chart-center-text { position: absolute; text-align: center; pointer-events: none; }
-.chart-center-text .value { font-size: 22px; font-weight: 700; color: var(--accent2); }
+.chart-box { position: relative; height: 180px; display: flex; justify-content: center; align-items: center; }
 </style>
 </head>
 <body>
 
-<div class="screen active" id="s-home">
-  <div class="header">
-    <div class="header-top">
-      <div class="dropdown-title"><span class="date-label">蘊一財務 /</span><span id="display-month"></span></div>
-      <div id="sync-status">讀取雲端中...</div>
-    </div>
-  </div>
-  <div class="card" style="padding-top: 20px;">
+<div class="header">
+  <div class="brand-title">蘊一財務 / <span id="hdr-m"></span></div>
+  <div id="sync-status">雲端同步中...</div>
+</div>
+
+<div id="s-home" class="screen active">
+  <div class="card" style="padding-top:20px;">
     <div class="card-title">本月盈餘概覽</div>
-    <div class="chart-container"><canvas id="metricsChart"></canvas><div class="chart-center-text"><div class="value" id="m-profit">$0</div></div></div>
+    <div class="chart-box"><canvas id="c-main"></canvas><div style="position:absolute; font-weight:700; font-size:22px;" id="val-p">$0</div></div>
   </div>
 </div>
 
-<div class="screen" id="s-salary">
-  <div class="header"><div class="header-top"><div class="dropdown-title">薪資清冊</div></div></div>
-  <div class="card"><div id="emp-list"></div><div class="btn-primary" style="background:rgba(124,106,247,0.1); color:var(--accent2); border:1px dashed var(--accent);" onclick="prepEmp()">＋ 新增人員</div></div>
+<div id="s-cal" class="screen">
+  <div class="card"><div id="cal-grid"></div></div>
+  <div class="card"><div class="card-title" id="cal-title">本日明細</div><div id="cal-list"></div></div>
 </div>
 
-<div class="screen" id="s-ledger">
-  <div class="header"><div class="header-top"><div class="dropdown-title">帳目明細</div><div style="font-size:12px; color:var(--muted)" onclick="loadFromCloud()">🔄 重新整理</div></div></div>
-  <div class="card"><div id="ledger-list"></div></div>
+<div id="s-ldg" class="screen">
+  <div class="card"><div class="card-title">帳目明細<span onclick="loadFromCloud()">🔄</span></div><div id="ldg-list"></div></div>
+</div>
+
+<div id="s-pay" class="screen">
+  <div class="card"><div id="emp-list"></div><div class="btn-p" style="background:rgba(124,106,247,0.1); color:var(--accent2); border:1px dashed var(--accent); margin-top:15px;" onclick="prepEmp()">＋ 新增人員</div></div>
 </div>
 
 <nav class="bottom-nav">
   <div class="nav-item active" onclick="go('home',this)"><div class="nav-icon">📊</div><div class="nav-label">總覽</div></div>
-  <div class="nav-item" style="flex: 0.5;" onclick="prepLedger()"><div class="fab-wrapper">＋</div></div>
-  <div class="nav-item" onclick="go('ledger',this)"><div class="nav-icon">🧾</div><div class="nav-label">明細</div></div>
-  <div class="nav-item" onclick="go('salary',this)"><div class="nav-icon">👥</div><div class="nav-label">薪資</div></div>
+  <div class="nav-item" onclick="go('cal',this)"><div class="nav-icon">📅</div><div class="nav-label">記帳本</div></div>
+  <div class="nav-item" style="flex:0.6;" onclick="prepLdg()"><div class="fab">＋</div></div>
+  <div class="nav-item" onclick="go('ldg',this)"><div class="nav-icon">🧾</div><div class="nav-label">明細</div></div>
+  <div class="nav-item" onclick="go('pay',this)"><div class="nav-icon">👥</div><div class="nav-label">薪資</div></div>
 </nav>
 
 <div class="modal-overlay" id="m-ldg" onclick="closeM(event,'m-ldg')">
-  <div class="modal"><div class="modal-handle"></div><div class="type-toggle"><div class="type-btn active exp" id="tab-exp" onclick="setType('expense')">支出</div><div class="type-btn inc" id="tab-inc" onclick="setType('income')">收入</div></div>
-  <form onsubmit="event.preventDefault(); saveLdg();"><input type="hidden" id="l-type" value="expense">
-  <div class="field"><label>金額</label><input type="number" id="l-amt" required inputmode="numeric" placeholder="0"></div>
-  <div class="field"><label>類別內容</label><input type="text" id="l-cat" placeholder="例如：辦公室租金、勞務費" required></div>
-  <div class="field"><label>經手成員</label><select id="l-member"></select></div>
-  <div class="field"><label>日期</label><input type="date" id="l-date" required></div>
-  <button type="submit" class="btn-primary">儲存並同步雲端</button></form></div>
+  <div class="modal"><div class="modal-h"></div><div class="t-toggle"><div class="t-btn active exp" id="tb-exp" onclick="setT('expense')">支出</div><div class="t-btn inc" id="tb-inc" onclick="setT('income')">收入</div></div>
+  <form onsubmit="event.preventDefault(); saveLdg();"><input type="hidden" id="l-t" value="expense">
+  <div class="field"><label>金額</label><input type="number" id="l-a" required inputmode="numeric"></div>
+  <div class="field"><label>類別</label><input type="text" id="l-c" placeholder="攝影費、耗材" required></div>
+  <div class="field"><label>經手成員</label><select id="l-m"></select></div>
+  <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
+  <button type="submit" class="btn-p">儲存並同步</button></form></div>
 </div>
 
 <div class="modal-overlay" id="m-emp" onclick="closeM(event,'m-emp')">
-  <div class="modal"><div class="modal-handle"></div><form onsubmit="event.preventDefault(); saveEmp();">
+  <div class="modal"><div class="modal-h"></div><form onsubmit="event.preventDefault(); saveEmp();">
   <input type="hidden" id="e-id">
-  <div class="field"><label>人員姓名</label><input type="text" id="e-name" required></div>
-  <div class="field"><label>薪資設定 (月薪/兼職費)</label><input type="number" id="e-salary" required inputmode="numeric"></div>
-  <div class="field"><label>其他獎金/代墊</label><input type="number" id="e-bonus" value="0" inputmode="numeric"></div>
-  <button type="submit" class="btn-primary">儲存人員資訊</button></form></div>
+  <div class="field"><label>人員姓名</label><input type="text" id="e-n" required></div>
+  <div class="field"><label>底薪設定</label><input type="number" id="e-s" required inputmode="numeric"></div>
+  <div class="field"><label>獎金代墊</label><input type="number" id="e-b" value="0" inputmode="numeric"></div>
+  <button type="submit" class="btn-p">儲存設定</button></form></div>
 </div>
 
 <script>
-// 🌟 已嵌入你提供的 Google Script URL
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec'; 
-
-const $ = id => document.getElementById(id), $$ = sel => document.querySelectorAll(sel);
+const URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
+const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
 const fmt = n => '$' + Math.round(n).toLocaleString();
-const parseNum = val => parseInt(val) || 0;
+let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
+let now = new Date(), selD = now.toISOString().slice(0,10), charts = {};
 
-let emp = JSON.parse(localStorage.getItem('yunyi_emp') || '[]');
-let ldg = JSON.parse(localStorage.getItem('yunyi_ledger') || '[]');
-let charts = {};
-
-// 雲端同步核心邏輯
-async function syncToCloud() {
-    if (!SCRIPT_URL) return;
-    $('sync-status').textContent = '同步中...';
-    $('sync-status').className = 'syncing';
-    try {
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: JSON.stringify({ emp, ldg })
-        });
-        setTimeout(() => {
-            $('sync-status').textContent = '雲端已同步';
-            $('sync-status').className = 'sync-success';
-        }, 1000);
-    } catch (e) {
-        $('sync-status').textContent = '同步失敗';
-        $('sync-status').className = '';
-    }
+async function sync() {
+    if(!URL) return; $('sync-status').textContent='同步中...'; $('sync-status').className='syncing';
+    try { await fetch(URL, {method:'POST', mode:'no-cors', body:JSON.stringify({emp,ldg})});
+    $('sync-status').textContent='雲端已同步'; $('sync-status').className='sync-ok'; } catch(e){ $('sync-status').textContent='離線模式'; }
 }
-
 async function loadFromCloud() {
-    if (!SCRIPT_URL) return;
-    try {
-        const res = await fetch(SCRIPT_URL);
-        const data = await res.json();
-        if (data && (data.emp || data.ldg)) {
-            emp = data.emp || [];
-            ldg = data.ldg || [];
-            saveLocal();
-            renderAll();
-            $('sync-status').textContent = '雲端已同步';
-            $('sync-status').className = 'sync-success';
-        }
-    } catch (e) { 
-        console.log('讀取雲端失敗'); 
-        $('sync-status').textContent = '離線模式';
-    }
+    try { const res = await fetch(URL); const d = await res.json(); if(d){ emp=d.emp||[]; ldg=d.ldg||[]; saveLoc(); render(); updateMem(); }} catch(e){}
 }
-
-function saveLocal() {
-    localStorage.setItem('yunyi_emp', JSON.stringify(emp));
-    localStorage.setItem('yunyi_ledger', JSON.stringify(ldg));
-}
-
-function triggerSave() {
-    saveLocal();
-    renderAll();
-    syncToCloud(); 
-}
-
-// UI & 渲染
-const now = new Date();
-function updateUI() {
-    $('display-month').textContent = `${now.getFullYear()}年 ${now.getMonth()+1}月`;
-    renderAll();
-}
-
-function go(page, el) { 
-    $$('.screen').forEach(s => s.classList.remove('active')); 
-    $$('.nav-item').forEach(n => n.classList.remove('active')); 
-    $('s-'+page).classList.add('active'); 
-    if(el) el.classList.add('active'); 
-}
-
+function saveLoc() { localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); }
+function go(p, el) { $$('.screen').forEach(s=>s.classList.remove('active')); $$('.nav-item').forEach(n=>n.classList.remove('active')); $(`s-${p}`).classList.add('active'); el.classList.add('active'); }
 function openM(id) { $(id).classList.add('open'); }
 function closeM(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
-function closeMById(id) { $(id).classList.remove('open'); }
+function setT(t) { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn active exp':'t-btn exp'; $('tb-inc').className=t==='income'?'t-btn active inc':'t-btn inc'; }
+function prepLdg() { setT('expense'); $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; openM('m-ldg'); }
+function prepEmp() { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; openM('m-emp'); }
+function saveLdg() { ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); saveLoc(); sync(); render(); $( 'm-ldg').classList.remove('open'); }
+function saveEmp() { const id=$('e-id').value, d={name:$('e-n').value, salary:Number($('e-s').value), bonus:Number($('e-b').value)}; if(id!=='') emp[id]=d; else emp.push(d); saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); }
+function updateMem() { $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">${e.name}</option>`).join(''); }
 
-function saveLdg() {
-    const d=$('l-date').value, a=$('l-amt').value, c=$('l-cat').value;
-    ldg.unshift({date:d, type:$('l-type').value, amt:parseNum(a), cat:c, member:$('l-member').value});
-    triggerSave();
-    closeMById('m-ldg');
-}
-
-function saveEmp() {
-    const n=$('e-name').value, s=parseNum($('e-salary').value), b=parseNum($('e-bonus').value);
-    const id = $('e-id').value;
-    if(id!=='') emp[id]={name:n,salary:s,bonus:b}; else emp.push({name:n,salary:s,bonus:b});
-    triggerSave();
-    updateMemSelect();
-    closeMById('m-emp');
-}
-
-function updateMemSelect() {
-    $('l-member').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e => `<option value="${e.name}">👤 ${e.name}</option>`).join('');
-}
-
-function prepLedger() { setType('expense'); $('l-date').value=now.toISOString().slice(0,10); $('l-amt').value=''; openM('m-ldg'); }
-function setType(t) { $('l-type').value=t; $('tab-exp').className=t==='expense'?'type-btn active exp':'type-btn exp'; $('tab-inc').className=t==='income'?'type-btn active inc':'type-btn inc'; }
-function prepEmp() { $('e-id').value=''; $('e-name').value=''; $('e-salary').value=''; openM('m-emp'); }
-
-function renderAll() {
-    const mStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}`;
-    const curLdg = ldg.filter(r => r.date.startsWith(mStr));
+function render() {
+    const mStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`;
+    const curLdg = ldg.filter(r=>r.date.startsWith(mStr));
+    $('hdr-m').textContent = `${now.getFullYear()}年 ${now.getMonth()+1}月`;
     
-    $('ledger-list').innerHTML = curLdg.map(r => `
-        <div class="list-row">
-            <div class="row-info"><div class="row-name">${r.cat}</div><div class="row-sub">${r.date} · ${r.member}</div></div>
-            <div style="font-weight:700; color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div>
-        </div>
-    `).join('') || '<div class="empty">本月尚無帳目</div>';
+    // List Render
+    const row = r => `<div class="list-row"><div class="row-info"><div class="row-main">${r.cat}</div><div class="row-sub">${r.date} · ${r.mem}</div></div><div class="amt" style="color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div></div>`;
+    $('ldg-list').innerHTML = curLdg.map(row).join('') || '<div class="empty">無紀錄</div>';
+    $('emp-list').innerHTML = emp.map((e,i)=>`<div class="list-row" onclick="$('e-id').value=${i};$('e-n').value='${e.name}';$('e-s').value=${e.salary};$('e-b').value=${e.bonus};openM('m-emp')"><div class="row-info"><div class="row-main">${e.name}</div><div class="row-sub">本月預算：${fmt(e.salary+e.bonus)}</div></div><div style="font-size:12px;color:var(--accent2)">編輯</div></div>`).join('') || '<div class="empty">無成員</div>';
 
-    $('emp-list').innerHTML = emp.map((e,i) => `
-        <div class="list-row" onclick="$('e-id').value=${i};$('e-name').value='${e.name}';$('e-salary').value=${e.salary};$('e-bonus').value=${e.bonus};openM('m-emp')">
-            <div class="row-info"><div class="row-name">${e.name}</div><div class="row-sub">本月預算：${fmt(e.salary+e.bonus)}</div></div>
-            <div style="font-size:12px; color:var(--accent2)">點擊編輯</div>
-        </div>
-    `).join('') || '<div class="empty">尚未加入成員</div>';
-
-    let inc=0, exp=0; curLdg.forEach(r=> r.type==='income'?inc+=r.amt:exp+=r.amt);
-    let sal = emp.reduce((s,e)=>s+e.salary+e.bonus, 0);
-    let net = inc-exp-sal;
-    $('m-profit').textContent = fmt(net);
-    $('m-profit').style.color = net >= 0 ? 'var(--accent2)' : 'var(--red)';
-
+    // Stats & Chart
+    let i=0, e=0; curLdg.forEach(r=>r.type==='income'?i+=r.amt:e+=r.amt);
+    let s=emp.reduce((a,b)=>a+b.salary+b.bonus, 0), net=i-e-s;
+    $('val-p').textContent=fmt(net); $('val-p').style.color=net>=0?'var(--accent2)':'var(--red)';
     if(charts['m']) charts['m'].destroy();
-    charts['m'] = new Chart($('metricsChart').getContext('2d'), { 
-        type:'doughnut', 
-        data:{datasets:[{data:[exp,sal,inc], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, 
-        options:{responsive:true, maintainAspectRatio:false, cutout:'85%'} 
-    });
+    charts['m'] = new Chart($('c-main'), {type:'doughnut', data:{datasets:[{data:[e,s,i], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'85%'} });
+
+    // Calendar
+    const dInM = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate(), fDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+    let calH = '<div class="cal-grid">'+['日','一','二','三','四','五','六'].map(w=>`<div class="cal-h">${w}</div>`).join('');
+    for(let j=0; j<fDay; j++) calH+='<div class="cal-c"></div>';
+    for(let d=1; d<=dInM; d++) {
+        const dS = `${mStr}-${d.toString().padStart(2,'0')}`, rcs = curLdg.filter(r=>r.date===dS);
+        let dots = (rcs.some(r=>r.type==='income')?`<div class="dot" style="background:var(--green)"></div>`:'') + (rcs.some(r=>r.type==='expense')?`<div class="dot" style="background:var(--red)"></div>`:'');
+        calH += `<div class="cal-c"><div class="cal-d ${dS===selD?'active':''} ${dS===new Date().toISOString().slice(0,10)?'today':''}" onclick="selD='${dS}';render();">${d}<div class="dots">${dots}</div></div></div>`;
+    }
+    $('cal-grid').innerHTML = calH+'</div>';
+    const [y,m,dy] = selD.split('-'); $('cal-title').textContent = `${m}月${dy}日 星期${['日','一','二','三','四','五','六'][new Date(y,m-1,dy).getDay()]}`;
+    $('cal-list').innerHTML = ldg.filter(r=>r.date===selD).map(row).join('') || '<div class="empty">本日無紀錄</div>';
 }
 
-// 初始啟動
-loadFromCloud();
-updateUI();
-updateMemSelect();
+window.onload = () => { render(); updateMem(); loadFromCloud(); };
 </script>
 </body>
 </html>
