@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
-<title>Yun Yi Finance v3.8.0</title>
+<title>Yun Yi Finance v3.8.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -98,6 +98,11 @@ body.nav-active .global-nav { display: flex; }
 .field { margin-bottom:18px; }
 .field label { font-size:12px; color:var(--muted); display:block; margin-bottom:6px; margin-left:4px; text-transform:uppercase; }
 .field input, .field select { width:100%; height:48px; padding:0 16px; background:var(--input-bg); border:none; border-radius:10px; color:#fff; font-size:16px; -webkit-appearance:none; }
+
+.t-toggle { display:flex; background:rgba(118,118,128,0.24); border-radius:9px; padding:2px; margin-bottom:25px; height: 38px; }
+.t-btn { flex:1; border:none; background:transparent; color:#fff; font-size:14px; font-weight:600; border-radius:7px; cursor:pointer; }
+.t-btn.active.exp { background: var(--red); }
+.t-btn.active.inc { background: var(--green); }
 </style>
 </head>
 <body class="nav-active">
@@ -106,51 +111,24 @@ body.nav-active .global-nav { display: flex; }
 
 <div class="drawer-overlay" id="d-overlay" onclick="toggleDrawer(false)"></div>
 <div class="drawer" id="drawer">
-  <div class="drawer-item" onclick="go('ldg'); toggleDrawer(false);">
-    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    <span>帳目明細</span>
-  </div>
-  <div class="drawer-item" onclick="go('pay'); toggleDrawer(false);">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-    <span>人員管理</span>
-  </div>
+  <div class="drawer-item" onclick="go('ldg'); toggleDrawer(false);"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span>帳目明細</span></div>
+  <div class="drawer-item" onclick="go('pay'); toggleDrawer(false);"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg><span>人員管理</span></div>
 </div>
 
 <div class="header">
-  <div class="menu-trigger" onclick="toggleDrawer(true)">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </div>
+  <div class="menu-trigger" onclick="toggleDrawer(true)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
   <div id="sync-status" onclick="loadCloud()">讀取雲端</div>
 </div>
 
 <div class="global-nav">
   <button onclick="shiftMonth(-1)" class="m-btn">‹</button>
-  <div class="m-picker-wrapper">
-    <span id="hdr-m"></span>
-    <input type="month" id="m-input" onchange="pickMonth(this.value)">
-  </div>
+  <div class="m-picker-wrapper"><span id="hdr-m"></span><input type="month" id="m-input" onchange="pickMonth(this.value)"></div>
   <button onclick="shiftMonth(1)" class="m-btn">›</button>
 </div>
 
-<div id="s-home" class="screen active">
-  <div class="card">
-    <div class="chart-box">
-      <canvas id="c-main"></canvas>
-      <div class="chart-center"><div class="chart-val" id="val-p">$0</div></div>
-    </div>
-  </div>
-</div>
-
-<div id="s-cal" class="screen">
-  <div class="card"><div id="cal-grid"></div></div>
-  <div class="card"><div class="card-title" id="cal-title" style="color:var(--text); font-size:17px; margin-bottom:10px;"></div><div id="cal-list"></div></div>
-</div>
-
-<div id="s-search" class="screen">
-  <div class="card"><input type="text" placeholder="搜尋項目、成員或備註..." oninput="handleSearch(this.value)" style="width:100%; background:var(--input-bg); border:none; padding:12px; border-radius:10px; color:#fff;"></div>
-  <div class="card"><div id="search-list"></div></div>
-</div>
-
+<div id="s-home" class="screen active"><div class="card"><div class="chart-box"><canvas id="c-main"></canvas><div class="chart-center"><div class="chart-val" id="val-p">$0</div></div></div></div></div>
+<div id="s-cal" class="screen"><div class="card"><div id="cal-grid"></div></div><div class="card"><div id="cal-title" style="color:var(--text); font-size:17px; margin-bottom:10px;"></div><div id="cal-list"></div></div></div>
+<div id="s-search" class="screen"><div class="card"><input type="text" placeholder="搜尋項目、成員或備註..." oninput="handleSearch(this.value)" style="width:100%; background:var(--input-bg); border:none; padding:12px; border-radius:10px; color:#fff;"></div><div class="card"><div id="search-list"></div></div></div>
 <div id="s-me" class="screen">
   <div class="profile-header">
     <div class="profile-main">
@@ -163,9 +141,7 @@ body.nav-active .global-nav { display: flex; }
     </div>
     <div class="profile-bio"><div class="bio-name" id="me-name">蘊一創意</div><div class="bio-text" id="me-desc"></div></div>
   </div>
-  <div class="post-grid"><div class="post-item"></div><div class="post-item"></div><div class="post-item"></div></div>
 </div>
-
 <div id="s-ldg" class="screen"><div class="card" id="ldg-list"></div></div>
 <div id="s-pay" class="screen"><div class="card" id="emp-list"></div></div>
 
@@ -184,10 +160,11 @@ body.nav-active .global-nav { display: flex; }
     <form id="ldg-form" onsubmit="event.preventDefault(); saveLdg();">
       <input type="hidden" id="l-t" value="expense">
       <div class="field"><label>日期</label><input type="date" id="l-d" required></div>
-      <div class="t-toggle" style="display:flex; background:rgba(118,118,128,0.24); border-radius:9px; padding:2px; margin-bottom:25px;"><button type="button" class="t-btn active exp" id="tb-exp" onclick="setT('expense')" style="flex:1; padding:8px; font-size:14px; border-radius:7px; color:#fff; font-weight:600; border:none; background:none;">支出</button><button type="button" class="t-btn inc" id="tb-inc" onclick="setT('income')" style="flex:1; padding:8px; font-size:14px; border-radius:7px; color:#fff; font-weight:600; border:none; background:none;">收入</button></div>
+      <div class="t-toggle"><button type="button" class="t-btn" id="tb-exp" onclick="setT('expense')">支出</button><button type="button" class="t-btn" id="tb-inc" onclick="setT('income')">收入</button></div>
       <div class="field"><label>金額</label><input type="number" id="l-a" placeholder="$0" required inputmode="numeric"></div>
       <div class="field"><label>項目內容</label><input type="text" id="l-c" placeholder="例如：租金" required></div>
       <div class="field"><label>歸屬成員</label><select id="l-m"></select></div>
+      <div class="field"><label>發票號碼</label><input type="text" id="l-inv" placeholder="AB-12345678"></div>
       <div class="field"><label>憑證類型</label><select id="l-vt"><option value="電子發票">電子發票</option><option value="三聯單">三聯單</option><option value="免用統一發票">免用統一發票</option><option value="無憑證">無憑證</option></select></div>
       <div class="field"><label>備註</label><input type="text" id="l-n" placeholder="補充說明..."></div>
     </form>
@@ -206,9 +183,7 @@ body.nav-active .global-nav { display: flex; }
 <div class="action-sheet-overlay" id="as-picker" onclick="closeAS(event)">
   <div class="action-sheet">
     <div class="as-group" id="as-list"></div>
-    <div class="as-group">
-      <div class="as-item add-btn" onclick="openAddEmpModal()">➕ 新增人員</div>
-    </div>
+    <div class="as-group"><div class="as-item add-btn" onclick="openAddEmpModal()">➕ 新增人員</div></div>
     <div class="as-cancel" onclick="closeASById()">取消</div>
   </div>
 </div>
@@ -221,13 +196,7 @@ let charts = {}, calYear = new Date().getFullYear(), calMonth = new Date().getMo
 
 const fmtK = n => n >= 1000 ? (n / 1000).toFixed(1) + 'k' : n;
 const setSync = (txt, cls) => { const s = $('sync-status'); s.textContent = txt; s.className = cls; };
-
-// 側邊選單控制
-const toggleDrawer = (open) => { 
-  const d = $('drawer'), o = $('d-overlay'); 
-  if(open){ o.style.display='block'; setTimeout(()=>{o.style.opacity='1'; d.classList.add('open');},10); } 
-  else { d.classList.remove('open'); o.style.opacity='0'; setTimeout(()=>o.style.display='none',300); } 
-};
+const toggleDrawer = (open) => { const d = $('drawer'), o = $('d-overlay'); if(open){ o.style.display='block'; setTimeout(()=>{o.style.opacity='1'; d.classList.add('open');},10); } else { d.classList.remove('open'); o.style.opacity='0'; setTimeout(()=>o.style.display='none',300); } };
 
 async function loadCloud() {
     setSync('讀取中...', 'syncing');
@@ -247,15 +216,7 @@ async function loadCloud() {
     document.head.appendChild(s);
 }
 
-const go = (p, el) => { 
-  $$('.screen, .nav-item').forEach(e => e.classList.remove('active')); 
-  $(`s-${p}`).classList.add('active'); 
-  if(el) el.classList.add('active'); 
-  document.body.classList.toggle('nav-active', p==='home' || p==='cal'); 
-  if(p==='me') updateMeUI(); 
-  render(); 
-};
-
+const go = (p, el) => { $$('.screen, .nav-item').forEach(e => e.classList.remove('active')); $(`s-${p}`).classList.add('active'); if(el) el.classList.add('active'); document.body.classList.toggle('nav-active', p==='home' || p==='cal'); if(p==='me') updateMeUI(); render(); };
 const resetAndGoMe = (el) => { currentMe = "蘊一創意"; go('me', el); };
 const shiftMonth = (d) => { const dt = new Date(calYear, calMonth+d, 1); calYear=dt.getFullYear(); calMonth=dt.getMonth(); render(); };
 const pickMonth = (v) => { if(!v) return; const [y, m] = v.split('-'); calYear=parseInt(y); calMonth=parseInt(m)-1; render(); };
@@ -292,11 +253,7 @@ function render() {
     $('emp-list').innerHTML = emp.map(e => `<div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:0.5px solid var(--border);"><div>${e.name}</div><small>$${e.salary.toLocaleString()}</small></div>`).join('');
 }
 
-// 人員管理與新增
-const openProfilePicker = () => { 
-    $('as-list').innerHTML = `<div class="as-item" onclick="selectMe('蘊一創意')">蘊一創意 (總覽)</div>` + emp.map(e => `<div class="as-item" onclick="selectMe('${e.name}')">${e.name}</div>`).join(''); 
-    $('as-picker').classList.add('open'); 
-};
+const openProfilePicker = () => { $('as-list').innerHTML = `<div class="as-item" onclick="selectMe('蘊一創意')">蘊一創意 (總覽)</div>` + emp.map(e => `<div class="as-item" onclick="selectMe('${e.name}')">${e.name}</div>`).join(''); $('as-picker').classList.add('open'); };
 const openAddEmpModal = () => { closeASById(); $('m-add-emp').classList.add('open'); };
 const saveEmp = () => {
     const name = $('new-e-name').value.trim();
@@ -304,29 +261,31 @@ const saveEmp = () => {
     emp.push({ name, salary: Number($('new-e-salary').value) || 0 });
     localStorage.setItem('ye', JSON.stringify(emp));
     $('new-e-name').value = ''; $('new-e-salary').value = '';
-    closeMById('m-add-emp');
-    sync(); render();
+    closeMById('m-add-emp'); sync(); render();
 };
-
 const selectMe = (n) => { currentMe = n; updateMeUI(); closeASById(); };
 const closeASById = () => { $('as-picker').classList.remove('open'); };
 const closeAS = (e) => { if(e.target === $('as-picker')) closeASById(); };
 
 const prepLdg = () => { 
-    $('ldg-form').reset(); 
-    setT('expense'); 
-    $('l-d').value = selD; 
+    $('ldg-form').reset(); setT('expense'); $('l-d').value = selD; 
     $('l-m').innerHTML = '<option value="公司">公司帳戶</option>' + emp.map(e => `<option value="${e.name}">${e.name}</option>`).join(''); 
     $('m-ldg').classList.add('open'); 
 };
 
-const setT = t => { $('l-t').value = t; $('tb-exp').className = t === 'expense' ? 't-btn active exp' : 't-btn'; $('tb-inc').className = t === 'income' ? 't-btn active inc' : 't-btn'; };
+function setT(t) {
+    $('l-t').value = t;
+    const btnExp = $('tb-exp'), btnInc = $('tb-inc');
+    btnExp.classList.toggle('active', t === 'expense'); btnExp.classList.toggle('exp', t === 'expense');
+    btnInc.classList.toggle('active', t === 'income'); btnInc.classList.toggle('inc', t === 'income');
+}
+
 const closeMById = id => $(id).classList.remove('open');
 const closeM = (e, id) => { if(e.target === $(id)) $(id).classList.remove('open'); };
 
 async function sync() { try { await fetch(GAS_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({emp, ldg})}); } catch(e) {} }
 function saveLdg() { 
-  ldg.unshift({ date: $('l-d').value, type: $('l-t').value, amt: Number($('l-a').value), cat: $('l-c').value, mem: $('l-m').value, vt: $('l-vt').value, note: $('l-n').value }); 
+  ldg.unshift({ date: $('l-d').value, type: $('l-t').value, amt: Number($('l-a').value), cat: $('l-c').value, mem: $('l-m').value, inv: $('l-inv').value, vt: $('l-vt').value, note: $('l-n').value }); 
   localStorage.setItem('yl', JSON.stringify(ldg)); 
   closeMById('m-ldg'); sync(); render(); 
 }
@@ -336,10 +295,7 @@ function handleSearch(v) {
   $('search-list').innerHTML = ldg.filter(r => r.cat.includes(v) || r.mem.includes(v)).map(r => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:0.5px solid var(--border);"><div>${r.cat}<br><small>${r.date}</small></div><b>$${r.amt.toLocaleString()}</b></div>`).join(''); 
 }
 
-window.onload = () => { 
-  loadCloud(); render(); 
-  setTimeout(() => { $('splash-screen').style.opacity='0'; setTimeout(()=>$('splash-screen').style.display='none', 600); }, 1500); 
-};
+window.onload = () => { loadCloud(); render(); setTimeout(() => { $('splash-screen').style.opacity='0'; setTimeout(()=>$('splash-screen').style.display='none', 600); }, 1500); };
 </script>
 </body>
 </html>
