@@ -76,6 +76,9 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 .legend-item div:first-child { font-size:10px; color:var(--muted); margin-bottom:4px; }
 .legend-item div:last-child { font-size:14px; font-weight:700; }
 </style>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 </head>
 <body id="swipe-area">
 
@@ -176,6 +179,15 @@ body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--
 </div>
 
 <script>
+// 版本號檢查機制 (強制更新)
+const CURRENT_VERSION = '2.5.1'; 
+const localVersion = localStorage.getItem('app_version');
+
+if (localVersion !== CURRENT_VERSION) {
+    localStorage.setItem('app_version', CURRENT_VERSION);
+    window.location.reload(true); 
+}
+
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
 
 const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s), qV = id => $(id).value;
@@ -239,7 +251,6 @@ const closeM = (e, id) => { if(e.target === $(id)) $(id).classList.remove('open'
 const closeMById = id => $(id).classList.remove('open');
 const setT = t => { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn active exp':'t-btn exp'; $('tb-inc').className=t==='income'?'t-btn active inc':'t-btn inc'; };
 
-// 準備新增帳目：清空所有新欄位
 const prepLdg = () => { 
   setT('expense'); 
   $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; 
@@ -249,7 +260,6 @@ const prepLdg = () => {
 
 const prepEmp = () => { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; $('btn-del-emp').style.display='none'; openM('m-emp'); };
 
-// 儲存帳目：包含新欄位資料
 function saveLdg() { 
   ldg.unshift({
     date: qV('l-d'), 
@@ -257,10 +267,10 @@ function saveLdg() {
     amt: Number(qV('l-a')), 
     cat: qV('l-c'), 
     mem: qV('l-m'),
-    inv: qV('l-inv'),   // 發票號碼
-    clm: qV('l-clm'),   // 請款狀態
-    vt: qV('l-vt'),     // 憑證類型
-    note: qV('l-n')     // 備註
+    inv: qV('l-inv'),   
+    clm: qV('l-clm'),   
+    vt: qV('l-vt'),     
+    note: qV('l-n')     
   }); 
   updateState('m-ldg'); 
 }
@@ -280,7 +290,6 @@ function render() {
     $('hdr-m').textContent = `${calYear}年 ${calMonth+1}月`;
     $('m-input').value = mStr;
     
-    // 列表顯示優化：在明細中加入備註或請款小標籤 (選用)
     const row = r => `<div class="list-row" ontouchstart="pressT=setTimeout(()=>{delIdx=${r.oid};openM('m-del')},600)" ontouchend="clearTimeout(pressT)"><div class="row-info"><div class="row-main">${r.cat}${r.clm==='請款'?' <small style="color:var(--amber);font-size:9px;">[請款]</small>':''}</div><div class="row-sub">${r.date} · ${r.mem}${r.note?' · '+r.note:''}</div></div><div class="amt" style="color:var(--${r.type==='income'?'green':'red'})">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div></div>`;
     
     $('ldg-list').innerHTML = curLdg.map(row).join('') || '<div class="empty">本月無帳目</div>';
