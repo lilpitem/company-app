@@ -10,69 +10,58 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root { --bg: #0f0f1a; --bg2: #1a1a2e; --card: #1e1e35; --accent: #7c6af7; --accent2: #a78bfa; --green: #34d399; --red: #f87171; --amber: #fbbf24; --text: #f0f0ff; --muted: #8888aa; --border: rgba(124,106,247,0.15); --radius: 16px; }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; }
-.screen { display: none; min-height: 100vh; padding-bottom: 110px; }
-.screen.active { display: block; }
-
-/* Header & Status */
-.header { padding: 56px 20px 20px; background: linear-gradient(180deg, var(--bg2), transparent); display: flex; justify-content: space-between; align-items: center; }
-.brand { font-size: 18px; font-weight: 700; }
-#sync-status { font-size: 10px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.05); transition: 0.3s; }
-.syncing { color: var(--amber); animation: pulse 1s infinite; }
-.sync-ok { color: var(--green); background: rgba(52,211,153,0.1); }
-.sync-err { color: var(--red); background: rgba(248,113,113,0.1); cursor: pointer; }
-@keyframes pulse { 50% { opacity: 0.5; } }
-
-/* Bottom Nav */
-.bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 10px 0 calc(15px + env(safe-area-inset-bottom)); align-items: center; }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--muted); }
-.nav-item.active { color: var(--accent2); }
-.nav-icon { font-size: 20px; } .nav-label { font-size: 10px; font-weight: 500; }
-.fab { position: absolute; top: -30px; width: 56px; height: 56px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; color: #fff; border: 4px solid var(--bg); box-shadow: 0 4px 15px rgba(124,106,247,0.3); }
-
-/* Components */
-.card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 0 16px 12px; }
-.card-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.list-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 0.5px solid rgba(255,255,255,0.03); }
-.row-info { display: flex; flex-direction: column; gap: 2px; }
-.row-main { font-size: 15px; font-weight: 500; }
-.row-sub { font-size: 11px; color: var(--muted); }
-.amt { font-weight: 700; font-size: 15px; }
-.empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
-
-/* Calendar Engine (Safari Fixed) */
-.cal-grid { display: flex; flex-wrap: wrap; width: 100%; }
-.cal-h { width: 14.285%; font-size: 11px; color: var(--muted); text-align: center; padding-bottom: 8px; }
-.cal-c { width: 14.285%; height: 45px; display: flex; justify-content: center; align-items: flex-start; }
-.cal-d { width: 34px; height: 34px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; font-size: 14px; position: relative; }
-.cal-d.active { background: var(--accent); color: #fff; }
-.cal-d.today:not(.active) { border: 1px solid var(--accent2); color: var(--accent2); }
-.dots { display: flex; gap: 2px; position: absolute; bottom: 3px; }
-.dot { width: 3.5px; height: 3.5px; border-radius: 50%; }
-
-/* Modals */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: flex-end; }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 20px 20px calc(40px + env(safe-area-inset-bottom)); width: 100%; max-height: 88vh; overflow-y: auto; }
-.modal-h { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-.t-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 10px; padding: 4px; margin-bottom: 15px; }
-.t-btn { flex: 1; text-align: center; padding: 10px; font-size: 14px; border-radius: 7px; color: var(--muted); }
-.t-btn.active.exp { background: var(--red); color: #fff; }
-.t-btn.active.inc { background: var(--green); color: #fff; }
-.field { margin-bottom: 15px; }
-.field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
-.field input, .field select { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: 8px; color: #fff; font-size: 15px; outline: none; }
-.btn-p { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
-
-/* Chart Area */
-.chart-box { position: relative; height: 180px; display: flex; justify-content: center; align-items: center; margin: 10px 0; }
-.chart-center { position: absolute; text-align: center; pointer-events: none; }
-.chart-val { font-size: 20px; font-weight: 700; }
-.legend { display: flex; justify-content: space-around; padding-top: 15px; border-top: 0.5px solid var(--border); text-align: center; }
-.legend-item div:first-child { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
-.legend-item div:last-child { font-size: 14px; font-weight: 700; }
+:root { --bg:#0f0f1a; --bg2:#1a1a2e; --card:#1e1e35; --accent:#7c6af7; --accent2:#a78bfa; --green:#34d399; --red:#f87171; --amber:#fbbf24; --text:#f0f0ff; --muted:#8888aa; --border:rgba(124,106,247,0.15); --radius:16px; }
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Noto Sans TC',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:430px; margin:0 auto; overflow-x:hidden; }
+.screen { display:none; min-height:100vh; padding-bottom:110px; }
+.screen.active { display:block; }
+.header { padding:56px 20px 20px; background:linear-gradient(180deg,var(--bg2),transparent); display:flex; justify-content:space-between; align-items:center; }
+.brand { font-size:18px; font-weight:700; }
+#sync-status { font-size:10px; padding:4px 10px; border-radius:12px; background:rgba(255,255,255,0.05); transition:.3s; }
+.syncing { color:var(--amber); animation:pulse 1s infinite; }
+.sync-ok { color:var(--green); background:rgba(52,211,153,0.1); }
+.sync-err { color:var(--red); background:rgba(248,113,113,0.1); cursor:pointer; }
+@keyframes pulse { 50% { opacity:0.5; } }
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:var(--bg2); border-top:.5px solid var(--border); display:flex; z-index:100; padding:10px 0 calc(15px + env(safe-area-inset-bottom)); }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; color:var(--muted); }
+.nav-item.active { color:var(--accent2); }
+.nav-icon { font-size:20px; } .nav-label { font-size:10px; font-weight:500; }
+.fab { position:absolute; top:-30px; width:56px; height:56px; background:var(--accent); border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; color:#fff; border:4px solid var(--bg); box-shadow:0 4px 15px rgba(124,106,247,.3); }
+.card { background:var(--card); border:.5px solid var(--border); border-radius:var(--radius); padding:16px; margin:0 16px 12px; }
+.card-title { font-size:12px; color:var(--muted); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; }
+.list-row { display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:.5px solid rgba(255,255,255,.03); }
+.row-info { display:flex; flex-direction:column; gap:2px; }
+.row-main { font-size:15px; font-weight:500; }
+.row-sub { font-size:11px; color:var(--muted); }
+.amt { font-weight:700; font-size:15px; }
+.empty { text-align:center; padding:40px 0; color:var(--muted); font-size:13px; }
+.cal-grid { display:flex; flex-wrap:wrap; width:100%; }
+.cal-h, .cal-c { width:14.285%; text-align:center; }
+.cal-h { font-size:11px; color:var(--muted); padding-bottom:8px; }
+.cal-c { height:45px; display:flex; justify-content:center; }
+.cal-d { width:34px; height:34px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:50%; font-size:14px; position:relative; }
+.cal-d.active { background:var(--accent); color:#fff; }
+.cal-d.today:not(.active) { border:1px solid var(--accent2); color:var(--accent2); }
+.dots { display:flex; gap:2px; position:absolute; bottom:3px; }
+.dot { width:3.5px; height:3.5px; border-radius:50%; }
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; align-items:flex-end; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--bg2); border-radius:24px 24px 0 0; padding:20px 20px calc(40px + env(safe-area-inset-bottom)); width:100%; max-height:88vh; overflow-y:auto; }
+.modal-h { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 20px; }
+.t-toggle { display:flex; background:rgba(255,255,255,.05); border-radius:10px; padding:4px; margin-bottom:15px; }
+.t-btn { flex:1; text-align:center; padding:10px; font-size:14px; border-radius:7px; color:var(--muted); }
+.t-btn.active.exp { background:var(--red); color:#fff; }
+.t-btn.active.inc { background:var(--green); color:#fff; }
+.field { margin-bottom:15px; }
+.field label { font-size:11px; color:var(--muted); display:block; margin-bottom:5px; }
+.field input, .field select { width:100%; padding:12px; background:rgba(255,255,255,.05); border:.5px solid var(--border); border-radius:8px; color:#fff; font-size:15px; outline:none; }
+.btn-p { width:100%; padding:15px; background:var(--accent); color:#fff; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; }
+.chart-box { position:relative; height:180px; display:flex; justify-content:center; align-items:center; margin:10px 0; }
+.chart-center { position:absolute; text-align:center; pointer-events:none; }
+.chart-val { font-size:20px; font-weight:700; }
+.legend { display:flex; justify-content:space-around; padding-top:15px; border-top:.5px solid var(--border); text-align:center; }
+.legend-item div:first-child { font-size:10px; color:var(--muted); margin-bottom:4px; }
+.legend-item div:last-child { font-size:14px; font-weight:700; }
 </style>
 </head>
 <body>
@@ -82,10 +71,10 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
   <div id="sync-status" onclick="loadCloud()">點擊讀取雲端</div>
 </div>
 <div style="display:flex;align-items:center;justify-content:center;gap:12px;padding:0 16px 8px;">
-  <button onclick="shiftMonth(-1)" style="background:var(--card);border:0.5px solid var(--border);color:var(--accent2);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;line-height:1;">‹</button>
+  <button onclick="shiftMonth(-1)" style="background:var(--card);border:.5px solid var(--border);color:var(--accent2);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;line-height:1;">‹</button>
   <span id="hdr-m" style="font-size:15px;font-weight:600;min-width:100px;text-align:center;"></span>
-  <button onclick="shiftMonth(1)" style="background:var(--card);border:0.5px solid var(--border);color:var(--accent2);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;line-height:1;">›</button>
-  <button onclick="resetMonth()" style="font-size:11px;background:rgba(124,106,247,0.15);color:var(--accent2);border:0.5px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;">本月</button>
+  <button onclick="shiftMonth(1)" style="background:var(--card);border:.5px solid var(--border);color:var(--accent2);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;line-height:1;">›</button>
+  <button onclick="resetMonth()" style="font-size:11px;background:var(--border);color:var(--accent2);border:.5px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer;">本月</button>
 </div>
 
 <div id="s-home" class="screen active">
@@ -106,11 +95,11 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <div id="s-ldg" class="screen">
-  <div class="card"><div class="card-title">帳目明細 <span style="font-size:10px; color:var(--muted); font-weight:normal; cursor:pointer;" onclick="loadCloud()">🔄 點此更新</span></div><div id="ldg-list"></div></div>
+  <div class="card"><div class="card-title">帳目明細 <span style="font-size:10px;color:var(--muted);font-weight:normal;cursor:pointer;" onclick="loadCloud()">🔄 點此更新</span></div><div id="ldg-list"></div></div>
 </div>
 
 <div id="s-pay" class="screen">
-  <div class="card"><div id="emp-list"></div><div class="btn-p" style="background:rgba(124,106,247,0.1); color:var(--accent2); border:1px dashed var(--accent); margin-top:15px;" onclick="prepEmp()">＋ 新增人員</div></div>
+  <div class="card"><div id="emp-list"></div><div class="btn-p" style="background:rgba(124,106,247,0.1);color:var(--accent2);border:1px dashed var(--accent);margin-top:15px;" onclick="prepEmp()">＋ 新增人員</div></div>
 </div>
 
 <nav class="bottom-nav">
@@ -122,7 +111,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </nav>
 
 <div class="modal-overlay" id="m-del" onclick="closeM(event,'m-del')">
-  <div class="modal" style="text-align: center;"><div class="modal-h"></div><div class="modal-title">確定刪除紀錄嗎？</div><div style="display: flex; gap: 12px; margin-top:20px;"><button class="btn-p" style="flex:1; background:rgba(255,255,255,0.08);" onclick="closeMById('m-del')">取消</button><button class="btn-p" style="flex:1; background:var(--red);" onclick="execDel()">刪除</button></div></div>
+  <div class="modal" style="text-align:center;"><div class="modal-h"></div><div class="modal-title">確定刪除紀錄嗎？</div><div style="display:flex;gap:12px;margin-top:20px;"><button class="btn-p" style="flex:1;background:rgba(255,255,255,.08);" onclick="closeMById('m-del')">取消</button><button class="btn-p" style="flex:1;background:var(--red);" onclick="execDel()">刪除</button></div></div>
 </div>
 
 <div class="modal-overlay" id="m-ldg" onclick="closeM(event,'m-ldg')">
@@ -146,136 +135,123 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 </div>
 
 <div class="modal-overlay" id="m-det" onclick="closeM(event,'m-det')">
-  <div class="modal"><div class="modal-h"></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h2 id="det-n" style="font-size:18px;"></h2><div class="btn-p" id="det-e-btn" style="width:auto; padding:6px 12px; font-size:12px;">✏️ 編輯</div></div><div class="chart-box"><canvas id="c-emp"></canvas></div><div id="det-list"></div></div>
+  <div class="modal"><div class="modal-h"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;"><h2 id="det-n" style="font-size:18px;"></h2><div class="btn-p" id="det-e-btn" style="width:auto;padding:6px 12px;font-size:12px;">✏️ 編輯</div></div><div class="chart-box"><canvas id="c-emp"></canvas></div><div id="det-list"></div></div>
 </div>
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzsCdf4E4p52LOIvRM7n_UMoAcMz05kTAM4zKf72KIzFPzcTi5ShA1xMAOlDoghhKR-/exec';
 
-const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s);
+const $ = id => document.getElementById(id), $$ = s => document.querySelectorAll(s), qV = id => $(id).value;
 const fmt = n => '$' + Math.round(n).toLocaleString();
+const toIsoD = d => d.toISOString().slice(0,10);
+const setSync = (txt, cls) => { const s = $('sync-status'); s.textContent = txt; s.className = cls; };
+
 let emp = JSON.parse(localStorage.getItem('ye') || '[]'), ldg = JSON.parse(localStorage.getItem('yl') || '[]');
 
-// 月份狀態（可切換）
-const _today = new Date();
-let calYear = _today.getFullYear(), calMonth = _today.getMonth(); // 0-based
-let selD = _today.toISOString().slice(0,10), charts = {}, delIdx = -1;
+const today = new Date();
+let calYear = today.getFullYear(), calMonth = today.getMonth(), selD = toIsoD(today);
+let charts = {}, delIdx = -1;
 
-function shiftMonth(delta) {
-    calMonth += delta;
-    if (calMonth < 0) { calMonth = 11; calYear--; }
-    if (calMonth > 11) { calMonth = 0; calYear++; }
-    render();
-}
-function resetMonth() {
-    const n = new Date();
-    calYear = n.getFullYear(); calMonth = n.getMonth();
-    selD = n.toISOString().slice(0,10);
-    render();
-}
+// 優化：利用原生 Date 自動處理跨年月邏輯
+const shiftMonth = (delta) => { const d = new Date(calYear, calMonth + delta, 1); calYear = d.getFullYear(); calMonth = d.getMonth(); render(); };
+const resetMonth = () => { const d = new Date(); calYear = d.getFullYear(); calMonth = d.getMonth(); selD = toIsoD(d); render(); };
 
-// ── 雲端同步（JSONP 方式，完全繞過 Safari ITP / CORS）──
 function jsonpFetch(url) {
     return new Promise((resolve, reject) => {
-        const cbName = '_cb_' + Date.now();
-        const script = document.createElement('script');
-        const timer = setTimeout(() => {
-            cleanup(); reject(new Error('請求逾時（10 秒）'));
-        }, 10000);
+        const cbName = '_cb_' + Date.now(), script = document.createElement('script');
+        const timer = setTimeout(() => { cleanup(); reject(new Error('請求逾時')); }, 10000);
         function cleanup() { clearTimeout(timer); delete window[cbName]; script.remove(); }
-        window[cbName] = (data) => { cleanup(); resolve(data); };
-        script.onerror = () => { cleanup(); reject(new Error('Script 載入失敗，請確認 GAS 已部署且為公開存取')); };
-        script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
+        window[cbName] = data => { cleanup(); resolve(data); };
+        script.onerror = () => { cleanup(); reject(new Error('Script 載入失敗')); };
+        script.src = `${url}${url.includes('?')?'&':'?'}callback=${cbName}`;
         document.head.appendChild(script);
     });
 }
 
 async function sync() {
-    const st = $('sync-status'); st.textContent='上傳中...'; st.className='syncing';
+    setSync('上傳中...', 'syncing');
     try {
-        // POST 仍用 no-cors，只負責寫入；讀取改用 JSONP
         await fetch(GAS_URL, {method:'POST', mode:'no-cors', body: JSON.stringify({emp, ldg})});
-        st.textContent='✅ 雲端已同步'; st.className='sync-ok';
-    } catch(e) {
-        st.textContent='📵 離線儲存'; st.className='';
-    }
+        setSync('✅ 雲端已同步', 'sync-ok');
+    } catch(e) { setSync('📵 離線儲存', ''); }
 }
 
 async function loadCloud() {
-    const st = $('sync-status'); st.textContent='讀取中...'; st.className='syncing';
+    setSync('讀取中...', 'syncing');
     try {
         const d = await jsonpFetch(GAS_URL);
-        if (d && (d.emp || d.ldg)) {
+        if (d?.emp || d?.ldg) {
             emp = d.emp || []; ldg = d.ldg || [];
             saveLoc(); render(); updateMem();
-            st.textContent='✅ 雲端已同步'; st.className='sync-ok';
-        } else {
-            // 雲端是空的，把本地資料推上去
-            await sync();
-        }
+            setSync('✅ 雲端已同步', 'sync-ok');
+        } else await sync();
     } catch(e) {
-        console.error(e);
-        st.textContent='⚠️ 讀取失敗'; st.className='sync-err';
-        st.onclick = () => alert('錯誤：' + e.message + '\n\n請確認：\n1. GAS 已部署新版本\n2. 執行身分設為「我」\n3. 存取權設為「所有人」\n4. doGet 回傳的是 ContentService.MimeType.JAVASCRIPT');
+        setSync('⚠️ 讀取失敗', 'sync-err');
+        $('sync-status').onclick = () => alert(`錯誤：${e.message}`);
     }
 }
 
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") loadCloud(); });
 
-function saveLoc() { localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); }
-function go(p, el) { $$('.screen').forEach(s=>s.classList.remove('active')); $$('.nav-item').forEach(n=>n.classList.remove('active')); $(`s-${p}`).classList.add('active'); el.classList.add('active'); }
-function openM(id) { $(id).classList.add('open'); }
-function closeM(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
-function closeMById(id) { $(id).classList.remove('open'); }
-function setT(t) { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn active exp':'t-btn exp'; $('tb-inc').className=t==='income'?'t-btn active inc':'t-btn inc'; }
-function prepLdg() { setT('expense'); $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; openM('m-ldg'); }
-function prepEmp() { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; $('btn-del-emp').style.display='none'; openM('m-emp'); }
+const saveLoc = () => { localStorage.setItem('ye', JSON.stringify(emp)); localStorage.setItem('yl', JSON.stringify(ldg)); };
+const go = (p, el) => { $$('.screen, .nav-item').forEach(e => e.classList.remove('active')); $(`s-${p}`).classList.add('active'); el.classList.add('active'); };
+const openM = id => $(id).classList.add('open');
+const closeM = (e, id) => { if(e.target === $(id)) $(id).classList.remove('open'); };
+const closeMById = id => $(id).classList.remove('open');
+const setT = t => { $('l-t').value=t; $('tb-exp').className=t==='expense'?'t-btn active exp':'t-btn exp'; $('tb-inc').className=t==='income'?'t-btn active inc':'t-btn inc'; };
+const prepLdg = () => { setT('expense'); $('l-d').value=selD; $('l-a').value=''; $('l-c').value=''; openM('m-ldg'); };
+const prepEmp = () => { $('e-id').value=''; $('e-n').value=''; $('e-s').value=''; $('e-b').value='0'; $('btn-del-emp').style.display='none'; openM('m-emp'); };
 
-function saveLdg() { 
-  ldg.unshift({date:$('l-d').value, type:$('l-t').value, amt:Number($('l-a').value), cat:$('l-c').value, mem:$('l-m').value}); 
-  saveLoc(); sync(); render(); $('m-ldg').classList.remove('open'); 
-}
+function saveLdg() { ldg.unshift({date:qV('l-d'), type:qV('l-t'), amt:Number(qV('l-a')), cat:qV('l-c'), mem:qV('l-m')}); updateState('m-ldg'); }
 function saveEmp() { 
-  const id=$('e-id').value, d={name:$('e-n').value, salary:Number($('e-s').value), bonus:Number($('e-b').value)}; 
-  if(id!=='') emp[id]=d; else emp.push(d); 
-  saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); 
+  const id = qV('e-id'), d = {name:qV('e-n'), salary:Number(qV('e-s')), bonus:Number(qV('e-b'))}; 
+  id ? emp[id]=d : emp.push(d); 
+  updateMem(); updateState('m-emp'); 
 }
-function delEmp() { if(confirm('確定刪除人員？')){ emp.splice($('e-id').value,1); saveLoc(); sync(); render(); updateMem(); $('m-emp').classList.remove('open'); } }
-function execDel() { if(delIdx!==-1){ ldg.splice(delIdx,1); saveLoc(); sync(); render(); } closeMById('m-del'); }
-function updateMem() { $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">👤 ${e.name}</option>`).join(''); }
+const delEmp = () => { if(confirm('確定刪除？')){ emp.splice(qV('e-id'),1); updateMem(); updateState('m-emp'); } };
+const execDel = () => { if(delIdx!==-1){ ldg.splice(delIdx,1); updateState('m-del', true); } };
+const updateState = (mId, skipMems) => { saveLoc(); sync(); render(); if(!skipMems) updateMem(); closeMById(mId); };
+const updateMem = () => $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">👤 ${e.name}</option>`).join('');
 
 function showDet(i) {
     const e = emp[i]; $('det-n').textContent = e.name;
-    if(charts['e']) charts['e'].destroy();
-    charts['e'] = new Chart($('c-emp'), {type:'doughnut', data:{datasets:[{data:[e.salary, e.bonus], backgroundColor:['#7c6af7','#fbbf24'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'80%'} });
+    if(charts.e) charts.e.destroy();
+    charts.e = new Chart($('c-emp'), {type:'doughnut', data:{datasets:[{data:[e.salary, e.bonus], backgroundColor:['#7c6af7','#fbbf24'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'80%'} });
     $('det-e-btn').onclick = () => { closeMById('m-det'); $('e-id').value=i; $('e-n').value=e.name; $('e-s').value=e.salary; $('e-b').value=e.bonus; $('btn-del-emp').style.display='block'; openM('m-emp'); };
     openM('m-det');
 }
 
 function render() {
-    const mStr = `${calYear}-${(calMonth+1).toString().padStart(2,'0')}`;
+    const mStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
     const curLdg = ldg.map((r,i)=>({...r, oid:i})).filter(r=>r.date.startsWith(mStr));
     $('hdr-m').textContent = `${calYear}年 ${calMonth+1}月`;
-    const row = r => `<div class="list-row" ontouchstart="pressT=setTimeout(()=>{delIdx=${r.oid};openM('m-del')},600)" ontouchend="clearTimeout(pressT)"><div class="row-info"><div class="row-main">${r.cat}</div><div class="row-sub">${r.date} · ${r.mem}</div></div><div class="amt" style="color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div></div>`;
+    
+    const row = r => `<div class="list-row" ontouchstart="pressT=setTimeout(()=>{delIdx=${r.oid};openM('m-del')},600)" ontouchend="clearTimeout(pressT)"><div class="row-info"><div class="row-main">${r.cat}</div><div class="row-sub">${r.date} · ${r.mem}</div></div><div class="amt" style="color:var(--${r.type==='income'?'green':'red'})">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div></div>`;
+    
     $('ldg-list').innerHTML = curLdg.map(row).join('') || '<div class="empty">本月無帳目</div>';
     $('emp-list').innerHTML = emp.map((e,i)=>`<div class="list-row" onclick="showDet(${i})"><div class="row-info"><div class="row-main">${e.name}</div><div class="row-sub">本月預算：${fmt(e.salary+e.bonus)}</div></div><div style="font-size:12px;color:var(--accent2)">詳情</div></div>`).join('') || '<div class="empty">無人員</div>';
-    let i=0, e=0; curLdg.forEach(r=>r.type==='income'?i+=r.amt:e+=r.amt);
-    let s=emp.reduce((a,b)=>a+b.salary+b.bonus, 0), net=i-e-s;
-    $('val-p').textContent=fmt(net); $('val-p').style.color=net>=0?'var(--accent2)':'var(--red)';
-    $('val-inc').textContent=fmt(i); $('val-exp').textContent=fmt(e); $('val-sal').textContent=fmt(s);
-    if(charts['m']) charts['m'].destroy();
-    charts['m'] = new Chart($('c-main'), {type:'doughnut', data:{datasets:[{data:[e,s,i||1], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'85%'} });
+    
+    let inc=0, exp=0; curLdg.forEach(r=>r.type==='income'?inc+=r.amt:exp+=r.amt);
+    let sal = emp.reduce((a,b)=>a+b.salary+b.bonus, 0), net = inc-exp-sal;
+    
+    $('val-p').textContent=fmt(net); $('val-p').style.color = net>=0 ? 'var(--accent2)' : 'var(--red)';
+    $('val-inc').textContent=fmt(inc); $('val-exp').textContent=fmt(exp); $('val-sal').textContent=fmt(sal);
+    
+    if(charts.m) charts.m.destroy();
+    charts.m = new Chart($('c-main'), {type:'doughnut', data:{datasets:[{data:[exp,sal,inc||1], backgroundColor:['#f87171','#fbbf24','#34d399'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, cutout:'85%'} });
+    
     const dInM = new Date(calYear, calMonth+1, 0).getDate(), fDay = new Date(calYear, calMonth, 1).getDay();
-    let calH = '<div class="cal-grid">'+['日','一','二','三','四','五','六'].map(w=>`<div class="cal-h">${w}</div>`).join('');
-    for(let j=0; j<fDay; j++) calH+='<div class="cal-c"></div>';
-    const todayStr = new Date().toISOString().slice(0,10);
+    let calH = '<div class="cal-grid">' + ['日','一','二','三','四','五','六'].map(w=>`<div class="cal-h">${w}</div>`).join('') + '<div class="cal-c"></div>'.repeat(fDay);
+    
     for(let d=1; d<=dInM; d++) {
-        const dS = `${mStr}-${d.toString().padStart(2,'0')}`, rcs = curLdg.filter(r=>r.date===dS);
-        let dots = (rcs.some(r=>r.type==='income')?`<div class="dot" style="background:var(--green)"></div>`:'') + (rcs.some(r=>r.type==='expense')?`<div class="dot" style="background:var(--red)"></div>`:'');
-        calH += `<div class="cal-c"><div class="cal-d ${dS===selD?'active':''} ${dS===todayStr?'today':''}" onclick="selD='${dS}';render();">${d}<div class="dots">${dots}</div></div></div>`;
+        const dS = `${mStr}-${String(d).padStart(2,'0')}`, rcs = curLdg.filter(r=>r.date===dS);
+        const dots = (rcs.some(r=>r.type==='income')?`<div class="dot" style="background:var(--green)"></div>`:'') + (rcs.some(r=>r.type==='expense')?`<div class="dot" style="background:var(--red)"></div>`:'');
+        calH += `<div class="cal-c"><div class="cal-d ${dS===selD?'active':''} ${dS===toIsoD(new Date())?'today':''}" onclick="selD='${dS}';render();">${d}<div class="dots">${dots}</div></div></div>`;
     }
     $('cal-grid').innerHTML = calH+'</div>';
-    const [yr,m,dy] = selD.split('-'); $('cal-title').textContent = `${m}月${dy}日 星期${['日','一','二','三','四','五','六'][new Date(yr,m-1,dy).getDay()]}`;
+    
+    const dObj = new Date(selD);
+    $('cal-title').textContent = `${dObj.getMonth()+1}月${dObj.getDate()}日 星期${['日','一','二','三','四','五','六'][dObj.getDay()]}`;
     $('cal-list').innerHTML = ldg.map((r,ix)=>({...r,oid:ix})).filter(r=>r.date===selD).map(row).join('') || '<div class="empty">本日無紀錄</div>';
 }
 
