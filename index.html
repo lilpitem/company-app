@@ -15,7 +15,7 @@
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; outline:none; }
 body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","Helvetica Neue",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:430px; margin:0 auto; overflow-x:hidden; line-height:1.4; -webkit-font-smoothing:antialiased; }
 
-/* ── 啟動畫面 (Splash Screen) ── */
+/* ── 啟動畫面 (Splash Screen) 優化 ── */
 #splash-screen {
   position: fixed;
   inset: 0;
@@ -27,15 +27,17 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","
   transition: opacity 0.6s ease-out;
 }
 .splash-logo {
-  width: 22%; /* 放大至螢幕寬度的 22%，比例接近 iPhone 開機 Apple Logo */
-  max-width: 110px;
+  /* 模擬 iPhone 開機 Logo 比例：佔螢幕短邊約 20% */
+  width: 20%; 
+  max-width: 90px;
+  filter: drop-shadow(0 0 1px rgba(255,255,255,0.1));
   animation: splashAnim 1.8s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
 }
 @keyframes splashAnim {
-  0% { opacity: 0; transform: scale(0.9); }
+  0% { opacity: 0; transform: scale(0.96); }
   30% { opacity: 1; transform: scale(1); }
-  80% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0.8; transform: scale(1.05); }
+  85% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.02); }
 }
 
 /* ── 列表行與通用樣式 ── */
@@ -52,7 +54,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","
 .card { background:var(--card); border-radius:var(--radius-card); padding:18px; margin:0 16px 12px; }
 .card-title { font-size:14px; color:var(--muted); margin-bottom:15px; text-transform:uppercase; letter-spacing:.5px; }
 
-/* ── Header 調整：靠右對齊，移除文字 ── */
+/* ── Header 調整 ── */
 .header { padding:56px 20px 20px; display:flex; justify-content:flex-end; align-items:center; min-height: 98px; }
 #sync-status { font-size:11px; padding:6px 12px; border-radius:20px; background:var(--input-bg); transition:.3s; font-weight:600; }
 .syncing { color:var(--amber); animation:pulse 1s infinite; }
@@ -60,7 +62,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","
 .sync-err { color:var(--red); background:rgba(255,69,58,.1); cursor:pointer; }
 @keyframes pulse { 50% { opacity:.5; } }
 
-/* ── 月份導覽優化 ── */
+/* ── 月份導覽 ── */
 .month-nav { display:flex; align-items:center; justify-content:center; gap:8px; padding:0 16px 16px; }
 .m-btn { background:none; border:none; color:var(--accent); border-radius:8px; padding:8px 12px; font-size:24px; cursor:pointer; line-height:1; font-weight:300; }
 .m-btn:active { background:rgba(255,255,255,.05); }
@@ -127,9 +129,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","
 .legend-item div:first-child { font-size:11px; color:var(--muted); margin-bottom:4px; font-weight: 600; text-transform: uppercase;}
 .legend-item div:last-child { font-size:16px; font-weight:700; }
 </style>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 </head>
 <body id="swipe-area">
 
@@ -192,7 +191,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","
 <div class="modal-overlay" id="m-del" onclick="closeM(event,'m-del')">
   <div class="modal" style="text-align:center;">
     <div class="modal-h"></div>
-    <div class="modal-title" style="margin-bottom:25px; color:var(--text);">確定刪除此筆紀錄嗎？<br><span style="font-weight:400; font-size:14px; color:var(--muted);">此動作無法還原</span></div>
+    <div class="modal-title" style="margin-bottom:25px; color:var(--text);">確定刪除此筆紀錄嗎？</div>
     <div style="display:flex;flex-direction:column; gap:12px;"><button class="btn-p" style="background:var(--red);" onclick="execDel()">刪除</button><button class="btn-secondary" onclick="closeMById('m-del')">取消</button></div>
   </div>
 </div>
@@ -211,7 +210,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","
       <div class="field"><label>金額</label><input type="number" id="l-a" placeholder="$0" required inputmode="numeric"></div>
       <div class="field"><label>項目內容</label><input type="text" id="l-c" placeholder="例如：租金" required></div>
       <div class="field"><label>歸屬成員</label><select id="l-m"></select></div>
-      <div class="field"><label>上傳照片 (目前僅供展示)</label><input type="file" id="l-p" accept="image/*"></div>
       <div class="field"><label>發票號碼</label><input type="text" id="l-inv" placeholder="AB-12345678"></div>
       <div class="field"><label>報帳狀態</label><select id="l-clm"><option value="請款">請款</option><option value="不請款">不請款</option></select></div>
       <div class="field"><label>憑證類型</label><select id="l-vt"><option value="電子發票">電子發票</option><option value="三聯單">三聯單</option><option value="三聯單收銀機">三聯單收銀機</option><option value="免用統一發票">免用統一發票</option><option value="無憑證">無憑證</option></select></div>
@@ -248,7 +246,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro NT","Noto Sans TC","
 </div>
 
 <script>
-const CURRENT_VERSION = '3.4.1_iOS_BigLogo'; 
+const CURRENT_VERSION = '3.4.1_iOS_AppleScale'; 
 if (localStorage.getItem('app_version') !== CURRENT_VERSION) {
     localStorage.setItem('app_version', CURRENT_VERSION);
     window.location.reload(true); 
@@ -303,7 +301,7 @@ function saveLdg() {
   updateState('m-ldg'); 
 }
 function saveEmp() { const id = qV('e-id'), d = {name:qV('e-n'), salary:Number(qV('e-s')), bonus:Number(qV('e-b'))}; id ? emp[id]=d : emp.push(d); updateState('m-emp'); }
-const delEmp = () => { if(confirm('確定刪除此人員及其所有薪資預算？此動作無法還原。')){ emp.splice(qV('e-id'),1); updateMem(); updateState('m-emp'); } };
+const delEmp = () => { if(confirm('確定刪除此人員？')){ emp.splice(qV('e-id'),1); updateMem(); updateState('m-emp'); } };
 const execDel = () => { if(delIdx!==-1){ ldg.splice(delIdx,1); delIdx=-1; updateState('m-del', true); } };
 const updateState = (mId, skipMems) => { saveLoc(); sync(); render(); if(!skipMems) updateMem(); closeMById(mId); };
 const updateMem = () => $('l-m').innerHTML = '<option value="公司">🏛 公司帳戶</option>' + emp.map(e=>`<option value="${e.name}">👤 ${e.name}</option>`).join('');
@@ -353,15 +351,12 @@ function render() {
 function showDet(i) {
     const e = emp[i]; $('det-n').textContent = e.name;
     const curMonthLdg = ldg.map((r,ix)=>({...r,oid:ix})).filter(r=>r.date.startsWith(`${calYear}-${String(calMonth+1).padStart(2,'0')}`) && r.mem === e.name);
-
-    $('det-list').innerHTML = curMonthLdg.map(r=>rowTemplate(r, false)).join('') || '<div class="empty">本月無相關支薪</div>';
-
+    $('det-list').innerHTML = curMonthLdg.map(r=>rowTemplate(r, false)).join('') || '<div class="empty">本月無支出</div>';
     $('det-e-btn').onclick = () => {
       closeMById('m-det'); $('m-emp-title').textContent = "編輯人員";
       $('e-id').value=i; $('e-n').value=e.name; $('e-s').value=e.salary; $('e-b').value=e.bonus;
       $('btn-del-emp').style.display='block'; openM('m-emp');
     }; 
-    
     openM('m-det');
     setTimeout(() => {
         if(charts.e) charts.e.destroy();
@@ -373,13 +368,11 @@ window.onload = () => {
     render(); 
     updateMem(); 
     loadCloud(); 
-    
-    // 控制 Splash Screen 延遲消失
     setTimeout(() => {
         const splash = $('splash-screen');
-        splash.style.opacity = '0'; // 觸發 CSS 過渡淡出
-        setTimeout(() => splash.style.display = 'none', 600); // 確保從畫面中移除，不再阻擋點擊
-    }, 1500); // 畫面停留 1.5 秒
+        splash.style.opacity = '0';
+        setTimeout(() => splash.style.display = 'none', 600);
+    }, 1500);
 };
 </script>
 </body>
