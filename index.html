@@ -1,3 +1,11 @@
+這兩個調整非常實用！
+
+1. **專案自行填寫：** 我已經把下拉選單改成了**文字輸入框**。為了方便，如果你新增帳目時沒有填寫專案名稱，系統會自動幫你標記為「一般常規」。
+2. **全面支援滑動：** 之前為了防止誤觸，我把卡片（包含圖表區塊）的滑動給鎖定了。現在我已經解除了這個限制，你現在**在「本月財務概覽」的卡片上直接左右滑動，也能順暢切換月份了！**
+
+請再次全選並用這份 **v2.7 版** 的程式碼覆蓋：
+
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -7,7 +15,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.6</title>
+<title>Yun Yi Finance v2.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -52,12 +60,12 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 
 /* 長按互動樣式 */
 .pressable-row {
-  -webkit-touch-callout: none; /* 禁用系統選單 */
-  -webkit-user-select: none;   /* 禁用文字選取 */
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none;   
   user-select: none;
   transition: background 0.2s, transform 0.1s;
   border-radius: 8px;
-  padding: 12px 8px; /* 增加一點點擊範圍 */
+  padding: 12px 8px; 
   margin: 0 -8px;
 }
 .pressable-row:active { background: rgba(255,255,255,0.05); transform: scale(0.98); }
@@ -201,13 +209,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
         </select>
       </div>
       <div class="field"><label>歸屬專案</label>
-        <select id="l-proj">
-          <option value="一般常規">一般常規</option>
-          <option value="DV門店-香包">DV門店-香包</option>
-          <option value="DV門店-蠟燭">DV門店-蠟燭</option>
-          <option value="DV門店-水晶">DV門店-水晶</option>
-          <option value="DV門店-cocodor">DV門店-cocodor</option>
-        </select>
+        <input type="text" id="l-proj" placeholder="例如：一般常規、DV茶會 等等">
       </div>
       <div class="field"><label>支付/收款方式</label>
         <select id="l-pay">
@@ -310,22 +312,24 @@ function openModal(id) { $(id).classList.add('open'); }
 function closeModal(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeModalById(id) { $(id).classList.remove('open'); }
 
-// 左右滑動切換月份 (Swipe Left / Right)
+// 解除卡片的滑動限制，允許全畫面左右滑動切換月份
 let touchstartX = 0, touchstartY = 0, touchendX = 0, touchendY = 0;
 document.addEventListener('touchstart', e => {
-  if(e.target.closest('.modal-overlay') || e.target.closest('.card')) return; 
+  // 只阻擋彈出視窗內的滑動，其他地方(包含卡片)都可以滑
+  if(e.target.closest('.modal-overlay')) return; 
   touchstartX = e.changedTouches[0].screenX;
   touchstartY = e.changedTouches[0].screenY;
 }, { passive: true });
 
 document.addEventListener('touchend', e => {
-  if(e.target.closest('.modal-overlay') || e.target.closest('.card')) return;
+  if(e.target.closest('.modal-overlay')) return;
   touchendX = e.changedTouches[0].screenX;
   touchendY = e.changedTouches[0].screenY;
   
   let xDiff = touchstartX - touchendX;
   let yDiff = touchstartY - touchendY;
   
+  // 判斷橫向滑動
   if(Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 60) {
     if(xDiff > 0) changeMonth(1); 
     else changeMonth(-1); 
@@ -337,10 +341,9 @@ document.addEventListener('touchend', e => {
 function startPress(e, idx) {
   targetDeleteIndex = idx;
   pressTimer = setTimeout(() => {
-    // 觸發短暫震動 (Android支援)
     if(navigator.vibrate) navigator.vibrate(50);
     openModal('modal-delete');
-  }, 600); // 600毫秒
+  }, 600);
 }
 
 function cancelPress() {
@@ -409,11 +412,12 @@ function deleteEmployee() {
 }
 
 function addLedger() {
-  const date=$('l-date').value, name=$('l-name').value, amt=$('l-amt').value, cat=$('l-cat').value, proj=$('l-proj').value, pay=$('l-pay').value;
+  const date=$('l-date').value, name=$('l-name').value, amt=$('l-amt').value, cat=$('l-cat').value, pay=$('l-pay').value;
+  const proj=$('l-proj').value.trim() || '一般常規'; // 若未填寫自動帶入一般常規
   if(!name || !amt) return;
   ledger.unshift({ date, name, amt: parseInt(amt), cat, proj, pay });
   save(); renderAll(); closeModalById('modal-ledger');
-  $('l-name').value = ''; $('l-amt').value = '';
+  $('l-name').value = ''; $('l-amt').value = ''; $('l-proj').value = '';
   if(document.activeElement) document.activeElement.blur();
 }
 
@@ -421,7 +425,6 @@ function renderLedger() {
   const selMonth = getCurrentMonthStr();
   const el = $('ledger-list');
   
-  // 建立包含原始 index 的陣列，確保刪除時不會刪錯筆
   const renderedItems = [];
   ledger.forEach((r, idx) => {
     if(r.date.startsWith(selMonth)) {
@@ -561,3 +564,4 @@ updateDateUI();
 </script>
 </body>
 </html>
+```
