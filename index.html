@@ -277,7 +277,13 @@ body.nav-active .global-nav { display:flex; }
 </div>
 
 <div id="s-ldg" class="screen"><div class="card" id="ldg-list"></div></div>
-<div id="s-pay" class="screen"><div class="card" id="emp-list"></div></div>
+<div id="s-pay" class="screen">
+  <div class="page-title">
+    <span>人員管理</span>
+    <button class="icon-btn" onclick="$('m-add-emp').classList.add('open')">＋</button>
+  </div>
+  <div class="card" id="emp-list"></div>
+</div>
 
 <div id="s-payroll" class="screen">
   <div class="page-title">
@@ -361,6 +367,23 @@ body.nav-active .global-nav { display:flex; }
   </div>
 </div>
 
+<div class="modal-overlay" id="m-emp-detail" onclick="closeM(event,'m-emp-detail')">
+  <div class="modal" style="height: 90vh; display: flex; flex-direction: column; padding-bottom: calc(env(safe-area-inset-bottom) + 10px);">
+    <div class="modal-h" style="flex-shrink:0;"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-shrink:0;">
+      <button onclick="closeMById('m-emp-detail')" style="background:none;border:none;color:var(--accent);font-size:17px;">關閉</button>
+      <b style="font-size:17px;" id="emp-detail-name">人員明細</b>
+      <div style="width:34px;"></div> </div>
+    
+    <div id="emp-detail-stats" style="display:flex; gap:10px; margin-bottom: 15px; flex-shrink:0;">
+      </div>
+
+    <div class="divider-label" style="padding-left:0;">此人經手的帳目細項</div>
+    <div id="emp-detail-list" style="flex:1; overflow-y:auto; margin-bottom:20px;">
+      </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="m-add-proj" onclick="closeM(event,'m-add-proj')">
   <div class="modal">
     <div class="modal-h"></div>
@@ -410,6 +433,15 @@ body.nav-active .global-nav { display:flex; }
       <div class="as-item" style="color:var(--red); font-weight:600;" onclick="executeDeleteProj()">刪除此專案</div>
     </div>
     <div class="as-cancel" onclick="closeASById('as-delete-proj')">取消</div>
+  </div>
+</div>
+
+<div class="action-sheet-overlay" id="as-delete-emp" onclick="closeAS(event, 'as-delete-emp')">
+  <div class="action-sheet">
+    <div class="as-group">
+      <div class="as-item" style="color:var(--red); font-weight:600;" onclick="executeDeleteEmp()">刪除此人員</div>
+    </div>
+    <div class="as-cancel" onclick="closeASById('as-delete-emp')">取消</div>
   </div>
 </div>
 
@@ -526,21 +558,31 @@ function render() {
   $('cal-grid').innerHTML=calH+'</div>';
   $('cal-title').textContent=selD;
   
-  // 渲染日曆的每日明細 (支援長按刪除)
+  // 渲染日曆的每日明細
   $('cal-list').innerHTML=ldg.map((r,i)=>({...r,_o:i})).filter(r=>r.date===selD).map(r=>`
     <div class="long-pressable" style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${r._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
       <div>${r.cat} <small style="color:var(--muted)">${r.mem}</small></div>
       <b style="color:${r.type==='income'?'var(--green)':'#fff'}">${r.type==='income'?'+':'-'}$${r.amt.toLocaleString()}</b>
     </div>`).join('')||'<div style="padding:20px;text-align:center;color:var(--muted);">本日無紀錄</div>';
   
-  // 渲染帳目明細 (支援長按刪除)
+  // 渲染帳目明細
   $('ldg-list').innerHTML=ldg.map((r,i)=>`
     <div class="long-pressable" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);" onpointerdown="startLP(${i})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
       <div>${r.cat}<br><small style="color:var(--muted)">${r.date} · ${r.mem} ${r.proj?`[${r.proj}]`:''}</small></div>
       <b style="color:${r.type==='income'?'var(--green)':'#fff'}">${r.type==='income'?'+':'-'}$${r.amt.toLocaleString()}</b>
     </div>`).join('');
   
-  $('emp-list').innerHTML=emp.map(e=>`<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);"><div>${e.name}<br><small style="color:var(--muted)">${e.idNo||'未填寫身分證'}</small></div><small>$${(e.salary||0).toLocaleString()}</small></div>`).join('');
+  // 渲染人員清單 (新增長按刪除與點擊查看明細)
+  $('emp-list').innerHTML=emp.map((e, idx)=>`
+    <div class="long-pressable" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);"
+         onpointerdown="startLPEmp(${idx})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()" 
+         onclick="handleEmpClick(${idx})">
+      <div>${e.name}<br><small style="color:var(--muted)">${e.idNo||'未填寫身分證'}</small></div>
+      <div style="text-align:right">
+        <small>$${(e.salary||0).toLocaleString()}</small><br>
+        <small style="color:var(--accent);font-size:11px;">查看明細 ></small>
+      </div>
+    </div>`).join('');
 }
 
 const openProfilePicker = () => {
@@ -595,53 +637,138 @@ function handleSearch(v){
     </div>`).join('');
 }
 
-// ── 長按刪除 (Apple Native Feel) 邏輯 ──
+// ── 防點擊誤觸機制與長按刪除 (Apple Native Feel) 邏輯 ──
 let lpTimer = null;
+let preventClick = false; // 用於區分長按與單點
 let deleteTargetIdx = null;
 let deleteProjTarget = null;
+let deleteEmpTargetIdx = null;
 
 function startLP(idx) {
-  cancelLP(); // 先清空可能殘留的計時
+  cancelLP(); 
+  preventClick = false;
   lpTimer = setTimeout(() => {
-    if(navigator.vibrate) navigator.vibrate(50); // 震動回饋
+    preventClick = true; // 已經觸發長按，阻止後續的 click 事件
+    if(navigator.vibrate) navigator.vibrate(50);
     deleteTargetIdx = idx;
     $('as-delete').classList.add('open');
-  }, 500); // 500ms 即視為長按
+  }, 500); 
 }
 
 function startLPProj(pName) {
   cancelLP();
+  preventClick = false;
   lpTimer = setTimeout(() => {
+    preventClick = true;
     if(navigator.vibrate) navigator.vibrate(50);
     deleteProjTarget = pName;
     $('as-delete-proj').classList.add('open');
   }, 500);
 }
 
-// 防止滑動時觸發長按 (Native Experience)
+function startLPEmp(idx) {
+  cancelLP();
+  preventClick = false;
+  lpTimer = setTimeout(() => {
+    preventClick = true;
+    if(navigator.vibrate) navigator.vibrate(50);
+    deleteEmpTargetIdx = idx;
+    $('as-delete-emp').classList.add('open');
+  }, 500);
+}
+
+// 防止滑動時觸發長按
 function cancelLP() {
   if(lpTimer) clearTimeout(lpTimer);
 }
 
+// 處理人員點擊 (若為長按則略過)
+function handleEmpClick(idx) {
+  if (preventClick) return;
+  openEmpDetail(idx);
+}
+
+// 開啟人員詳細資訊 (記帳細項)
+function openEmpDetail(idx) {
+  const person = emp[idx];
+  $('emp-detail-name').textContent = person.name;
+
+  // 篩選該人員所有的記帳資料
+  const personLdg = ldg.filter(r => r.mem === person.name);
+  let inc = 0, exp = 0;
+  personLdg.forEach(r => {
+     if(r.type === 'income') inc += r.amt;
+     else exp += r.amt;
+  });
+
+  // 渲染人員卡片狀態
+  $('emp-detail-stats').innerHTML = `
+    <div style="flex:1; background:var(--input-bg); padding:10px; border-radius:10px; text-align:center;">
+      <div style="font-size:11px; color:var(--muted)">身分證字號</div>
+      <div style="font-size:14px; font-weight:500; margin-top:4px;">${person.idNo || '-'}</div>
+    </div>
+    <div style="flex:1; background:var(--input-bg); padding:10px; border-radius:10px; text-align:center;">
+      <div style="font-size:11px; color:var(--muted)">設定月薪</div>
+      <div style="font-size:14px; font-weight:500; margin-top:4px;">$${(person.salary||0).toLocaleString()}</div>
+    </div>
+    <div style="flex:1; background:var(--input-bg); padding:10px; border-radius:10px; text-align:center;">
+      <div style="font-size:11px; color:var(--muted)">總經手 (收/支)</div>
+      <div style="font-size:13px; font-weight:600; margin-top:4px; white-space:nowrap;">
+        <span style="color:var(--green)">+${fmtK(inc)}</span> / <span style="color:var(--red)">-${fmtK(exp)}</span>
+      </div>
+    </div>
+  `;
+
+  // 渲染細項列表
+  $('emp-detail-list').innerHTML = personLdg.map(r => `
+    <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);">
+      <div>${r.cat}<br><small style="color:var(--muted)">${r.date} ${r.proj ? `[${r.proj}]` : ''}</small></div>
+      <b style="color:${r.type==='income'?'var(--green)':'#fff'}">${r.type==='income'?'+':'-'}$${r.amt.toLocaleString()}</b>
+    </div>
+  `).join('') || '<div class="empty-state">尚無帳目紀錄</div>';
+
+  $('m-emp-detail').classList.add('open');
+}
+
+// 執行刪除單筆帳目
 function executeDelete() {
   if(deleteTargetIdx !== null) {
     ldg.splice(deleteTargetIdx, 1);
     localStorage.setItem('yl', JSON.stringify(ldg));
-    sync(); // 觸發背景同步
-    fullRender(); // 重新計算所有報表、預算、毛利
+    sync(); 
+    fullRender(); 
     closeASById('as-delete');
     deleteTargetIdx = null;
   }
 }
 
+// 執行刪除整個專案
 function executeDeleteProj() {
   if(deleteProjTarget !== null) {
+    ldg.forEach(r => { if(r.proj === deleteProjTarget) r.proj = ''; });
+    localStorage.setItem('yl', JSON.stringify(ldg));
     delete projs[deleteProjTarget];
     localStorage.setItem('yp', JSON.stringify(projs));
-    if(currentProject === deleteProjTarget) currentProject = Object.keys(projs)[0] || "";
-    renderProject(); // 刷新專案表
+    if(currentProject === deleteProjTarget) {
+       const remaining = Object.keys(projs);
+       currentProject = remaining.length ? remaining[0] : "";
+    }
+    sync(); 
+    fullRender(); 
     closeASById('as-delete-proj');
     deleteProjTarget = null;
+  }
+}
+
+// 執行刪除人員
+function executeDeleteEmp() {
+  if(deleteEmpTargetIdx !== null) {
+    emp.splice(deleteEmpTargetIdx, 1);
+    localStorage.setItem('ye', JSON.stringify(emp));
+    sync();
+    fullRender();
+    closeASById('as-delete-emp');
+    deleteEmpTargetIdx = null;
   }
 }
 
@@ -676,10 +803,10 @@ function renderProject() {
   const pKeys = Object.keys(projs);
   if(pKeys.length && !pKeys.includes(currentProject)) currentProject = pKeys[0];
   
-  // 渲染專案 Tabs，支援長按刪除整包專案
+  // 加入 preventClick 防誤觸判定
   $('proj-tabs').innerHTML = pKeys.map(p =>
     `<div class="proj-tab ${p===currentProject?'active':''} long-pressable" 
-          onclick="switchProject('${p.replace(/'/g,"\\'")}')"
+          onclick="if(!preventClick) switchProject('${p.replace(/'/g,"\\'")}')"
           onpointerdown="startLPProj('${p.replace(/'/g,"\\'")}')"
           onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
        📦 ${p}
@@ -693,7 +820,6 @@ function renderProject() {
   }
 
   const proj = projs[currentProject];
-  // 記錄原始 index 以便刪除連動
   let relatedLdg = ldg.map((r, i) => ({...r, _o: i})).filter(r => r.proj === currentProject);
   let totalActual = relatedLdg.filter(r=>r.type==='expense').reduce((s,i)=>s+i.amt, 0);
   
@@ -707,7 +833,6 @@ function renderProject() {
     <div class="pbb-row"><span class="pbb-label">實際支出 $${totalActual.toLocaleString()}</span><span class="pbb-val">剩餘 <span style="color:${remaining>=0?'var(--green)':'var(--red)'}">$${remaining.toLocaleString()}</span></span></div>
   </div>`;
 
-  // 篩選與渲染項目
   let items = relatedLdg.map(r => ({
     name: r.cat, actual: r.amt, payer: r.mem, date: r.date, type: r.type, inv: r.vt !== '無憑證', done: true, _o: r._o
   }));
@@ -720,7 +845,6 @@ function renderProject() {
   if(items.length) {
     html += `<div class="proj-section-hdr">實際記帳項目 (由明細自動匯入)</div>`;
     items.forEach(item => {
-      // 支援專案細項長按刪除
       html += `
       <div class="proj-item long-pressable" onpointerdown="startLP(${item._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
         <div class="proj-item-left">
@@ -760,12 +884,11 @@ function setInvSort(type) {
 
 function renderInvoice() {
   $('inv-month-picker').value = currentInvMonth;
-  // 記錄原始 index 以便刪除
   let dInM = ldg.map((r, i) => ({...r, _o: i})).filter(r => r.date.startsWith(currentInvMonth) && r.vt && r.vt !== '無憑證');
   
   let totalIn = 0, totalOut = 0;
   dInM.forEach(r => { if(r.type==='income') totalIn+=r.amt; else totalOut+=r.amt; });
-  let taxEst = Math.round((totalIn - totalOut) * 0.05); // 簡單估算營業稅
+  let taxEst = Math.round((totalIn - totalOut) * 0.05);
   if(taxEst < 0) taxEst = 0;
   let grossProfit = totalIn - totalOut;
 
@@ -775,7 +898,6 @@ function renderInvoice() {
     <div class="inv-sum-card"><div class="inv-sum-label">🏦 預估營業稅額</div><div class="inv-sum-val tax">$${taxEst.toLocaleString()}</div></div>
     <div class="inv-sum-card"><div class="inv-sum-label">💰 本月毛利</div><div class="inv-sum-val profit">$${grossProfit.toLocaleString()}</div></div>`;
 
-  // 篩選與排序
   let displayList = dInM.filter(r => (r.type==='income' && invFilterSet.has('inc')) || (r.type==='expense' && invFilterSet.has('exp')));
   displayList.sort((a,b) => {
     if(invSortBy === 'date') { return invSortDesc ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date); }
@@ -785,7 +907,6 @@ function renderInvoice() {
   let html = '';
   displayList.forEach(item => {
     let isInc = item.type==='income';
-    // 支援長按刪除，加入 ontouchmove="cancelLP()" 防止滾動誤觸
     html += `
     <div class="inv-item long-pressable" onpointerdown="startLP(${item._o})" onpointerup="cancelLP()" onpointercancel="cancelLP()" onpointerleave="cancelLP()" ontouchmove="cancelLP()" oncontextmenu="event.preventDefault()">
       <div class="inv-item-left">
@@ -804,12 +925,11 @@ function renderInvoice() {
 }
 function switchInvMonth(m){ if(m){ currentInvMonth=m; renderInvoice(); } }
 
-// ── 薪資清冊功能 (結合政府格式) ──
+// ── 薪資清冊功能 ──
 function renderPayroll() {
   const y = currentPayrollMonth.split('-')[0], m = currentPayrollMonth.split('-')[1];
   let payrollData = [];
   
-  // 依照人員清單抓取當月費用
   emp.forEach(e => {
     let empExp = ldg.filter(r => r.mem === e.name && r.type === 'expense' && r.date.startsWith(currentPayrollMonth));
     let totalAmt = empExp.reduce((s,i) => s+i.amt, 0);
@@ -901,7 +1021,6 @@ function buildGovTable() {
 }
 
 window.onload = () => {
-  // 自動補齊預設假資料供展示
   if(!ldg.length && !emp.length) {
     emp.push({name:"林柏衡", idNo:"A123456789", salary:37100});
   }
