@@ -5,253 +5,207 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="公司財務">
+<meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>公司財務管理</title>
+<title>Yun Yi Finance v2.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root {
-  --bg: #0f0f1a;
-  --bg2: #1a1a2e;
-  --bg3: #16213e;
-  --card: #1e1e35;
-  --accent: #7c6af7;
-  --accent2: #a78bfa;
-  --green: #34d399;
-  --red: #f87171;
-  --amber: #fbbf24;
-  --text: #f0f0ff;
-  --muted: #8888aa;
-  --border: rgba(124,106,247,0.2);
-  --radius: 16px;
-  --radius-sm: 10px;
+  --bg: #0f0f1a; --bg2: #1a1a2e; --bg3: #16213e; --card: #1e1e35;
+  --accent: #7c6af7; --accent2: #a78bfa; --green: #34d399; --red: #f87171;
+  --amber: #fbbf24; --text: #f0f0ff; --muted: #8888aa;
+  --border: rgba(124,106,247,0.2); --radius: 16px; --radius-sm: 10px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; max-width: 430px; margin: 0 auto; overflow-x: hidden; }
-.screen { display: none; min-height: 100vh; padding-bottom: 80px; }
+.screen { display: none; min-height: 100vh; padding-bottom: 90px; }
 .screen.active { display: block; }
 
-/* Header */
+/* Header & Navigation */
 .header { padding: 56px 20px 20px; background: linear-gradient(180deg, var(--bg2) 0%, transparent 100%); }
-.header-top { display: flex; justify-content: space-between; align-items: center; }
-.header h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-.header .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; }
 
-/* Bottom Nav */
+/* 標題下拉選單風格 (包含透明原生 Input) */
+.dropdown-title { position: relative; display: inline-flex; align-items: center; gap: 6px; font-size: 18px; padding: 4px 8px; margin-left: -8px; border-radius: 8px; transition: background 0.2s; overflow: hidden; }
+.dropdown-title:active { background: rgba(255,255,255,0.05); }
+.dropdown-title .muted { color: var(--muted); font-weight: 400; }
+.dropdown-title .active-text { color: var(--text); font-weight: 700; }
+.dropdown-title .chevron { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.native-date-input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+
 .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--bg2); border-top: 0.5px solid var(--border); display: flex; z-index: 100; padding: 8px 0 20px; }
-.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 4px 0; }
-.nav-icon { font-size: 22px; color: var(--muted); transition: color 0.2s; }
-.nav-label { font-size: 10px; color: var(--muted); transition: color 0.2s; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.nav-icon { font-size: 20px; color: var(--muted); }
+.nav-label { font-size: 10px; color: var(--muted); }
 .nav-item.active .nav-icon, .nav-item.active .nav-label { color: var(--accent2); }
 
-/* Cards */
+/* Components */
 .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 0 16px 12px; }
-.card-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.card-title { font-size: 12px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; display: flex; justify-content: space-between; }
 
-/* Metrics Grid */
-.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; margin-bottom: 12px; }
-.metric { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
-.metric .ml { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-.metric .mv { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-.metric .mv.green { color: var(--green); }
-.metric .mv.red { color: var(--red); }
-.metric .mv.amber { color: var(--amber); }
-.metric .mv.purple { color: var(--accent2); }
-
-/* List rows */
 .list-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
-.list-row:last-child { border-bottom: none; }
-.row-left { display: flex; align-items: center; gap: 10px; }
-.avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
-.av1 { background: rgba(124,106,247,0.2); color: var(--accent2); }
-.av2 { background: rgba(52,211,153,0.2); color: var(--green); }
-.av3 { background: rgba(251,191,36,0.2); color: var(--amber); }
-.av4 { background: rgba(248,113,113,0.2); color: var(--red); }
-.row-name { font-size: 14px; font-weight: 500; }
-.row-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-.row-amount { font-size: 15px; font-weight: 700; }
+.row-left { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+.row-info { overflow: hidden; }
+.row-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-sub { font-size: 11px; color: var(--muted); }
+.tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--muted); margin-right: 4px; }
 
-/* Inputs */
-.field { margin-bottom: 14px; }
-.field label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
-.field input, .field select { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; font-family: inherit; outline: none; -webkit-appearance: none; }
-.field input:focus, .field select:focus { border-color: var(--accent); }
-.field select option { background: var(--bg2); }
+/* Buttons & Inputs */
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.btn-add { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: rgba(124,106,247,0.1); border: 1px dashed var(--accent); border-radius: var(--radius-sm); color: var(--accent2); cursor: pointer; font-size: 14px; margin-top: 10px; }
+.field { margin-bottom: 12px; }
+.field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+.field input, .field select { width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none; }
+.btn-primary { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; }
 
-/* Buttons */
-.btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; font-family: inherit; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.1s; }
-.btn:active { transform: scale(0.98); }
-.btn-primary { background: var(--accent); color: white; }
-.btn-danger { background: rgba(248,113,113,0.15); color: var(--red); border: 0.5px solid rgba(248,113,113,0.3); margin-top: 8px; }
-.btn-row { display: flex; gap: 8px; }
-.btn-row .btn { font-size: 13px; padding: 10px; }
-.btn-ghost { background: rgba(255,255,255,0.05); color: var(--text); border: 0.5px solid var(--border); }
-
-/* Tags */
-.tag { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500; }
-.tag-in { background: rgba(52,211,153,0.15); color: var(--green); }
-.tag-out { background: rgba(248,113,113,0.15); color: var(--red); }
-
-/* Modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: flex-end; }
+/* Modals */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: flex-end; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 24px 20px 40px; width: 100%; max-height: 85vh; overflow-y: auto; }
-.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 20px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 15px; }
 
-/* Section padding */
-.section-pad { padding: 0 16px; }
-.divider { height: 0.5px; background: var(--border); margin: 8px 16px; }
+.empty { text-align: center; padding: 30px; color: var(--muted); font-size: 13px; }
 
-/* Tax result rows */
-.tax-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); font-size: 14px; }
-.tax-row:last-child { border-bottom: none; }
-.tax-row .tl { color: var(--muted); }
-.tax-row .tv { font-weight: 500; }
-
-/* Empty state */
-.empty { text-align: center; padding: 32px; color: var(--muted); font-size: 14px; }
-
-/* Salary breakdown */
-.sal-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+/* Doughnut Chart */
+.chart-center-text { position: absolute; text-align: center; pointer-events: none; }
+.chart-center-text .label { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+.chart-center-text .value { font-size: 22px; font-weight: 700; color: var(--green); letter-spacing: -0.5px; }
+.doughnut-legend { display: flex; justify-content: space-around; margin-top: 20px; text-align: center; padding-top: 16px; border-top: 0.5px solid var(--border); }
+.doughnut-legend .ml { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.doughnut-legend .mv { font-size: 16px; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<!-- Dashboard -->
 <div class="screen active" id="s-home">
   <div class="header">
     <div class="header-top">
       <div>
-        <div class="header h1" style="font-size:22px;font-weight:700;">公司財務</div>
-        <div class="sub" id="today-date"></div>
+        <div class="dropdown-title">
+          <span class="muted">蘊一財務 /</span>
+          <span class="active-text" id="disp-date">2026年 05月</span>
+          <span class="chevron">▼</span>
+          <input type="month" id="native-month-picker" class="native-date-input" onchange="handleNativeDateChange(this)">
+        </div>
       </div>
-      <div class="icon-btn" onclick="openModal('modal-quick')">＋</div>
-    </div>
-  </div>
-  <div class="metrics">
-    <div class="metric"><div class="ml">本月收入</div><div class="mv green" id="m-income">$0</div></div>
-    <div class="metric"><div class="ml">本月支出</div><div class="mv red" id="m-expense">$0</div></div>
-    <div class="metric"><div class="ml">薪資總額</div><div class="mv amber" id="m-salary">$0</div></div>
-    <div class="metric"><div class="ml">本月結餘</div><div class="mv purple" id="m-balance">$0</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">最近紀錄</div>
-    <div id="home-recent"><div class="empty">點右上角 ＋ 新增收支</div></div>
-  </div>
-</div>
-
-<!-- Salary -->
-<div class="screen" id="s-salary">
-  <div class="header">
-    <div class="header-top">
-      <div><div style="font-size:22px;font-weight:700;">薪資管理</div><div class="sub" id="emp-count"></div></div>
-      <div class="icon-btn" onclick="openModal('modal-emp')">＋</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">員工列表</div>
-    <div id="emp-list"><div class="empty">點右上角 ＋ 新增員工</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">薪資試算</div>
-    <div class="field"><label>輸入月薪</label><input type="number" id="calc-salary" placeholder="例：38000" oninput="calcSalary()" inputmode="numeric"></div>
-    <div id="calc-result"></div>
-  </div>
-</div>
-
-<!-- Ledger -->
-<div class="screen" id="s-ledger">
-  <div class="header">
-    <div class="header-top">
-      <div><div style="font-size:22px;font-weight:700;">收支帳本</div></div>
       <div class="icon-btn" onclick="openModal('modal-ledger')">＋</div>
     </div>
   </div>
+  
+  <div class="card" style="padding-top: 20px;">
+    <div class="card-title">本月財務概覽</div>
+    <div style="position: relative; height: 200px; display: flex; justify-content: center; align-items: center;">
+      <canvas id="metricsChart"></canvas>
+      <div class="chart-center-text">
+        <div class="label">本月收入</div>
+        <div class="value" id="m-income">$0</div>
+      </div>
+    </div>
+    <div class="doughnut-legend">
+      <div><div class="ml">本月支出</div><div class="mv" style="color:var(--red)" id="m-expense">$0</div></div>
+      <div><div class="ml">薪資預算</div><div class="mv" style="color:var(--amber)" id="m-salary">$0</div></div>
+      <div><div class="ml">專案淨利</div><div class="mv" style="color:var(--accent2)" id="m-profit">$0</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="padding-top: 20px;">
+    <div class="card-title">近半年收支趨勢</div>
+    <div style="height: 160px;"><canvas id="trendChart"></canvas></div>
+  </div>
+  
   <div class="card">
-    <div class="card-title">所有紀錄</div>
-    <div id="ledger-list"><div class="empty">點右上角 ＋ 新增</div></div>
+    <div class="card-title">專案盈虧概覽</div>
+    <div id="project-summary"></div>
   </div>
 </div>
 
-<!-- Tax -->
-<div class="screen" id="s-tax">
+<div class="screen" id="s-salary">
   <div class="header">
     <div class="header-top">
-      <div><div style="font-size:22px;font-weight:700;">稅務試算</div></div>
+      <div class="dropdown-title"><span class="active-text">薪資清冊</span></div>
     </div>
+    <div id="emp-count" class="row-sub" style="margin-left:8px; margin-top:4px;"></div>
   </div>
   <div class="card">
-    <div class="card-title">年度試算</div>
-    <div class="field"><label>年度營業收入（元）</label><input type="number" id="t-rev" placeholder="0" oninput="calcTax()" inputmode="numeric"></div>
-    <div class="field"><label>年度費用支出（元）</label><input type="number" id="t-cost" placeholder="0" oninput="calcTax()" inputmode="numeric"></div>
-    <div id="tax-result"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">勞健保（公司負擔）</div>
-    <div id="ins-summary"><div class="empty">尚無員工資料</div></div>
+    <div class="card-title">員工名單</div>
+    <div id="emp-list"></div>
+    <div class="btn-add" onclick="prepareAddEmployee()">＋ 新增員工 / 兼職</div>
   </div>
 </div>
 
-<!-- Bottom Nav -->
+<div class="screen" id="s-ledger">
+  <div class="header">
+    <div class="header-top">
+      <div class="dropdown-title">
+        <span class="muted">收支帳本 /</span>
+        <span class="active-text" id="disp-date-ledger">2026年 05月</span>
+        <span class="chevron">▼</span>
+        <input type="month" id="native-month-picker-ledger" class="native-date-input" onchange="handleNativeDateChange(this)">
+      </div>
+      <div class="icon-btn" onclick="exportCSV()">💾</div>
+    </div>
+  </div>
+  <div class="card">
+    <div id="ledger-list"></div>
+    <div class="btn-add" onclick="openModal('modal-ledger')">＋ 新增帳目</div>
+  </div>
+</div>
+
 <nav class="bottom-nav">
-  <div class="nav-item active" onclick="goTo('home',this)">
-    <div class="nav-icon">🏠</div><div class="nav-label">總覽</div>
-  </div>
-  <div class="nav-item" onclick="goTo('salary',this)">
-    <div class="nav-icon">👥</div><div class="nav-label">薪資</div>
-  </div>
-  <div class="nav-item" onclick="goTo('ledger',this)">
-    <div class="nav-icon">📒</div><div class="nav-label">帳本</div>
-  </div>
-  <div class="nav-item" onclick="goTo('tax',this)">
-    <div class="nav-icon">🧾</div><div class="nav-label">稅務</div>
-  </div>
+  <div class="nav-item active" onclick="goTo('home',this)"><div class="nav-icon">📊</div><div class="nav-label">總覽</div></div>
+  <div class="nav-item" onclick="goTo('salary',this)"><div class="nav-icon">👥</div><div class="nav-label">薪資</div></div>
+  <div class="nav-item" onclick="goTo('ledger',this)"><div class="nav-icon">📒</div><div class="nav-label">帳本</div></div>
 </nav>
 
-<!-- Modal: Quick Add -->
-<div class="modal-overlay" id="modal-quick" onclick="closeModal(event,'modal-quick')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">新增收支</div>
-    <div class="field"><label>項目說明</label><input type="text" id="q-name" placeholder="例：廣告設計費"></div>
-    <div class="field"><label>金額</label><input type="number" id="q-amt" placeholder="0" inputmode="numeric"></div>
-    <div class="field"><label>類型</label>
-      <select id="q-type"><option value="income">收入</option><option value="expense">支出</option></select>
-    </div>
-    <div class="field"><label>日期</label><input type="date" id="q-date"></div>
-    <button class="btn btn-primary" onclick="addQuick()">新增</button>
-  </div>
-</div>
-
-<!-- Modal: Add Employee -->
-<div class="modal-overlay" id="modal-emp" onclick="closeModal(event,'modal-emp')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="emp-modal-title">新增員工</div>
-    <input type="hidden" id="emp-edit-id" value="">
-    <div class="field"><label>姓名</label><input type="text" id="e-name" placeholder="例：張小明"></div>
-    <div class="field"><label>職稱</label><input type="text" id="e-role" placeholder="例：設計師"></div>
-    <div class="field"><label>月薪（元）</label><input type="number" id="e-salary" placeholder="例：38000" inputmode="numeric"></div>
-    <button class="btn btn-primary" onclick="saveEmployee()">儲存</button>
-    <button class="btn btn-danger" id="emp-delete-btn" style="display:none;" onclick="deleteEmployee()">刪除員工</button>
-  </div>
-</div>
-
-<!-- Modal: Add Ledger -->
 <div class="modal-overlay" id="modal-ledger" onclick="closeModal(event,'modal-ledger')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">新增帳目</div>
-    <div class="field"><label>項目說明</label><input type="text" id="l-name" placeholder="例：客戶款項"></div>
-    <div class="field"><label>金額</label><input type="number" id="l-amt" placeholder="0" inputmode="numeric"></div>
-    <div class="field"><label>類型</label>
-      <select id="l-type"><option value="income">收入</option><option value="expense">支出</option></select>
-    </div>
+    <div class="modal-title" style="margin-bottom:15px; font-weight:700;">新增帳目</div>
     <div class="field"><label>日期</label><input type="date" id="l-date"></div>
-    <button class="btn btn-primary" onclick="addLedger()">新增</button>
+    <div class="field"><label>項目名稱</label><input type="text" id="l-name" placeholder="例如：DV茶會場地費"></div>
+    <div class="field"><label>金額</label><input type="number" id="l-amt" placeholder="0"></div>
+    <div class="field"><label>分類 (科目)</label>
+      <select id="l-cat">
+        <option value="營業收入">營業收入</option>
+        <option value="進貨成本">進貨成本</option>
+        <option value="行銷費用">行銷費用</option>
+        <option value="人事費用">人事費用</option>
+        <option value="雜支">雜支</option>
+      </select>
+    </div>
+    <div class="field"><label>歸屬專案</label>
+      <select id="l-proj">
+        <option value="一般常規">一般常規</option>
+        <option value="DV門店-香包">DV門店-香包</option>
+        <option value="DV門店-蠟燭">DV門店-蠟燭</option>
+        <option value="DV門店-水晶">DV門店-水晶</option>
+        <option value="DV門店-cocodor">DV門店-cocodor</option>
+      </select>
+    </div>
+    <div class="field"><label>支付/收款方式</label>
+      <select id="l-pay">
+        <option value="公司轉帳">公司轉帳</option>
+        <option value="現金">現金</option>
+        <option value="個人代墊">個人代墊</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="addLedger()">儲存紀錄</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-emp" onclick="closeModal(event,'modal-emp')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="emp-modal-title" style="margin-bottom:15px; font-weight:700;">新增人員</div>
+    <input type="hidden" id="emp-edit-id">
+    <div class="field"><label>姓名</label><input type="text" id="e-name"></div>
+    <div class="field"><label>職稱</label><input type="text" id="e-role"></div>
+    <div class="field"><label>底薪 / 基本薪資</label><input type="number" id="e-salary"></div>
+    <div class="field"><label>本月獎金 / 代墊回補</label><input type="number" id="e-bonus" value="0"></div>
+    <button class="btn-primary" onclick="saveEmployee()">儲存資料</button>
+    <button style="width:100%; margin-top:10px; background:transparent; color:var(--red); border:none; font-size:13px;" onclick="deleteEmployee()">刪除人員</button>
   </div>
 </div>
 
@@ -259,16 +213,57 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: va
 const $ = id => document.getElementById(id);
 const fmt = n => '$' + Math.round(n).toLocaleString();
 
-// Data
-let employees = JSON.parse(localStorage.getItem('emp') || '[]');
-let ledger = JSON.parse(localStorage.getItem('ledger') || '[]');
+let employees = JSON.parse(localStorage.getItem('yunyi_emp') || '[]');
+let ledger = JSON.parse(localStorage.getItem('yunyi_ledger') || '[]');
+let trendChart = null;
+let metricsChart = null;
 
-function save() {
-  localStorage.setItem('emp', JSON.stringify(employees));
-  localStorage.setItem('ledger', JSON.stringify(ledger));
+// 日期狀態管理
+const now = new Date();
+let currentYear = now.getFullYear();
+let currentMonth = now.getMonth() + 1;
+
+$('l-date').value = now.toISOString().slice(0,10);
+
+function getCurrentMonthStr() {
+  return `${currentYear}-${currentMonth.toString().padStart(2, '0')}`;
 }
 
-// Nav
+function updateDateUI() {
+  const dateText = `${currentYear}年 ${currentMonth.toString().padStart(2, '0')}月`;
+  $('disp-date').textContent = dateText;
+  if($('disp-date-ledger')) $('disp-date-ledger').textContent = dateText;
+  
+  // 同步原生 input 的值
+  const val = getCurrentMonthStr();
+  $('native-month-picker').value = val;
+  if($('native-month-picker-ledger')) $('native-month-picker-ledger').value = val;
+  
+  renderAll();
+}
+
+// 處理原生滾輪選擇器的變更
+function handleNativeDateChange(input) {
+  if (!input.value) return;
+  const parts = input.value.split('-');
+  currentYear = parseInt(parts[0], 10);
+  currentMonth = parseInt(parts[1], 10);
+  updateDateUI();
+}
+
+// 左右滑動切換月份
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+  else if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+  updateDateUI();
+}
+
+function save() {
+  localStorage.setItem('yunyi_emp', JSON.stringify(employees));
+  localStorage.setItem('yunyi_ledger', JSON.stringify(ledger));
+}
+
 function goTo(page, el) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -277,214 +272,216 @@ function goTo(page, el) {
   renderAll();
 }
 
-// Modals
-function openModal(id) {
-  $(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal(e, id) {
-  if (e.target === $(id)) { $(id).classList.remove('open'); document.body.style.overflow = ''; }
-}
-function closeModalById(id) { $(id).classList.remove('open'); document.body.style.overflow = ''; }
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
+function closeModalById(id) { $(id).classList.remove('open'); }
 
-// Avatar colors
-const avClasses = ['av1','av2','av3','av4'];
-function getAv(i) { return avClasses[i % 4]; }
+// 滑動手勢支援 (Swipe Left / Right)
+let touchstartX = 0, touchstartY = 0, touchendX = 0, touchendY = 0;
+document.addEventListener('touchstart', e => {
+  if(e.target.closest('.modal-overlay') || e.target.closest('.card')) return; 
+  touchstartX = e.changedTouches[0].screenX;
+  touchstartY = e.changedTouches[0].screenY;
+}, { passive: true });
 
-// Insurance calc
-function calcIns(salary) {
-  const lb = Math.min(Math.max(salary, 27470), 45800);
-  const hb = Math.min(Math.max(salary, 27470), 219500);
-  const lEmp = Math.round(lb * 0.105);
-  const lEmr = Math.round(lb * 0.1715);
-  const hEmp = Math.round(hb * 0.0517 * 0.3);
-  const hEmr = Math.round(hb * 0.0517 * 0.6);
-  return { lEmp, lEmr, hEmp, hEmr, net: salary - lEmp - hEmp, empCost: salary + lEmr + hEmr };
-}
+document.addEventListener('touchend', e => {
+  if(e.target.closest('.modal-overlay') || e.target.closest('.card')) return;
+  touchendX = e.changedTouches[0].screenX;
+  touchendY = e.changedTouches[0].screenY;
+  
+  let xDiff = touchstartX - touchendX;
+  let yDiff = touchstartY - touchendY;
+  
+  if(Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 60) {
+    if(xDiff > 0) changeMonth(1); // 向左滑 -> 下個月
+    else changeMonth(-1); // 向右滑 -> 上個月
+  }
+}, { passive: true });
 
-// Render employees
+
 function renderEmployees() {
   const el = $('emp-list');
-  $('emp-count').textContent = `共 ${employees.length} 位員工`;
-  if (!employees.length) { el.innerHTML = '<div class="empty">點右上角 ＋ 新增員工</div>'; return; }
-  el.innerHTML = employees.map((e,i) => {
-    const ins = calcIns(e.salary);
-    return `<div class="list-row" onclick="editEmployee(${i})">
+  $('emp-count').textContent = `目前共 ${employees.length} 位人員`;
+  if(!employees.length) { el.innerHTML = '<div class="empty">尚未建立人員資料</div>'; return; }
+  el.innerHTML = employees.map((e, i) => `
+    <div class="list-row" onclick="editEmployee(${i})">
       <div class="row-left">
-        <div class="avatar ${getAv(i)}">${e.name[0]}</div>
-        <div>
+        <div class="row-info">
           <div class="row-name">${e.name}</div>
-          <div class="row-sub">${e.role} · 實領 ${fmt(ins.net)}</div>
+          <div class="row-sub">${e.role} · 底薪 ${fmt(e.salary)}</div>
         </div>
       </div>
-      <div style="text-align:right;">
-        <div class="row-amount" style="color:var(--amber)">${fmt(e.salary)}</div>
-        <div class="sal-detail">公司成本 ${fmt(ins.empCost)}</div>
+      <div style="text-align:right">
+        <div style="font-weight:700; color:var(--accent2)">${fmt(parseInt(e.salary) + parseInt(e.bonus))}</div>
+        <div class="row-sub">含獎金代墊</div>
       </div>
-    </div>`;
-  }).join('');
+    </div>
+  `).join('');
 }
 
-// Edit employee
+function prepareAddEmployee() {
+  $('emp-modal-title').textContent = '新增人員';
+  $('emp-edit-id').value = '';
+  $('e-name').value = ''; $('e-role').value = ''; $('e-salary').value = ''; $('e-bonus').value = 0;
+  openModal('modal-emp');
+}
+
 function editEmployee(i) {
   const e = employees[i];
-  $('emp-modal-title').textContent = '編輯員工';
+  $('emp-modal-title').textContent = '編輯人員資料';
   $('emp-edit-id').value = i;
-  $('e-name').value = e.name;
-  $('e-role').value = e.role;
-  $('e-salary').value = e.salary;
-  $('emp-delete-btn').style.display = 'block';
+  $('e-name').value = e.name; $('e-role').value = e.role; $('e-salary').value = e.salary; $('e-bonus').value = e.bonus;
   openModal('modal-emp');
 }
 
 function saveEmployee() {
-  const name = $('e-name').value.trim();
-  const role = $('e-role').value.trim();
-  const salary = parseInt($('e-salary').value) || 0;
-  if (!name || !salary) return;
-  const editId = $('emp-edit-id').value;
-  if (editId !== '') {
-    employees[parseInt(editId)] = { name, role, salary };
-  } else {
-    employees.push({ name, role, salary });
-  }
+  const name=$('e-name').value, role=$('e-role').value, salary=$('e-salary').value, bonus=$('e-bonus').value;
+  if(!name || !salary) return alert('請填寫完整');
+  const id = $('emp-edit-id').value;
+  const data = { name, role, salary: parseInt(salary), bonus: parseInt(bonus) };
+  if(id !== '') employees[id] = data; else employees.push(data);
   save(); renderAll(); closeModalById('modal-emp');
-  $('emp-edit-id').value = ''; $('emp-modal-title').textContent = '新增員工';
-  $('e-name').value = ''; $('e-role').value = ''; $('e-salary').value = '';
-  $('emp-delete-btn').style.display = 'none';
 }
 
 function deleteEmployee() {
-  const i = parseInt($('emp-edit-id').value);
-  if (!confirm('確定刪除這位員工？')) return;
-  employees.splice(i, 1);
+  if(!confirm('確定刪除？')) return;
+  employees.splice($('emp-edit-id').value, 1);
   save(); renderAll(); closeModalById('modal-emp');
-  $('emp-edit-id').value = ''; $('emp-delete-btn').style.display = 'none';
 }
 
-// Salary calc
-function calcSalary() {
-  const base = parseInt($('calc-salary').value) || 0;
-  if (!base) { $('calc-result').innerHTML = ''; return; }
-  const ins = calcIns(base);
-  $('calc-result').innerHTML = `
-    <div class="tax-row"><span class="tl">月薪</span><span class="tv">${fmt(base)}</span></div>
-    <div class="tax-row"><span class="tl">勞保（員工）</span><span class="tv" style="color:var(--red)">-${fmt(ins.lEmp)}</span></div>
-    <div class="tax-row"><span class="tl">健保（員工）</span><span class="tv" style="color:var(--red)">-${fmt(ins.hEmp)}</span></div>
-    <div class="tax-row"><span class="tl" style="font-weight:500;color:var(--text)">員工實領</span><span class="tv" style="color:var(--green)">${fmt(ins.net)}</span></div>
-    <div class="tax-row"><span class="tl">勞保（公司）</span><span class="tv" style="color:var(--amber)">-${fmt(ins.lEmr)}</span></div>
-    <div class="tax-row"><span class="tl">健保（公司）</span><span class="tv" style="color:var(--amber)">-${fmt(ins.hEmr)}</span></div>
-    <div class="tax-row"><span class="tl" style="font-weight:500;color:var(--text)">公司總人力成本</span><span class="tv" style="color:var(--amber)">${fmt(ins.empCost)}</span></div>`;
-}
-
-// Ledger
 function addLedger() {
-  const name = $('l-name').value.trim();
-  const amt = parseInt($('l-amt').value) || 0;
-  const type = $('l-type').value;
-  const date = $('l-date').value || new Date().toISOString().slice(0,10);
-  if (!name || !amt) return;
-  ledger.unshift({ name, amt, type, date });
+  const date=$('l-date').value, name=$('l-name').value, amt=$('l-amt').value, cat=$('l-cat').value, proj=$('l-proj').value, pay=$('l-pay').value;
+  if(!name || !amt) return alert('請填寫項目與金額');
+  ledger.unshift({ date, name, amt: parseInt(amt), cat, proj, pay });
   save(); renderAll(); closeModalById('modal-ledger');
   $('l-name').value = ''; $('l-amt').value = '';
 }
 
-function addQuick() {
-  const name = $('q-name').value.trim();
-  const amt = parseInt($('q-amt').value) || 0;
-  const type = $('q-type').value;
-  const date = $('q-date').value || new Date().toISOString().slice(0,10);
-  if (!name || !amt) return;
-  ledger.unshift({ name, amt, type, date });
-  save(); renderAll(); closeModalById('modal-quick');
-  $('q-name').value = ''; $('q-amt').value = '';
-}
-
 function renderLedger() {
+  const selMonth = getCurrentMonthStr();
+  const filtered = ledger.filter(r => r.date.startsWith(selMonth));
   const el = $('ledger-list');
-  if (!ledger.length) { el.innerHTML = '<div class="empty">點右上角 ＋ 新增</div>'; return; }
-  el.innerHTML = ledger.map(r => `
+  if(!filtered.length) { el.innerHTML = '<div class="empty">本月尚無帳目紀錄</div>'; return; }
+  el.innerHTML = filtered.map(r => `
     <div class="list-row">
       <div class="row-left">
-        <div style="width:8px;height:8px;border-radius:50%;background:${r.type==='income'?'var(--green)':'var(--red)'};margin-top:2px;flex-shrink:0;"></div>
-        <div>
+        <div style="width:4px; height:24px; background:${r.cat==='營業收入'?'var(--green)':'var(--red)'}; border-radius:2px;"></div>
+        <div class="row-info">
           <div class="row-name">${r.name}</div>
-          <div class="row-sub">${r.date} · <span class="tag ${r.type==='income'?'tag-in':'tag-out'}">${r.type==='income'?'收入':'支出'}</span></div>
+          <div class="row-sub"><span class="tag">${r.proj}</span>${r.date} · ${r.pay}</div>
         </div>
       </div>
-      <div class="row-amount" style="color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div>
-    </div>`).join('');
+      <div style="font-weight:700; color:${r.cat==='營業收入'?'var(--green)':'var(--red)'}">
+        ${r.cat==='營業收入'?'+':'-'}${fmt(r.amt)}
+      </div>
+    </div>
+  `).join('');
 }
 
-// Dashboard
 function renderDashboard() {
-  const income = ledger.filter(r=>r.type==='income').reduce((s,r)=>s+r.amt,0);
-  const expense = ledger.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amt,0);
-  const salaryTotal = employees.reduce((s,e)=>s+e.salary,0);
-  const balance = income - expense - salaryTotal;
+  const selMonth = getCurrentMonthStr();
+  const filtered = ledger.filter(r => r.date.startsWith(selMonth));
+  
+  const income = filtered.filter(r => r.cat === '營業收入').reduce((s, r) => s + r.amt, 0);
+  const expense = filtered.filter(r => r.cat !== '營業收入').reduce((s, r) => s + r.amt, 0);
+  const salTotal = employees.reduce((s, e) => s + e.salary + e.bonus, 0);
+  const profit = income - expense - salTotal;
+  
   $('m-income').textContent = fmt(income);
-  $('m-expense').textContent = fmt(expense + salaryTotal);
-  $('m-salary').textContent = fmt(salaryTotal);
-  $('m-balance').textContent = fmt(balance);
-  $('m-balance').style.color = balance >= 0 ? 'var(--green)' : 'var(--red)';
-  const recent = $('home-recent');
-  if (!ledger.length) { recent.innerHTML = '<div class="empty">點右上角 ＋ 新增收支</div>'; return; }
-  recent.innerHTML = ledger.slice(0,5).map(r=>`
-    <div class="list-row">
-      <div class="row-left">
-        <div style="width:8px;height:8px;border-radius:50%;background:${r.type==='income'?'var(--green)':'var(--red)'};flex-shrink:0;"></div>
-        <div>
-          <div class="row-name">${r.name}</div>
-          <div class="row-sub">${r.date}</div>
-        </div>
+  $('m-expense').textContent = fmt(expense);
+  $('m-salary').textContent = fmt(salTotal);
+  $('m-profit').textContent = fmt(profit);
+  $('m-profit').style.color = profit >= 0 ? 'var(--accent2)' : 'var(--red)';
+
+  const ctx = $('metricsChart').getContext('2d');
+  if (metricsChart) metricsChart.destroy();
+  metricsChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['本月支出', '薪資預算', '專案淨利'],
+      datasets: [{
+        data: [expense, salTotal, Math.max(0, profit)], 
+        backgroundColor: ['#f87171', '#fbbf24', '#a78bfa'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '75%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  const projs = {};
+  filtered.forEach(r => {
+    if(!projs[r.proj]) projs[r.proj] = 0;
+    projs[r.proj] += (r.cat === '營業收入' ? r.amt : -r.amt);
+  });
+  
+  const projEl = $('project-summary');
+  const projKeys = Object.keys(projs);
+  if(!projKeys.length) projEl.innerHTML = '<div class="empty">無專案數據</div>';
+  else {
+    projEl.innerHTML = projKeys.map(k => `
+      <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
+        <span style="color:var(--muted)">${k}</span>
+        <span style="font-weight:600; color:${projs[k]>=0?'var(--green)':'var(--red)'}">${fmt(projs[k])}</span>
       </div>
-      <div class="row-amount" style="color:${r.type==='income'?'var(--green)':'var(--red)'}">${r.type==='income'?'+':'-'}${fmt(r.amt)}</div>
-    </div>`).join('');
+    `).join('');
+  }
 }
 
-// Tax
-function calcTax() {
-  const rev = parseInt($('t-rev').value) || 0;
-  const cost = parseInt($('t-cost').value) || 0;
-  if (!rev) { $('tax-result').innerHTML = ''; return; }
-  const profit = rev - cost;
-  const bizTax = Math.round(rev * 0.05);
-  const incTax = profit > 0 ? Math.round(profit * 0.2) : 0;
-  $('tax-result').innerHTML = `
-    <div class="tax-row"><span class="tl">年度營業額</span><span class="tv">${fmt(rev)}</span></div>
-    <div class="tax-row"><span class="tl">年度費用</span><span class="value">${fmt(cost)}</span></div>
-    <div class="tax-row"><span class="tl">年度盈餘</span><span class="tv" style="color:${profit>=0?'var(--green)':'var(--red)'}">${fmt(profit)}</span></div>
-    <div class="tax-row"><span class="tl">營業稅（5%）</span><span class="tv" style="color:var(--red)">-${fmt(bizTax)}</span></div>
-    <div class="tax-row"><span class="tl">營利事業所得稅（20%）</span><span class="tv" style="color:var(--red)">-${fmt(incTax)}</span></div>
-    <div class="tax-row"><span class="tl" style="font-weight:500;color:var(--text)">預估應繳稅額</span><span class="tv" style="color:var(--amber)">${fmt(bizTax+incTax)}</span></div>`;
+function renderChart() {
+  const ctx = $('trendChart').getContext('2d');
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    let m = currentMonth - i;
+    let y = currentYear;
+    if(m <= 0) { m += 12; y -= 1; }
+    months.push(`${y}-${m.toString().padStart(2, '0')}`);
+  }
+  
+  const incomeData = months.map(m => ledger.filter(r => r.date.startsWith(m) && r.cat === '營業收入').reduce((s, r) => s + r.amt, 0));
+  const expenseData = months.map(m => ledger.filter(r => r.date.startsWith(m) && r.cat !== '營業收入').reduce((s, r) => s + r.amt, 0));
+
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: months.map(m => m.split('-')[1] + '月'),
+      datasets: [
+        { label: '收入', data: incomeData, borderColor: '#34d399', tension: 0.4, fill: false },
+        { label: '支出', data: expenseData, borderColor: '#f87171', tension: 0.4, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { 
+        y: { grid: { display: false }, ticks: { display: false } },
+        x: { grid: { display: false }, ticks: { color: '#888' } }
+      }
+    }
+  });
 }
 
-function renderInsSummary() {
-  const el = $('ins-summary');
-  if (!employees.length) { el.innerHTML = '<div class="empty">尚無員工資料</div>'; return; }
-  let totL=0, totH=0, totSal=0;
-  employees.forEach(e => { const ins=calcIns(e.salary); totL+=ins.lEmr; totH+=ins.hEmr; totSal+=e.salary; });
-  el.innerHTML = `
-    <div class="tax-row"><span class="tl">勞保合計</span><span class="tv" style="color:var(--amber)">${fmt(totL)}/月</span></div>
-    <div class="tax-row"><span class="tl">健保合計</span><span class="tv" style="color:var(--amber)">${fmt(totH)}/月</span></div>
-    <div class="tax-row"><span class="tl">薪資合計</span><span class="tv">${fmt(totSal)}/月</span></div>
-    <div class="tax-row"><span class="tl" style="font-weight:500;color:var(--text)">每月人力總成本</span><span class="tv" style="color:var(--accent2)">${fmt(totSal+totL+totH)}/月</span></div>
-    <div class="tax-row"><span class="tl">每年人力總成本</span><span class="tv" style="color:var(--accent2)">${fmt((totSal+totL+totH)*12)}/年</span></div>`;
+function exportCSV() {
+  let csv = "\uFEFF日期,項目,金額,分類,支付方式,專案\n";
+  ledger.forEach(r => {
+    csv += `${r.date},${r.name},${r.amt},${r.cat},${r.pay},${r.proj}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `蘊一創意財務報表_${getCurrentMonthStr()}.csv`;
+  link.click();
 }
 
 function renderAll() {
-  renderDashboard();
-  renderEmployees();
-  renderLedger();
-  renderInsSummary();
+  renderDashboard(); renderEmployees(); renderLedger(); renderChart();
 }
 
-// Init
-const today = new Date().toISOString().slice(0,10);
-$('q-date').value = today;
-$('l-date').value = today;
-$('today-date').textContent = new Date().toLocaleDateString('zh-TW', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
-renderAll();
+updateDateUI();
 </script>
 </body>
 </html>
