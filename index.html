@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="蘊一財務">
 <meta name="theme-color" content="#1a1a2e">
-<title>Yun Yi Finance v2.7</title>
+<title>Yun Yi Finance v2.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -304,10 +304,9 @@ function openModal(id) { $(id).classList.add('open'); }
 function closeModal(e, id) { if(e.target === $(id)) $(id).classList.remove('open'); }
 function closeModalById(id) { $(id).classList.remove('open'); }
 
-// 解除卡片的滑動限制，允許全畫面左右滑動切換月份
+// 左右滑動切換月份 (防呆優化版)
 let touchstartX = 0, touchstartY = 0, touchendX = 0, touchendY = 0;
 document.addEventListener('touchstart', e => {
-  // 只阻擋彈出視窗內的滑動，其他地方(包含卡片)都可以滑
   if(e.target.closest('.modal-overlay')) return; 
   touchstartX = e.changedTouches[0].screenX;
   touchstartY = e.changedTouches[0].screenY;
@@ -321,8 +320,9 @@ document.addEventListener('touchend', e => {
   let xDiff = touchstartX - touchendX;
   let yDiff = touchstartY - touchendY;
   
-  // 判斷橫向滑動
-  if(Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 60) {
+  // 1. 降低左右滑動距離要求 (從 60 降至 40，輕輕撥動即可)
+  // 2. 嚴格限制上下滑動 (如果上下滑動超過 50px，系統會判定你在「滾動網頁」而非「切換月份」)
+  if(Math.abs(xDiff) > 40 && Math.abs(yDiff) < 50) {
     if(xDiff > 0) changeMonth(1); 
     else changeMonth(-1); 
   }
